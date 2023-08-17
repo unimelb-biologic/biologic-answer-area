@@ -1,0 +1,879 @@
+{
+   "activeExNetQuestionPack":{
+      "promptText":"<table style=\"margin: 5px;\"> <tbody> <tr> <td width=\"300\"> <p>Of the nine children of Queen Victoria of England, only Leopold had hemophilia. His sisters, Alice and Beatrice, did not have hemophia themselves, but had sons with the disease. None of their daughters had the disease.</p> <p>&nbsp;</p> </td> </tr> <tr> <td> <p><img src=\"hemophilia.jpg\" width=\"600\" height=\"175\" /></p> </td> </tr> <tr> <td> <p>&nbsp;</p> <p><span style=\"font-size: 14pt;\"><strong><span style=\"color: #000000;\">It seems only men exhibit the disease. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></strong></span></p> <h3><span style=\"font-size: 14pt;\">Explain why.</span></h3> </td> </tr> </tbody> </table>",
+      "exNetRelativePath":"Explanation Networks/hemophilia",
+      "exNetName":"hemophilia",
+      "statementElements":[
+         {
+            "statementType":0,
+            "id":140255704386336,
+            "content":{
+               "originalFacts":[
+                  "Only men get hemophilia"
+               ],
+               "userInput":[
+                  
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":2,
+               "yPosInParent":54,
+               "fontSizeStr":"12px"
+            },
+            "isActive":true
+         },
+         {
+            "statementType":1,
+            "id":140255704398288,
+            "content":{
+               "originalFacts":[
+                  "hemophilia is caused by an absence of FIX",
+                  "hand_bleed.jpg"
+               ],
+               "userInput":[
+                  
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":2,
+               "yPosInParent":21,
+               "fontSizeStr":"12px"
+            },
+            "isActive":true
+         },
+         {
+            "statementType":1,
+            "id":140255704398336,
+            "content":{
+               "originalFacts":[
+                  "the FIX gene is on the X chromosome",
+                  "fix_is_on_X.jpg"
+               ],
+               "userInput":[
+                  
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":252,
+               "yPosInParent":2,
+               "fontSizeStr":"12px"
+            },
+            "isActive":true
+         },
+         {
+            "statementType":2,
+            "id":140255704398432,
+            "content":{
+               "originalFacts":[
+                  [
+                     "women",
+                     "men"
+                  ],
+                  "have",
+                  [
+                     "--choose--",
+                     "only one X chromosome ",
+                     " two X chromosomes",
+                     "only one copy of the FIX gene ",
+                     " two copies of the FIX gene"
+                  ]
+               ],
+               "userInput":[
+                  "men",
+                  "only one X chromosome "
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":2,
+               "yPosInParent":2,
+               "fontSizeStr":"12px"
+            },
+            "isActive":true
+         },
+         {
+            "statementType":2,
+            "id":140255704398624,
+            "content":{
+               "originalFacts":[
+                  [
+                     "women",
+                     "men"
+                  ],
+                  "have",
+                  [
+                     "--choose--",
+                     "only one X chromosome ",
+                     " two X chromosomes",
+                     "only one copy of the FIX gene ",
+                     " two copies of the FIX gene"
+                  ]
+               ],
+               "userInput":[
+                  "women",
+                  " two X chromosomes"
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":2,
+               "yPosInParent":2,
+               "fontSizeStr":"12px"
+            },
+            "isActive":true
+         },
+         {
+            "statementType":2,
+            "id":140255704398528,
+            "content":{
+               "originalFacts":[
+                  [
+                     "a women",
+                     "a man"
+                  ],
+                  "inherits a faulty copy of FIX from their mother"
+               ],
+               "userInput":[
+                  "a man"
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":2,
+               "yPosInParent":17,
+               "fontSizeStr":"12px"
+            },
+            "isActive":true
+         },
+         {
+            "statementType":2,
+            "id":140255704398816,
+            "content":{
+               "originalFacts":[
+                  [
+                     "a women",
+                     "a man"
+                  ],
+                  "inherits a faulty copy of FIX from their mother"
+               ],
+               "userInput":[
+                  "a women"
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":910,
+               "yPosInParent":402,
+               "fontSizeStr":"12px"
+            },
+            "isActive":true
+         },
+         {
+            "statementType":2,
+            "id":140255704398720,
+            "content":{
+               "originalFacts":[
+                  [
+                     "the man",
+                     "the woman"
+                  ],
+                  [
+                     "--choose--",
+                     "would still have ",
+                     " would no longer have ",
+                     " would suffer from ",
+                     " would not suffer from"
+                  ],
+                  [
+                     "--choose--",
+                     "a working copy of FIX ",
+                     " hemophilia"
+                  ]
+               ],
+               "userInput":[
+                  "the man",
+                  " would no longer have ",
+                  "a working copy of FIX "
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":231,
+               "yPosInParent":2,
+               "fontSizeStr":"12px"
+            },
+            "isActive":true
+         },
+         {
+            "statementType":2,
+            "id":140255704399008,
+            "content":{
+               "originalFacts":[
+                  [
+                     "the man",
+                     "the woman"
+                  ],
+                  [
+                     "--choose--",
+                     "would still have ",
+                     " would no longer have ",
+                     " would suffer from ",
+                     " would not suffer from"
+                  ],
+                  [
+                     "--choose--",
+                     "a working copy of FIX ",
+                     " hemophilia"
+                  ]
+               ],
+               "userInput":[
+                  "the man",
+                  "--choose--",
+                  "--choose--"
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":14,
+               "yPosInParent":586,
+               "fontSizeStr":"12px"
+            }
+         },
+         {
+            "statementType":2,
+            "id":140255704399104,
+            "content":{
+               "originalFacts":[
+                  [
+                     "the man",
+                     "the woman"
+                  ],
+                  [
+                     "--choose--",
+                     "would still have ",
+                     " would no longer have ",
+                     " would suffer from ",
+                     " would not suffer from"
+                  ],
+                  [
+                     "--choose--",
+                     "a working copy of FIX ",
+                     " hemophilia"
+                  ]
+               ],
+               "userInput":[
+                  "the man",
+                  "--choose--",
+                  "--choose--"
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":18,
+               "yPosInParent":588,
+               "fontSizeStr":"12px"
+            }
+         },
+         {
+            "statementType":2,
+            "id":140255704399200,
+            "content":{
+               "originalFacts":[
+                  [
+                     "the man",
+                     "the woman"
+                  ],
+                  [
+                     "--choose--",
+                     "would still have ",
+                     " would no longer have ",
+                     " would suffer from ",
+                     " would not suffer from"
+                  ],
+                  [
+                     "--choose--",
+                     "a working copy of FIX ",
+                     " hemophilia"
+                  ]
+               ],
+               "userInput":[
+                  "the man",
+                  "--choose--",
+                  "--choose--"
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":22,
+               "yPosInParent":590,
+               "fontSizeStr":"12px"
+            }
+         },
+         {
+            "statementType":3,
+            "id":140255704398912,
+            "content":{
+               "originalFacts":[
+                  
+               ],
+               "userInput":[
+                  ""
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":10,
+               "yPosInParent":718,
+               "fontSizeStr":"12px"
+            }
+         },
+         {
+            "statementType":3,
+            "id":140255704399392,
+            "content":{
+               "originalFacts":[
+                  
+               ],
+               "userInput":[
+                  ""
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":14,
+               "yPosInParent":720,
+               "fontSizeStr":"12px"
+            }
+         },
+         {
+            "statementType":3,
+            "id":140255704399488,
+            "content":{
+               "originalFacts":[
+                  
+               ],
+               "userInput":[
+                  ""
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":18,
+               "yPosInParent":722,
+               "fontSizeStr":"12px"
+            }
+         },
+         {
+            "statementType":3,
+            "id":140255704399584,
+            "content":{
+               "originalFacts":[
+                  
+               ],
+               "userInput":[
+                  ""
+               ]
+            },
+            "graphicalContent":{
+               "xPosInParent":22,
+               "yPosInParent":724,
+               "fontSizeStr":"12px"
+            }
+         }
+      ]
+   },
+   "statementElements":[
+      {
+         "statementType":0,
+         "id":140255704386336,
+         "content":{
+            "originalFacts":[
+               "Only men get hemophilia"
+            ],
+            "userInput":[
+               
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":2,
+            "yPosInParent":54,
+            "fontSizeStr":"12px"
+         },
+         "isActive":true
+      },
+      {
+         "statementType":1,
+         "id":140255704398288,
+         "content":{
+            "originalFacts":[
+               "hemophilia is caused by an absence of FIX",
+               "hand_bleed.jpg"
+            ],
+            "userInput":[
+               
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":2,
+            "yPosInParent":21,
+            "fontSizeStr":"12px"
+         },
+         "isActive":true
+      },
+      {
+         "statementType":1,
+         "id":140255704398336,
+         "content":{
+            "originalFacts":[
+               "the FIX gene is on the X chromosome",
+               "fix_is_on_X.jpg"
+            ],
+            "userInput":[
+               
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":252,
+            "yPosInParent":2,
+            "fontSizeStr":"12px"
+         },
+         "isActive":true
+      },
+      {
+         "statementType":2,
+         "id":140255704398432,
+         "content":{
+            "originalFacts":[
+               [
+                  "women",
+                  "men"
+               ],
+               "have",
+               [
+                  "--choose--",
+                  "only one X chromosome ",
+                  " two X chromosomes",
+                  "only one copy of the FIX gene ",
+                  " two copies of the FIX gene"
+               ]
+            ],
+            "userInput":[
+               "men",
+               "only one X chromosome "
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":2,
+            "yPosInParent":2,
+            "fontSizeStr":"12px"
+         },
+         "isActive":true
+      },
+      {
+         "statementType":2,
+         "id":140255704398624,
+         "content":{
+            "originalFacts":[
+               [
+                  "women",
+                  "men"
+               ],
+               "have",
+               [
+                  "--choose--",
+                  "only one X chromosome ",
+                  " two X chromosomes",
+                  "only one copy of the FIX gene ",
+                  " two copies of the FIX gene"
+               ]
+            ],
+            "userInput":[
+               "women",
+               " two X chromosomes"
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":2,
+            "yPosInParent":2,
+            "fontSizeStr":"12px"
+         },
+         "isActive":true
+      },
+      {
+         "statementType":2,
+         "id":140255704398528,
+         "content":{
+            "originalFacts":[
+               [
+                  "a women",
+                  "a man"
+               ],
+               "inherits a faulty copy of FIX from their mother"
+            ],
+            "userInput":[
+               "a man"
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":2,
+            "yPosInParent":17,
+            "fontSizeStr":"12px"
+         },
+         "isActive":true
+      },
+      {
+         "statementType":2,
+         "id":140255704398816,
+         "content":{
+            "originalFacts":[
+               [
+                  "a women",
+                  "a man"
+               ],
+               "inherits a faulty copy of FIX from their mother"
+            ],
+            "userInput":[
+               "a women"
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":910,
+            "yPosInParent":402,
+            "fontSizeStr":"12px"
+         },
+         "isActive":true
+      },
+      {
+         "statementType":2,
+         "id":140255704398720,
+         "content":{
+            "originalFacts":[
+               [
+                  "the man",
+                  "the woman"
+               ],
+               [
+                  "--choose--",
+                  "would still have ",
+                  " would no longer have ",
+                  " would suffer from ",
+                  " would not suffer from"
+               ],
+               [
+                  "--choose--",
+                  "a working copy of FIX ",
+                  " hemophilia"
+               ]
+            ],
+            "userInput":[
+               "the man",
+               " would no longer have ",
+               "a working copy of FIX "
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":231,
+            "yPosInParent":2,
+            "fontSizeStr":"12px"
+         },
+         "isActive":true
+      },
+      {
+         "statementType":2,
+         "id":140255704399008,
+         "content":{
+            "originalFacts":[
+               [
+                  "the man",
+                  "the woman"
+               ],
+               [
+                  "--choose--",
+                  "would still have ",
+                  " would no longer have ",
+                  " would suffer from ",
+                  " would not suffer from"
+               ],
+               [
+                  "--choose--",
+                  "a working copy of FIX ",
+                  " hemophilia"
+               ]
+            ],
+            "userInput":[
+               "the man",
+               "--choose--",
+               "--choose--"
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":14,
+            "yPosInParent":586,
+            "fontSizeStr":"12px"
+         }
+      },
+      {
+         "statementType":2,
+         "id":140255704399104,
+         "content":{
+            "originalFacts":[
+               [
+                  "the man",
+                  "the woman"
+               ],
+               [
+                  "--choose--",
+                  "would still have ",
+                  " would no longer have ",
+                  " would suffer from ",
+                  " would not suffer from"
+               ],
+               [
+                  "--choose--",
+                  "a working copy of FIX ",
+                  " hemophilia"
+               ]
+            ],
+            "userInput":[
+               "the man",
+               "--choose--",
+               "--choose--"
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":18,
+            "yPosInParent":588,
+            "fontSizeStr":"12px"
+         }
+      },
+      {
+         "statementType":2,
+         "id":140255704399200,
+         "content":{
+            "originalFacts":[
+               [
+                  "the man",
+                  "the woman"
+               ],
+               [
+                  "--choose--",
+                  "would still have ",
+                  " would no longer have ",
+                  " would suffer from ",
+                  " would not suffer from"
+               ],
+               [
+                  "--choose--",
+                  "a working copy of FIX ",
+                  " hemophilia"
+               ]
+            ],
+            "userInput":[
+               "the man",
+               "--choose--",
+               "--choose--"
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":22,
+            "yPosInParent":590,
+            "fontSizeStr":"12px"
+         }
+      },
+      {
+         "statementType":3,
+         "id":140255704398912,
+         "content":{
+            "originalFacts":[
+               
+            ],
+            "userInput":[
+               ""
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":10,
+            "yPosInParent":718,
+            "fontSizeStr":"12px"
+         }
+      },
+      {
+         "statementType":3,
+         "id":140255704399392,
+         "content":{
+            "originalFacts":[
+               
+            ],
+            "userInput":[
+               ""
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":14,
+            "yPosInParent":720,
+            "fontSizeStr":"12px"
+         }
+      },
+      {
+         "statementType":3,
+         "id":140255704399488,
+         "content":{
+            "originalFacts":[
+               
+            ],
+            "userInput":[
+               ""
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":18,
+            "yPosInParent":722,
+            "fontSizeStr":"12px"
+         }
+      },
+      {
+         "statementType":3,
+         "id":140255704399584,
+         "content":{
+            "originalFacts":[
+               
+            ],
+            "userInput":[
+               ""
+            ]
+         },
+         "graphicalContent":{
+            "xPosInParent":22,
+            "yPosInParent":724,
+            "fontSizeStr":"12px"
+         }
+      }
+   ],
+   "connectorElements":[
+      {
+         "connectorType":0,
+         "id":140584459330176,
+         "isActive":true,
+         "graphicalContent":{
+            "xPosInParent":194,
+            "yPosInParent":2,
+            "newSentence":false,
+            "collapseTree":false,
+            "alternateLayoutDirection":true
+         },
+         "content":{
+            "selectedChoice":0
+         },
+         "childAId":140584459330848,
+         "childBId":140584441899760
+      },
+      {
+         "connectorType":1,
+         "id":140584459330320,
+         "isActive":true,
+         "graphicalContent":{
+            "xPosInParent":2,
+            "yPosInParent":2,
+            "newSentence":true,
+            "collapseTree":false,
+            "alternateLayoutDirection":false
+         },
+         "content":{
+            "selectedChoice":1
+         },
+         "childAId":140255704386336,
+         "childBId":140584459330176
+      },
+      {
+         "connectorType":3,
+         "id":140584459330848,
+         "isActive":true,
+         "graphicalContent":{
+            "xPosInParent":2,
+            "yPosInParent":2,
+            "newSentence":false,
+            "collapseTree":true,
+            "alternateLayoutDirection":false
+         },
+         "content":{
+            "selectedChoice":0
+         },
+         "childAId":140255704398288,
+         "childBId":140255704398336
+      },
+      {
+         "connectorType":5,
+         "id":140584459331568,
+         "isActive":true,
+         "graphicalContent":{
+            "xPosInParent":61,
+            "yPosInParent":51,
+            "newSentence":false,
+            "collapseTree":false,
+            "alternateLayoutDirection":true
+         },
+         "content":{
+            "selectedChoice":0
+         },
+         "childAId":140584459330320,
+         "childBId":140584472024880
+      },
+      {
+         "connectorType":6,
+         "id":140584459329792,
+         "isActive":true,
+         "graphicalContent":{
+            "xPosInParent":2,
+            "yPosInParent":150,
+            "newSentence":false,
+            "collapseTree":false,
+            "alternateLayoutDirection":false
+         },
+         "content":{
+            "selectedChoice":0
+         },
+         "childAId":140255704398528,
+         "childBId":140255704398720
+      },
+      {
+         "connectorType":0,
+         "id":140584441899760,
+         "isActive":true,
+         "graphicalContent":{
+            "xPosInParent":2,
+            "yPosInParent":89,
+            "newSentence":true,
+            "collapseTree":true,
+            "alternateLayoutDirection":true
+         },
+         "content":{
+            "selectedChoice":1
+         },
+         "childAId":140255704398432,
+         "childBId":140584459329792
+      },
+      {
+         "connectorType":0,
+         "id":140584472024880,
+         "isActive":true,
+         "graphicalContent":{
+            "xPosInParent":2,
+            "yPosInParent":207,
+            "newSentence":false,
+            "collapseTree":true,
+            "alternateLayoutDirection":true
+         },
+         "content":{
+            "selectedChoice":0
+         },
+         "childAId":140255704398624,
+         "childBId":140584472045216
+      },
+      {
+         "connectorType":6,
+         "id":140584472045216,
+         "isActive":true,
+         "graphicalContent":{
+            "xPosInParent":2,
+            "yPosInParent":150,
+            "newSentence":false,
+            "collapseTree":false,
+            "alternateLayoutDirection":false
+         },
+         "content":{
+            "selectedChoice":0
+         },
+         "childAId":null,
+         "childBId":null
+      }
+   ]
+}
