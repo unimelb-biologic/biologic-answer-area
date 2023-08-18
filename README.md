@@ -23,7 +23,8 @@ Sihan Zhang	Developer	sihazhang1@student.unimelb.edu.au
 1. Clone this repository.  
 2. Run npm install on the project directory.  
 3. Run npm run dev to start the server.  
-More detailed instructions and  are available in Confluence > Development Documentation  
+More detailed instructions and  are available in Confluence > Development Documentation
+https://confluence.cis.unimelb.edu.au:8443/display/COMP900822023SM2BIBlueRing/Development+Environment  
 
 ## Tools for Project Management
 Confluence	Document the details of the project and all created resources from Planning, Analysis and Design phases.	https://confluence.cis.unimelb.edu.au:8443/display/COMP900822023SM2BIBlueRing/Home  
@@ -32,8 +33,8 @@ GitHub	Manage and modify the project's code and to generate releases that will b
 
 ## Changelogs
 ### Sprint 1 (18/08/2023)
-Structure all the folders.   
-Upload requirement documents and planning documents to docs/ folder.    
-Establish collaboration processes and communication channels within the development team.    
-Create task assignments and time plans within Sprint 1.    
-Planning tasks and goals for Sprint 2.    
+1. Structure all the folders.   
+2. Upload requirement documents and planning documents to docs/ folder.    
+3. Establish collaboration processes and communication channels within the development team.    
+4. Create task assignments and time plans within Sprint 1.    
+5. Planning tasks and goals for Sprint 2.    
