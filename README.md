@@ -39,3 +39,7 @@ GitHub	Manage and modify the project's code and to generate releases that will b
 4. Establish collaboration processes and communication channels within the development team.    
 5. Create task assignments and time plans within Sprint 1.    
 6. Planning tasks and goals for Sprint 2.    
+
+## Checklist
+<img width="252" alt="Screen Shot 2023-08-18 at 15 12 30" src="https://github.com/COMP90082-2023-SM2/BI-Bluering/assets/41511323/6ea58e7d-f17a-4379-9258-2b0db1b0aaa4">
+More details in Confluence 'Plan for next sprints' page.
