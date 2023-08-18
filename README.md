@@ -33,8 +33,9 @@ GitHub	Manage and modify the project's code and to generate releases that will b
 
 ## Changelogs
 ### Sprint 1 (18/08/2023)
-1. Structure all the folders.   
-2. Upload requirement documents and planning documents to docs/ folder.    
-3. Establish collaboration processes and communication channels within the development team.    
-4. Create task assignments and time plans within Sprint 1.    
-5. Planning tasks and goals for Sprint 2.    
+1. Determine the client's needs and understand the relevant development knowledge
+2. Structure all the folders.   
+3. Upload requirement documents and planning documents to docs/ folder.    
+4. Establish collaboration processes and communication channels within the development team.    
+5. Create task assignments and time plans within Sprint 1.    
+6. Planning tasks and goals for Sprint 2.    
