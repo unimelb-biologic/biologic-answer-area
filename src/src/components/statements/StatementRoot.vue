@@ -12,11 +12,10 @@
 
       <!-- render the options -->
       <div v-else>
-        <select v-model="userSelected[index]">
-          <option v-for="item in segment" :value="item" :key="item">
-            {{ item }}
-          </option>
-        </select>
+        <div v-for="item in segment.slice(2)">
+          <input type="radio" :id="item" :value="item" v-model="userSelected[index]">
+          <label :for="item in segment.slice(2)">{{item}}</label><br>
+        </div>
       </div>
     </div>
     <!-- Display tooltips for this statement-->
