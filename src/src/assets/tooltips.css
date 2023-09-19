@@ -3,8 +3,7 @@
   position: relative;
   display: inline;
   color:grey;
-  height: 15px;
-  line-height: 15px;
+  top:-10px;
   /*border-bottom: 1px dotted black;  If you want dots under the hoverable text */
 }
 

@@ -1,16 +1,18 @@
 <template>
-  <div v-for="item in answerText" :value="item" :key="item">
-    {{ item }}
-  </div>
+    <div v-for="item in answerText">
+        {{ item }}
+    </div>
 </template>
 
 <script>
 export default {
-  name: "AnswerTextGeneratorArea",
-  props: {
-    answerText: Array,
-  },
-};
+    name: "AnswerTextGeneratorArea",
+    props: {
+        answerText: Array,
+    }
+}
 </script>
 
-<style></style>
+<style>
+
+</style>

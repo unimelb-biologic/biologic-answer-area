@@ -17,49 +17,48 @@ body {
 
 .left_column {
   float: left;
-  width: 20%;
+  width: 18%;
   background: #F0F0ED;
-  padding: 0px 10px;
-  max-height: 100vh;
+  padding-left: 10px;
+  max-height: 95vh;
   overflow-y: scroll;
 }
 
 .centre_column {
   float: left;
-  width: 66%;
+  width: 68%;
 }
 
 .displayQuery{
   background: lightpink;
   padding:5px;
-  height: 100%;
+  height: 28vh;
   overflow-y: scroll;
+  overflow-x: scroll;
 }
 
 .displayWorkspace{
   background: #FFF8E1;
-  padding-left: 1px;
+  padding-left: 10px;
   padding-top: 5px;
-  padding-bottom: 0px;
-  height: 100%;
+  height: 55vh;
   overflow-y: scroll;
+  overflow-x: scroll;
 }
 
 .displayWordedOutput{
   background: #F0E9FF;
   padding-left: 10px;
   padding-top: 5px;
-  height: 100%;
+  height: 12vh;
   overflow-y: scroll;
 }
 
 .right_column {
   float: left;
-  width: 14%;
+  width: 12%;
   background: #F0F0ED;
   padding-left: 10px;
-  max-height: 100vh;
-  overflow-y: scroll;
 }
 
 .displayConnectors{
