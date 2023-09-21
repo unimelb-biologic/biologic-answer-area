@@ -23,7 +23,7 @@
 
 .tooltips:hover .tooltip_info {
   visibility: visible;
-  /* change visible to hidden for opposite effect
+  /* change visible to hidden for opposite effect */
 }
 
 /* statementFreeText tooltips css style */
