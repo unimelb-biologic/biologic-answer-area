@@ -15,8 +15,8 @@
                     <span class="tooltip_info">Records of answers submitted by students.</span>
                  </div>
 
-                <StatementArea
-                    :statements="statementElements" />
+                <!-- <StatementArea
+                    :statements="statementElements" /> -->
             </div>
 
             <div class="centre_column">
