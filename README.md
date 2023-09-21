@@ -31,6 +31,9 @@ Confluence	Document the details of the project and all created resources from Pl
 Trello	Visualise the project's progress and to estimate, prioritise and manage our tasks and sprints.	https://trello.com/b/b9bcSevn/bi-bluering  
 GitHub	Manage and modify the project's code and to generate releases that will be accessed by the clients.	https://github.com/COMP90082-2023-SM2/BI-Bluering  
 
+## Demonstration for Sprint2
+https://youtu.be/c99gLT0rCrQ?si=tTGC375oh7ApCpui
+
 ## Changelogs
 ### Sprint 1 (18/08/2023)
 1. Determine the client's needs and understand the relevant development knowledge
@@ -40,4 +43,9 @@ GitHub	Manage and modify the project's code and to generate releases that will b
 5. Create task assignments and time plans within Sprint 1.    
 6. Planning tasks and goals for Sprint 2.    
 
-
+### Sprint 2 (21/09/2023)
+1. Implement different format to convert for the statement box.
+2. Add a new feedback UI interface. 
+3. Add new functionality for dragging the connector and directly drop onto the statement box in the Answer Area (still need bug fixing)
+4. Update the client with the recent progress made during Sprint2.   
+5. Planning tasks and goals for Sprint 3. 
