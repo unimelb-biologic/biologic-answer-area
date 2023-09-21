@@ -1,482 +1,605 @@
 <template>
-    <body>
-    <div>
-        <div>
-            <button @click="logIn" v-if="!authorised" style="font-size:30px">Log in</button><br>
-        </div>
-
-        <div class="main_workspace" v-if="authorised">
-
-            <div class="left_column">
-                <!-- Displays Statements -->
-                <h2 class="displayStatements">Statement Area</h2>
-                <div class="tooltips"> 
-                    Please see the instruction here.
-                    <span class="tooltip_info">Drag any statement from here to the answer area.</span>
-                 </div>
-
-                <StatementArea
-                    :statements="this.statementElements" />
-            </div>
-
-            <div class="centre_column">
-                <!-- Displays the question -->
-                <div class="displayQuery">
-                    <h2>Question
-                        <select @change="getLastWorkingAnswer" v-model="selectedQuestion">
-                        <option v-for="item in questions" :value="item">
-                            <!-- Removing the .data from the end of question file names -->
-                            {{ item.slice(0, -'.data'.length) }}
-                        </option>
-                        </select>
-                    </h2>
-
-                    <div class="tooltips"> 
-                        Please see the instruction here.
-                        <span class="tooltip_info">Please answer the following
-                            question using the supplied statements.</span>
-                    </div>
-
-                    <QuestionArea :prompttext="this.promptText"/>
-                </div>
-
-                <!-- Displays workspace -->
-                <div class="displayWorkspace"
-                    @drop="onDropWorkspace($event)"
-                    @dragover.prevent
-                    @dragenter.prevent>
-
-                    <h2>Answer Area</h2>
-
-                    <div class="tooltips"> 
-                    Please see the instruction here.
-                    <span class="tooltip_info">This is answer section,
-                        you can drag any statement or connector to answer the question.</span>
-                    </div>
-
-                    <AnswerArea ref="workspace"
-                        :offsetX="offsetX"
-                        :offsetY="offsetY"
-                        :statements="statementElements"
-
-                        @answer-data="updateJsonOutput"
-                        @update-answer-area-content="handleUpdateAnswerContent"
-                        @statement-used="handleStatementUsed" />
-                </div>
-
-                <!-- Displays worded answer output -->
-                <div class="displayWordedOutput">
-                    <h4>Check your answer here</h4>
-                    <AnswerTextGeneratorArea :answerText="this.answerText" />
-                </div>
-            </div>
-
-            <div class="right_column">
-                <!-- Displays the connectors -->
-                <div class="displayConnectors">
-                    <h2>Connector Area</h2>
-                    <ConnectorArea />
-                </div>
-            </div>
-        </div>
+  <div>
+    <div v-if="!authorised">
+      <button @click="logIn" v-if="!authorised" style="font-size: 30px">
+        Log in
+      </button>
+      <br />
+      <!-- TODO: Remove this! Development purposes only! -->
+      <button
+        @click="authorised = true"
+        v-if="!authorised"
+        style="font-size: 30px"
+      >
+        Bypass login
+      </button>
     </div>
-    </body>
+    <splitpanes v-if="authorised" class="mainContainer">
+      <pane max-size="20" class="statementContainer">
+        <!-- Displays Statements -->
+        <h2 class="displayStatements">Statement Area</h2>
+        <div class="tooltips">
+          Please see the instruction here.
+          <span class="tooltip_info">
+            This is statement section, you can drag any statement to the
+            answerarea.
+          </span>
+        </div>
+
+        <StatementArea
+          :statements="this.statementElements"
+          @onDragStart="onDragStart"
+        />
+      </pane>
+      <pane>
+        <splitpanes horizontal>
+          <pane>
+            <!-- Displays the question -->
+            <div class="displayQuery">
+              <h2>
+                Question
+                <select
+                  @change="getLastWorkingAnswer"
+                  v-model="selectedQuestion"
+                >
+                  <option v-for="item in questions" :value="item" :key="item">
+                    {{ item.slice(0, -".data".length) }}
+                  </option>
+                </select>
+              </h2>
+
+              <div class="tooltips">
+                Please see the instruction here.
+                <span class="tooltip_info">
+                  This is question section, you can view questions here.
+                </span>
+              </div>
+              <QuestionArea :prompttext="this.promptText" />
+            </div>
+          </pane>
+          <pane>
+            <!-- Displays workspace -->
+            <div
+              class="displayWorkspace"
+              @drop="onDropWorkspace($event)"
+              @dragover.prevent
+              @dragenter.prevent
+            >
+              <div id="answerArea" class="sectionTitle">
+                <h2>Answer Area</h2>
+                <div class="tooltips">
+                  Please see the instruction here.
+                  <span class="tooltip_info">
+                    This is answer section, you can drag any statement or
+                    connector to answer the question.
+                  </span>
+                </div>
+              </div>
+
+              <AnswerArea
+                ref="workspace"
+                :droppedItems="droppedItems"
+                :draggedItem="draggedItem"
+                :offsetX="offsetX"
+                :offsetY="offsetY"
+                :statements="statementElements"
+                @answer-data="updateJsonOutput"
+                @setDraggedItem="onDragStart"
+                @addDroppedItems="addDroppedItems"
+                @delDroppedItem="delDroppedItem"
+                @update-answer-area-content="handleUpdateAnswerContent"
+                @statement-used="handleStatementUsed"
+                @enable-area="(n) => toggleAnswerArea(n)"
+              />
+            </div>
+          </pane>
+          <pane>
+            <!-- Displays worded answer, automatically formed -->
+            <div class="displayWordedOutput">
+              <h4>Check your answer here</h4>
+              <!-- Get texts from AnswerArea -->
+              <AnswerTextGeneratorArea :answerText="this.answerText" />
+            </div>
+          </pane>
+        </splitpanes>
+      </pane>
+      <pane max-size="14" class="connectorContainer">
+        <!-- Displays the connectors -->
+        <div class="displayConnectors">
+          <h2>Connector Area</h2>
+          <ConnectorArea />
+        </div>
+      </pane>
+    </splitpanes>
+  </div>
 </template>
 
 <script>
-import QuestionArea from './components/QuestionArea.vue';
-import StatementArea from './components/StatementArea.vue';
+import QuestionArea from "./components/QuestionArea.vue";
+import StatementArea from "./components/StatementArea.vue";
 import ConnectorArea from "@/components/ConnectorArea.vue";
 import AnswerArea from "@/components/AnswerArea.vue";
-import AnswerTextGeneratorArea from './components/AnswerTextGeneratorArea.vue';
+import AnswerTextGeneratorArea from "./components/AnswerTextGeneratorArea.vue";
+import { Splitpanes, Pane } from "splitpanes";
+import "splitpanes/dist/splitpanes.css";
 
 export default {
-    name: 'App',
+  name: "App",
 
-    data() {
-        return {
-            questions: null,            // The list of questions from the server.
-            selectedQuestion: null,     // The current question that is shown.
+  data() {
+    return {
+      questions: null,
+      showQuestionList: false,
+      selectedQuestion: null,
 
-            promptText: null,           // Prompt text for the question.
-            exNetRelativePath: null,    // The relative path to the question.
-            exNetName: null,            // Name of the question file.
-            statementElements: [],      // All the statements from the question file.
+      promptText: null,
+      exNetRelativePath: null,
+      exNetName: null,
+      statementElements: [],
 
-            statements: [],             // Stores statements, in addition which ares are "visible".
-            offsetX: 0,
-            offsetY: 0,                 // Records coordinates related to where the mouse stopped.
+      statements: [],
+      connectors: [],
+      droppedItems: [],
+      draggedItem: null,
+      offsetX: 0,
+      offsetY: 0,
+      answerAreaEnabled: true,
 
-            clientID: null,             // Records the client ID to be sent to the server.
-            authorised: false,          // Whether the client is authorised.
-            secret_key: null,           // Secret key for the session.
+      clientID: null,
+      authorised: false,
+      secret_key: null,
 
-            answerText: [],             // Worded output from student solution.
+      answerText: [], // Receive all content texts from AnswerArea
+      jsonOutput: {},
+      jsonData: [],
+      dataObject: {},
+    };
+  },
 
-            jsonOutput: {},
-            jsonData: [],
-            dataObject: {}              // Data related to serialising data to the server.
+  components: {
+    AnswerArea,
+    ConnectorArea,
+    QuestionArea,
+    StatementArea,
+    AnswerTextGeneratorArea,
+    Splitpanes,
+    Pane,
+  },
+
+  created() {
+    // TODO: put this to the statements added later.
+    for (let statement of this.statementElements) {
+      statement["visible"] = true;
+    }
+  },
+
+  methods: {
+    async updateJsonOutput(dataObject) {
+      this.dataObject = dataObject;
+      this.dataObject["offsetX"] = String(this.offsetX);
+      this.dataObject["offsetY"] = String(this.offsetY);
+      this.dataObject["statementElements"] = this.statementElements;
+      this.jsonOutput = this.dataObject;
+      console.log(this.jsonOutput);
+      let response = await this.StoreLastWorkingAnswer(this.selectedQuestion);
+      if (response["success"] === true) {
+        window.alert("Submission successful!");
+      }
+      console.log("Submission response:", response);
+    },
+
+    // // Selects a specific question from the list.
+    // questionSelected() {
+    //     // console.log("Displaying question", this.selectedQuestion)
+    //     this.getExnet(this.selectedQuestion,true)
+    // },
+
+    // When a statement is dropped onto a connector, this fires.
+    // Set the corresponding statement's "visible" property to false.
+    handleStatementUsed(statementID, state = false) {
+      for (let statement of this.statementElements) {
+        if (statement["id"] === statementID) {
+          statement["visible"] = state;
+          return;
         }
+      }
     },
 
-    components: {
-        AnswerArea,
-        ConnectorArea,
-        QuestionArea,
-        StatementArea,
-        AnswerTextGeneratorArea,
+    // add the statement to the droppedItem array
+    addDroppedItems(data) {
+      this.droppedItems.push(data);
     },
 
-    methods: {
-        /**
-         * Hashes a value using SHA256 and a predetermined salt.
-         *
-         * @param msg the value to be hashed.
-         * @returns {Promise<string>} the 16-bit string corresponding to the hashed value.
-         * @author MDN contributors, https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
-         */
-        // FIXME: Remove this function once hashing is not required.
-        async digestMessage(msg) {
-            const message =
-                "pre_salt_jkBVJcT9h8" +
-                msg +
-                "EirlCrW8P6_post_salt"
+    // remove the dropped statement on the answerArea
+    delDroppedItem(data) {
+      this.droppedItems = this.droppedItems.filter(
+        (item) => item.id !== data.id
+      );
+    },
 
-            const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
-            const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8); // hash the message
-            const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
-            // convert bytes to hex string
-            return hashArray
-                .map((b) => b.toString(16).padStart(2, "0"))
-                .join("");
-        },
+    //sets the dragged statement to the item that has started to be dragged
+    onDragStart(item) {
+      this.draggedItem = item;
+    },
 
-        /**
-         * Retrieves a specific question file from the server. This can be used to display a question,
-         * or to prepare for the submission of a question.
-         *
-         * @param exnetName the name of the exnet to be retrieved.
-         * @param clear whether the workspace should be cleared after retrieving it. It should be true when swapping
-         * questions, and no when performing any other operation (such as retrieving data prior to submission)
-         * @returns {Promise<any>} a promise containing the response from the server.
-         */
-        async getExnet(exnetName, clear = false) {
-            let response = await this.sendGetExnetRequest(exnetName)
+    //Record the coordinate of X,Y when it clicked
+    onMousedown(e) {
+      this.offsetX = e.offsetX;
+      this.offsetY = e.offsetY;
+    },
 
-            if (response["success"] === true) {
-                if (clear) {
-                    const exnetWorkingAnswerJson = JSON.parse(response.exnet_working_answer_json)
-                    // Successful response code here.
-                    this.promptText = exnetWorkingAnswerJson.activeExNetQuestionPack.promptText;
-                    this.exNetRelativePath = exnetWorkingAnswerJson.activeExNetQuestionPack.exNetRelativePath;
-                    this.exNetName = exnetWorkingAnswerJson.activeExNetQuestionPack.exNetName;
-                    this.statementElements = exnetWorkingAnswerJson.activeExNetQuestionPack.statementElements;
-                    for (let statement of this.statementElements) {
-                        statement["visible"] = true;
-                    }
+    onDropWorkspace(e) {
+      if (this.answerAreaEnabled === false) {
+        return;
+      }
+      this.$refs.workspace.onDrop(e);
+    },
 
-                    // Clear the current workspace.
-                    this.$refs.workspace.clearWorkspace()
-                }
-            } else {
-                console.err("Cannot retrieve question.")
-            }
-            return response
-        },
+    toggleAnswerArea(e) {
+      this.answerAreaEnabled = e;
+    },
 
-        /**
-         * Main function to retrieve the previously submitted answer for a question. The question name
-         * is automatically set to the currently selected question.
-         */
-        async getLastWorkingAnswer() {
-            let response = await this.sendGetExnetAnswer(this.selectedQuestion)
+    // Receive all content texts from AnswerArea
+    handleUpdateAnswerContent(info) {
+      const rootID = Array.from(info[0]);
+      const newAnswerContentObject = info[1];
+      this.answerText = [];
+      for (let i = 0; i < rootID.length; i++) {
+        this.answerText.push(
+          Object.values(newAnswerContentObject[rootID[i]]).join("")
+        );
+      }
+    },
 
-            // FIXME: server response has misspelled success!
-            if (response["succcess"] === true) {
-                let last_working_answer_data = await JSON.parse(response["last_working_answer_data"]);
-                let activeExNetQuestionPack = last_working_answer_data["activeExNetQuestionPack"];
-                let promptText = activeExNetQuestionPack["promptText"];
-                await this.getExnet(this.selectedQuestion, true)
+    // TODO: Remove this once hashing is not required.
+    async digestMessage(msg) {
+      const message = "pre_salt_jkBVJcT9h8" + msg + "EirlCrW8P6_post_salt";
 
-                // If the promptText type is string, that means no new data has been submitted by the student.
-                // The query can be interpreted right away.
+      const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
+      const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8); // hash the message
+      const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
+      // convert bytes to hex string
+      return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+    },
 
-                // If promptText is a LIST, LIST[0] is the query itself - display to question area.
-                // LIST[1] are the previously saved content, which includes serialised data for the front end.
-                if (typeof promptText === "object") {
-                    let data = promptText[1]
-                    this.offsetX = parseInt(data["offsetX"])
-                    this.offsetY = parseInt(data["offsetY"])
-                    this.statementElements = data["statementElements"]
-                    // Pass the rest of the data into the workspace.
-                    this.$refs.workspace.loadPreviousAnswer(data)
-                }
-            } else {
-                await this.getExnet(this.selectedQuestion, true);
-            }
-        },
+    // Sends the login HTTP request to the server.
+    async sendLoginRequest() {
+      let userID = window.prompt("Enter your user ID.", "dummy_1");
 
-        /**
-         * Main function to retrieve the list of questions available.
-         */
-        async getQuestions() {
-            let response = await this.sendGetQuestionsListRequest()
+      //FIXME: will the client ID be hashed or plaintext???
+      this.clientID = userID;
 
-            if (response && response["success"] === true) {
-                this.questions = response.available_exnets
-            } else {
-                console.error('Failed to fetch available questions');
-            }
-        },
+      // FIXME: remove this to stop hashing client ID.
+      await this.digestMessage(userID).then((digestHex) => {
+        userID = digestHex;
+      });
 
-        /**
-         * Set a statement's visible property to false, making it not rendered in statementArea.
-         *
-         * @param statementID the statement to be modified.
-         * @param state the visible property of the statement. Defaults to false (no longer visible).
-         */
-        handleStatementUsed(statementID, state = false) {
-            for (let statement of this.statementElements) {
-                if (statement["id"] === statementID) {
-                    statement["visible"] = state;
-                    return
-                }
-            }
-        },
+      this.clientID = userID;
 
-        /**
-         * Updates the information in the worded output section of the application.
-         *
-         * @param info the new information that should be rendered.
-         */
-        handleUpdateAnswerContent(info) {
-            const rootID = Array.from(info[0])
-            const newAnswerContentObject = info[1]
-            this.answerText = []
-            for (let i = 0; i < rootID.length; i++) {
-                this.answerText.push(Object.values(newAnswerContentObject[rootID[i]]).join(""))
-            }
-        },
+      try {
+        // FIXME: Server URL here
+        let response = await fetch("http://localhost:5000/verify-client", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: `{"client_id":"${userID}"}`,
+        });
+        return await response.json();
+      } catch (error) {
+        console.log(error);
+      }
+    },
 
-        /**
-         * Main function to handle log in request. Stores the returned secret key if log in was successful.
-         */
-        async logIn() {
-            let response = await this.sendLoginRequest()
-            if (response && response["success"] === true) {
-                this.secret_key = response["persistent_secret_key"]
-                this.authorised = true
-                window.alert("Successfully authorised!")
-            } else {
-                window.alert("Login failed!")
-            }
-        },
+    // Sends login request and processes returned promise.
+    async logIn() {
+      let response = await this.sendLoginRequest();
+      console.log(response);
+      if (response && response["success"] === true) {
+        this.secret_key = response["persistent_secret_key"];
+        this.authorised = true;
+        window.alert("Successfully authorised!");
+      } else {
+        window.alert("Login failed!");
+      }
+    },
 
-        /**
-         * Makes the workspace aware that an item has been dropped onto it.
-         *
-         * @param e the event corresponding to the element being dragged onto the workspace.
-         */
-        onDropWorkspace(e) {
-            this.$refs.workspace.onDrop(e)
-        },
-
-        /**
-         * Tracks the X and Y coordinate of the mouse as it is clicked.
-         *
-         * @param e the mouse down event.
-         */
-        onMousedown(e) {
-            this.offsetX = e.offsetX
-            this.offsetY = e.offsetY
-        },
-
-        /**
-         * Send the HTTP request for the previously submitted answer for a question.
-         *
-         * @param exnetName the name of the question to be retrieved.
-         * @returns {Promise<any>} the json format of the server response.
-         */
-        async sendGetExnetAnswer(exnetName) {
-            try {
-                // FIXME: Endpoint URL here
-                let response = await fetch("http://localhost:5000/get-last-working-answer", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: `{
-                              "client_id": "${this.clientID}",
-                              "persistent_secret_key": "${this.secret_key}",
-                              "exnet_name": "${exnetName}"
-                           }`
-                })
-                return await response.json()
-            } catch (error) {
-                console.log(error)
-            }
-        },
-
-        /**
-         * Sends the HTTP request to retrieve a question.
-         *
-         * @param exnetName the name of the exnet to be retrieved.
-         * @returns {Promise<any>} a json object containing the server response.
-         */
-        async sendGetExnetRequest(exnetName) {
-            try {
-                // FIXME: Endpoint URL here
-                let response = await fetch("http://localhost:5000/get-exnet", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: `{
-                              "client_id": "${this.clientID}",
-                              "persistent_secret_key": "${this.secret_key}",
-                              "exnet_name": "${exnetName}"
-                           }`
-                })
-                return await response.json()
-            } catch (error) {
-                console.log(`Failed to fetch ${exnetName}!`)
-            }
-        },
-
-        /**
-         * Sends the HTTP request to retrieve the list of questions available.
-         *
-         * @returns {Promise<any>} the server response, in json.
-         */
-        async sendGetQuestionsListRequest() {
-            try {
-                // FIXME: Endpoint URL here
-                let response = await fetch("http://localhost:5000/list-available-exnet", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: `{
+    async sendGetQuestionsListRequest() {
+      try {
+        // FIXME: HTTP request here.
+        let response = await fetch(
+          "http://localhost:5000/list-available-exnet",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: `{
                               "client_id": "${this.clientID}",
                               "persistent_secret_key": "${this.secret_key}"
-                           }`
-                })
-                return await response.json()
-            } catch (error) {
-                console.log(error)
-            }
-        },
-
-        /**
-         * Sends the log in HTTP request to the server.
-         *
-         * @returns {Promise<any>} the json corresponding to the server response.
-         */
-        async sendLoginRequest() {
-            let userID = window.prompt("Enter your user ID.", "dummy_1")
-            this.clientID = userID
-
-            // FIXME: remove this to stop hashing client ID.
-            await this.digestMessage(userID).then((digestHex) => {
-                userID = digestHex
-            })
-            this.clientID = userID
-
-            try {
-                // FIXME: Endpoint URL here
-                let response = await fetch("http://localhost:5000/verify-client", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: `{"client_id":"${userID}"}`
-                })
-                return await response.json()
-            } catch (error) {
-                console.log(error)
-            }
-        },
-
-        /**
-         * Send the student's current solution to the server.
-         *
-         * @param exnetName the current question being worked on
-         * @returns {Promise<any>} the server response to whether the store process was successful
-         */
-        async storeLastWorkingAnswer(exnetName) {
-            try {
-                let response = await this.getExnet(exnetName, false);
-                let exnetQuestionPack = response["exnet_working_answer_json"]
-                exnetQuestionPack = JSON.parse(exnetQuestionPack)
-                let activeExNetQuestionPack = exnetQuestionPack["activeExNetQuestionPack"]
-                let promptText = activeExNetQuestionPack["promptText"]
-                promptText = [promptText, this.dataObject]
-                activeExNetQuestionPack["promptText"] = promptText
-                exnetQuestionPack["activeExNetQuestionPack"] = activeExNetQuestionPack
-                exnetQuestionPack = JSON.stringify(exnetQuestionPack)
-
-                let msgBody = {
-                    "client_id": this.clientID,
-                    "persistent_secret_key": this.secret_key,
-                    "exnet_name": exnetName,
-                    "working_answer_data": exnetQuestionPack
-                }
-                msgBody = JSON.stringify(msgBody)
-
-                let postResponse = await fetch("http://localhost:5000/store-working-answer", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: msgBody
-                })
-
-                if (!postResponse.ok) {
-                    console.error(`HTTP error! status: ${postResponse.status}`);
-                }
-                return await postResponse.json();
-            } catch (error) {
-                console.log(error);
-            }
-        },
-
-        /**
-         * Prepares the data to be submitted to the server in working answer.
-         *
-         * @param dataObject the data passed up from answerArea.
-         */
-        async updateJsonOutput(dataObject) {
-            this.dataObject = dataObject
-            this.dataObject["offsetX"] = String(this.offsetX)
-            this.dataObject["offsetY"] = String(this.offsetY)
-            this.dataObject["statementElements"] = this.statementElements
-            this.jsonOutput = this.dataObject;
-            let response = await this.storeLastWorkingAnswer(this.selectedQuestion)
-            if (response["success"] === true) {
-                window.alert("Submission successful!")
-            }
-        },
+                           }`,
+          }
+        );
+        return await response.json();
+      } catch (error) {
+        console.log(error);
+      }
     },
 
-    async mounted() {
-        await this.logIn()
-        if (this.authorised) {
-            await this.getQuestions();
+    async getQuestions() {
+      // TODO: re-enable this
+      let response = await this.sendGetQuestionsListRequest();
+      console.log(response);
 
-            if (!this.questions !== null) {
-                this.selectedQuestion = this.questions[0]
-                await this.getExnet(this.selectedQuestion,true)
-            }
+      // TODO: Remove sample server response.
+      // let response = {
+      //     "success": true,
+      //     "available_exnets": [
+      //         "CAL_Q1_question.data",
+      //         "CAL_Q2_question.data",
+      //         "CAL_Q3_question.data",
+      //         "fur_question.data",
+      //         "hemophilia_question.data",
+      //         "leucine_question.data",
+      //         "oocyte_question.data",
+      //         "pcr_Q1_question.data",
+      //         "pcr_Q2_question.data",
+      //         "pcr_Q3_question.data",
+      //         "promoter_question.data",
+      //         "sky_question.data"
+      //     ]
+      // }
+
+      if (response && response["success"] === true) {
+        // Successful response code here.
+        this.questions = response.available_exnets;
+      } else {
+        console.error("Failed to fetch available questions");
+      }
+    },
+
+    async sendGetExnetRequest(exnetName) {
+      try {
+        // FIXME: HTTP request here.
+        // Is this GET or POST?
+        let response = await fetch("http://localhost:5000/get-exnet", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: `{
+                              "client_id": "${this.clientID}",
+                              "persistent_secret_key": "${this.secret_key}",
+                              "exnet_name": "${exnetName}"
+                           }`,
+        });
+        return await response.json();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    async getExnet(exnetName, clear = false) {
+      // TODO: reenable this
+      let response = await this.sendGetExnetRequest(exnetName);
+      console.log(response);
+
+      // TODO: Remove sample server response.
+      // let response = {"success": true, "exnet_name": "sky_question.data", "exnet_working_answer_json": "{\"activeExNetQuestionPack\": {\"promptText\": \"<table style=\\\"border-collapse: collapse; width: 50.0213%; margin:10px;\\\" border=\\\"1\\\"> <tbody> <tr> <td style=\\\"width: 49.949%;\\\"> <h4><span style=\\\"color: #ba372a;\\\"><em><strong>When you look up at the sky,</strong></em></span></h4> <p>the sun is yellow, while the sky is blue.</p> <h4><span style=\\\"text-decoration: underline;\\\"><span style=\\\"color: #169179; text-decoration: underline;\\\"><strong>Explain why the sky is blue.</strong>.</span></span></h4> </td> <td><img src=\\\"blue_sky.jpg\\\" alt=\\\"blue_sky.jpg\\\" width=\\\"100\\\" height=\\\"158\\\" data-api-endpoint=\\\"https://canvas.lms.unimelb.edu.au/api/v1/courses/63494/files/13454251\\\" data-api-returntype=\\\"File\\\" /></td> </tr> </tbody> </table>\", \"exNetRelativePath\": \"Explanation Networks/sky\", \"exNetName\": \"sky\", \"statementElements\": [{\"statementType\": 0, \"id\": 140255704346928, \"content\": {\"originalFacts\": [\"The sky is blue\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 20, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348560, \"content\": {\"originalFacts\": [\"light is comprised of multiple wavelengths\", \"light_has_multiple_wavelengths.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 59, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348608, \"content\": {\"originalFacts\": [\"blue light has a short wavelength\", \"blue_light.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 221, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348704, \"content\": {\"originalFacts\": [\"yellow light has a long wavelength\", \"yellow_light.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 338, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 2, \"id\": 140255704348800, \"content\": {\"originalFacts\": [\"the\", [\"--choose--\", \"smaller\", \"longer\"], \"the wavelength the more it is scattered\"], \"userInput\": [\"--choose--\"]}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 455, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 2, \"id\": 140255704348896, \"content\": {\"originalFacts\": [[\"blue light\", \"yellow light\"], \"is scattered more than\", [\"yellow light\", \"blue light\"]], \"userInput\": [\"blue light\", \"yellow light\"]}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 568, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348992, \"content\": {\"originalFacts\": [\"the light we see when we arent looking at the sun\", \"direct_indirect_light.jpg\", \"is scattered light\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 683, \"fontSizeStr\": \"12px\"}}]}, \"statementElements\": [{\"statementType\": 0, \"id\": 140255704346928, \"content\": {\"originalFacts\": [\"The sky is blue\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 20, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348560, \"content\": {\"originalFacts\": [\"light is comprised of multiple wavelengths\", \"light_has_multiple_wavelengths.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 59, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348608, \"content\": {\"originalFacts\": [\"blue light has a short wavelength\", \"blue_light.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 221, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348704, \"content\": {\"originalFacts\": [\"yellow light has a long wavelength\", \"yellow_light.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 338, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 2, \"id\": 140255704348800, \"content\": {\"originalFacts\": [\"the\", [\"--choose--\", \"smaller\", \"longer\"], \"the wavelength the more it is scattered\"], \"userInput\": [\"--choose--\"]}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 455, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 2, \"id\": 140255704348896, \"content\": {\"originalFacts\": [[\"blue light\", \"yellow light\"], \"is scattered more than\", [\"yellow light\", \"blue light\"]], \"userInput\": [\"blue light\", \"yellow light\"]}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 568, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348992, \"content\": {\"originalFacts\": [\"the light we see when we arent looking at the sun\", \"direct_indirect_light.jpg\", \"is scattered light\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 683, \"fontSizeStr\": \"12px\"}}], \"connectorElements\": []}"}
+
+      if (response["success"] === true) {
+        if (clear) {
+          const exnetWorkingAnswerJson = JSON.parse(
+            response.exnet_working_answer_json
+          );
+          // Successful response code here.
+          this.promptText =
+            exnetWorkingAnswerJson.activeExNetQuestionPack.promptText;
+          console.log("FIXED PROMPT TEXT", this.promptText);
+          this.exNetRelativePath =
+            exnetWorkingAnswerJson.activeExNetQuestionPack.exNetRelativePath;
+          this.exNetName =
+            exnetWorkingAnswerJson.activeExNetQuestionPack.exNetName;
+          this.statementElements =
+            exnetWorkingAnswerJson.activeExNetQuestionPack.statementElements;
+          for (let statement of this.statementElements) {
+            statement["visible"] = true;
+            // this.statements.push(statement);
+          }
+
+          this.showQuestionList = false;
+
+          this.$refs.workspace.clearWorkspace();
+          this.droppedItems = [];
         }
+      } else {
+        // What to do if failed?
+      }
+      return response;
+    },
+    async StoreLastWorkingAnswer(exnetName) {
+      try {
+        let response = await this.getExnet(exnetName, false);
+        console.log("Get exnet response\n", response);
+        let exnetQuestionPack = response["exnet_working_answer_json"];
+        // console.log(JSON.parse(exnetQuestionPack))
+        exnetQuestionPack = JSON.parse(exnetQuestionPack);
+
+        let activeExNetQuestionPack =
+          exnetQuestionPack["activeExNetQuestionPack"];
+
+        let promptText = activeExNetQuestionPack["promptText"];
+
+        console.log(typeof promptText);
+
+        promptText = [promptText, this.dataObject];
+
+        activeExNetQuestionPack["promptText"] = promptText;
+
+        exnetQuestionPack["activeExNetQuestionPack"] = activeExNetQuestionPack;
+
+        exnetQuestionPack = JSON.stringify(exnetQuestionPack);
+
+        // console.log(exnetQuestionPack)
+
+        let msgBody = {
+          client_id: this.clientID,
+          persistent_secret_key: this.secret_key,
+          exnet_name: exnetName,
+          working_answer_data: exnetQuestionPack,
+        };
+
+        console.log("msgBody", msgBody);
+        msgBody = JSON.stringify(msgBody);
+        // console.log(msgBody)
+
+        let postResponse = await fetch(
+          "http://localhost:5000/store-working-answer",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: msgBody,
+          }
+        );
+
+        if (!postResponse.ok) {
+          throw new Error(`HTTP error! status: ${postResponse.status}`);
+        }
+
+        return await postResponse.json();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async sendGetExnetAnswer(exnetName) {
+      try {
+        // FIXME: HTTP request here.
+        // Is this GET or POST?
+        let response = await fetch(
+          "http://localhost:5000/get-last-working-answer",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: `{
+                      "client_id": "${this.clientID}",
+                      "persistent_secret_key": "${this.secret_key}",
+                      "exnet_name": "${exnetName}"
+                    }`,
+          }
+        );
+        return await response.json();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async getLastWorkingAnswer() {
+      // 1. Send HTTP Request. Body needs client_id, persistent_secret_key, exnet_name using fetch
+      let response = await this.sendGetExnetAnswer(this.selectedQuestion);
+      console.log(response);
+      console.log(response["succcess"]);
+      // 2. confirm server responds with "success" : true
+      // FIX ME: Success spell is wrong!
+      if (response["succcess"] === true) {
+        console.log("ddas");
+        let last_working_answer_data = await JSON.parse(
+          response["last_working_answer_data"]
+        );
+        // 3. activeExNetQuestionPack is from "last_working_answer_data" entry.
+        let activeExNetQuestionPack =
+          last_working_answer_data["activeExNetQuestionPack"];
+        console.log("questionpack", activeExNetQuestionPack);
+        // 4. get the query entry via activeExNetQuestionPack > promptText
+        let promptText = activeExNetQuestionPack["promptText"];
+        console.log("promptText", promptText);
+        console.log(typeof promptText);
+        // 5. Check promptText is a LIST and not just a string. If it is a string - there is no information
+        // that has been stored. Display the question similar to the getExnet above.
+        await this.getExnet(this.selectedQuestion, true);
+        if (typeof promptText === "string") {
+          console.log(promptText);
+        }
+        // 6. If promptText is a LIST, LIST[0] is the query itself - display directly.
+        // 7. LIST[1] contains all the parameters passed when saving. Extract entries and replace those in App.vue.
+        // let data = LIST[1];
+        // this.offSetX = data["offSetX"]
+        else if (typeof promptText === "object") {
+          let data = promptText[1];
+          console.log("data", typeof data);
+          this.offsetX = parseInt(data["offsetX"]);
+          this.offsetY = parseInt(data["offsetY"]);
+          this.statementElements = data["statementElements"];
+          this.$refs.workspace.loadPreviousAnswer(data);
+
+          console.log(data);
+        }
+      } else {
+        await this.getExnet(this.selectedQuestion, true);
+      }
+
+      // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
+    },
+  },
+
+  async mounted() {
+    await this.logIn();
+    await this.getQuestions();
+
+    if (!this.questions !== null) {
+      this.selectedQuestion = this.questions[0];
+      await this.getExnet(this.selectedQuestion, true);
     }
-}
+  },
+};
 </script>
 
 <style>
-@import './assets/appdesign.css';
-@import './assets/tooltips.css'; 
+@import "./assets/appdesign.css";
+@import "./assets/tooltips.css";
+
+body {
+  margin: 0px;
+  padding: 0px;
+}
 
 .displayWorkspace {
-    position: relative;
+  position: relative;
+}
+
+.sectionTitle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.sectionTitle h2 {
+  width: 220px;
+  margin: 0px 0px 0px 10px;
+}
+
+.splitpanes--vertical > .splitpanes__splitter {
+  min-width: 8px;
+  background: gray;
+}
+
+.splitpanes--horizontal > .splitpanes__splitter {
+  min-height: 8px;
+  background: gray;
+}
+
+.mainContainer {
+  height: 100vh;
+}
+
+.statementContainer {
+  overflow-y: scroll;
+}
+
+.connectorContainer {
+  overflow-y: scroll;
 }
 </style>
