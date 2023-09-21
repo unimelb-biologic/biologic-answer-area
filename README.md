@@ -32,7 +32,9 @@ Trello	Visualise the project's progress and to estimate, prioritise and manage o
 GitHub	Manage and modify the project's code and to generate releases that will be accessed by the clients.	https://github.com/COMP90082-2023-SM2/BI-Bluering  
 
 ## Demonstration for Sprint2
-![Output sample](https://youtu.be/c99gLT0rCrQ?si=tTGC375oh7ApCpui)
+![Output sample]() https://youtu.be/c99gLT0rCrQ?si=tTGC375oh7ApCpui
+
+[<img src="https://img.youtube.com/vi/c99gLT0rCrQ?si=tTGC375oh7ApCpui/maxresdefault.jpg" width="50%">](https://youtu.be/c99gLT0rCrQ?si=tTGC375oh7ApCpui)
 
 
 ## Changelogs
