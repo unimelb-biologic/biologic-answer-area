@@ -33,6 +33,7 @@ GitHub	Manage and modify the project's code and to generate releases that will b
 
 ## Demonstration for Sprint 2
 A short recorded video which demonstrates our development progress after Sprint 2.
+
 Link: https://youtu.be/c99gLT0rCrQ?si=tTGC375oh7ApCpui
 
 ## Changelogs
