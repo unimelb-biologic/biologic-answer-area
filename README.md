@@ -19,6 +19,12 @@ Xingchen Han	Developer	xingchenh1@student.unimelb.edu.au
 Jiuneng Zhang	Developer	jiunengz@student.unimelb.edu.au  
 Sihan Zhang	Developer	sihazhang1@student.unimelb.edu.au
 
+## Project Roadmap
+18th August 2023: End of Sprint 1/Inception
+22nd August 2023: End of Sprint 2
+25th October 2023: End of Sprint 3
+8th November 2023: End of Sprint 4 and project.
+
 ## Project Setup
 1. Clone this repository.  
 2. Run npm install on the project directory.  
