@@ -18,7 +18,7 @@
         v-if="this.data.statementType === 0"
         :data="this.data"
         @user-choice-changed="handleUserChoiceChanged"
-        @double-clicked="handleDoubleClick"
+        
     />
     <StatementTruth
         v-bind="$attrs"
@@ -37,7 +37,7 @@
         :data="this.data"
         @user-input-changed="handleUserInputChanged"
     />
-    <div v-if="renderedText">{{ renderedText }}</div>
+    <!-- <div v-if="renderedText">{{ renderedText }}</div> -->
   </div>
 </template>
 

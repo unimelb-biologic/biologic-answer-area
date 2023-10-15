@@ -1,35 +1,44 @@
 <template>
-  <div @dblclick="handleDoubleClick">
+  <!-- <div @dblclick="handleDoubleClick"> -->
     <!-- if clickCount is odd，display the render text -->
-    <div v-if="clickCount % 2 !== 0">
+    <!-- <div v-if="clickCount % 2 !== 0">
       {{ renderedText }}
     </div>
 
-    <!-- if clickCount is even，display the text and the options -->
-    <div v-else>
+    <div v-else> -->
       <!-- record the statement position-->
-      <div class="StatementRoot" v-for="(segment, index) in this.data.content.originalFacts"
-           :key="index">
+      <div class="StatementRoot">
+        <div
+          v-for="(segment, index) in this.data.content.originalFacts"
+          :key="index"
+        >
+      <!-- <div class="StatementRoot" v-for="(segment, index) in this.data.content.originalFacts"
+           :key="index"> -->
         <!-- render the text from selection -->
-        <div v-if="typeof segment === 'string'">
-          {{ segment }}
-        </div>
+          <div v-if="typeof segment === 'string'">
+            {{ segment }}
+          </div>
 
-        <!-- render the options -->
-        <div v-else>
-          <div v-for="item in segment.slice(2)">
-            <input type="radio" :id="item" :value="item" v-model="userSelected[index]">
-            <label :for="item in segment.slice(2)">{{item}}</label><br>
+          <!-- render the options -->
+          <div v-else>
+            <select v-model="userSelected[index]">
+              <option v-for="item in segment" :value="item" :key="item">
+                {{ item }}
+              </option>
+            </select>
+            <!-- <div v-for="item in segment.slice(2)">
+              <input type="radio" :id="item" :value="item" v-model="userSelected[index]">
+              <label :for="item in segment.slice(2)">{{item}}</label><br>
+            </div> -->
           </div>
         </div>
-      </div>
-      <!-- Display tooltips for this statement-->
-      <span v-if="data.visible" class="StatementRoot_tooltip">
-      This statement must be used.<br /><br />
-      It is a starting point for therest of the problem.
-    </span>
+        <!-- Display tooltips for this statement-->
+        <span v-if="data.visible" class="StatementRoot_tooltip">
+          This statement must be used.<br /><br />
+          It is a starting point for therest of the problem.
+        </span>
     </div>
-  </div>
+  <!-- </div> -->
 </template>
 
 <script>

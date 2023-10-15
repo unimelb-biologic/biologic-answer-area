@@ -88,6 +88,10 @@ margin-top: 5px;
 visibility: visible;
 }
 
+.StatementStudent:active .StatementStudent_tooltip  {
+  visibility: hidden;
+  }
+
 /* statementTruth tooltips css style */
 .StatementTruth .StatementTruth_tooltip {
   visibility: hidden;
