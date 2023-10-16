@@ -1,35 +1,38 @@
 <template>
-  <div @dblclick="handleDoubleClick">
-    <!-- if clickCount is odd，display the render text -->
-    <div v-if="clickCount % 2 !== 0">
-      {{ renderedText }}
-    </div>
-
-    <!-- if clickCount is even，display the text and the options -->
-    <div v-else>
-      <!-- record the statement position-->
-      <div class="StatementStudent" v-for="(segment, index) in this.data.content.originalFacts" 
-      :key="index">
-        <!-- render the text from selection -->
-        <div v-if="typeof segment === 'string'">
-          {{ segment }}
+  <div class="StatementStudent">
+    <div class="content-wrapper">
+      <button v-if="showToggle" @click="toggleView">T</button>
+      
+      <div class="main-content">
+        <div v-if="showConcatenated">
+          {{ concatenatedStatement }}
         </div>
 
-        <!-- render the options -->
         <div v-else>
-          <select v-model="userSelected[index]">
-            <option v-for="item in segment" :value="item" :key="item">
-              {{ item }}
-            </option>
-          </select>
+          <!-- record the statement position-->
+          <div v-for="(segment, index) in data.content.originalFacts" :key="index">
+            <!-- render the text from selection -->
+            <div v-if="typeof segment === 'string'">
+              {{ segment }}
+            </div>
+
+            <!-- render the options -->
+            <div v-else>
+              <select v-model="userSelected[index]">
+                <option v-for="item in segment" :value="item" :key="item">
+                  {{ item }}
+                </option>
+              </select>
+            </div>
+          </div>
         </div>
+        <!-- Display tooltips for this statement-->
+        <span v-if="data.visible" class="StatementStudent_tooltip">
+          You can use this statement to answer the question.
+        </span>
       </div>
-    <!-- Display tooltips for this statement-->
-    <span v-if="data.visible" class="StatementRoot_tooltip">
-      You can use this statement to answer the question.
-    </span>
+    </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -39,6 +42,10 @@ export default {
   props: {
     data: Object,
     position: String,
+    showToggle: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {
@@ -48,27 +55,20 @@ export default {
       previousUserInput: this.data.content.userInput,
       userSelected: [],
       answeredData: null,
-      renderedText: "",
-      clickCount: 0,
+      showConcatenated: false,
     };
   },
+  computed: {
+    concatenatedStatement() {
+      return this.data.content.originalFacts.map((segment, index) => 
+        typeof segment === 'string' ? segment : this.userSelected[index] || segment[0]
+      ).join(" ");
+    }
+  },
   methods: {
-    handleDoubleClick() {
-      this.clickCount++;
-      
-      if (this.clickCount % 2 !== 0) {
-        let constructedSentence = "";
-        for (let i = 0; i < this.data.content.originalFacts.length; i++) {
-          if (typeof this.data.content.originalFacts[i] === "string") {
-            constructedSentence += this.data.content.originalFacts[i] + " ";
-          } else {
-            constructedSentence += this.userSelected[i] + " ";
-          }
-        }
-        this.renderedText = constructedSentence.trim();
-      }
+    toggleView() {
+      this.showConcatenated = !this.showConcatenated;
     },
-    
     handleSelectChange() {
       let studentContentText = "";
       // Concat all the texts
@@ -145,4 +145,19 @@ export default {
   position: relative;
   display: inline-block;
 }
+
+.content-wrapper {
+  display: flex;
+  align-items: flex-start;
+}
+
+.main-content {
+  flex: 1;
+  padding-left: 10px;
+}
+
+button {
+  margin-right: 10px;
+}
 </style>
+
