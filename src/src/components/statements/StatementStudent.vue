@@ -11,7 +11,7 @@
       <div class="StatementStudent">
 
         <!-- radio button format -->
-        <!-- <div v-for="(segment, index) in this.data.content.originalFacts"
+        <div v-for="(segment, index) in this.data.content.originalFacts"
            :key="index" style="float: left; ">
           <div v-if="typeof segment === 'string'" class="segmentString">
             {{ segment }}
@@ -24,7 +24,7 @@
               </div>
             </div>
           </div>
-        </div> -->
+        </div>
 
         <!-- dropdown format -->
         <div v-for="(segment, index) in this.data.content.originalFacts"
