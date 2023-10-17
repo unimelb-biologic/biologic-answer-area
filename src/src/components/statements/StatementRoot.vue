@@ -1,13 +1,14 @@
 <template>
-  <!-- <div @dblclick="handleDoubleClick"> -->
-    <!-- if clickCount is odd，display the render text -->
-    <!-- <div v-if="clickCount % 2 !== 0">
-      {{ renderedText }}
-    </div>
+  <div class="StatementRoot">
+    <div class="content-wrapper">
+      <button v-if="showToggle" @click="toggleView">T</button>
+      
+      <div class="main-content">
+        <div v-if="showConcatenated">
+          {{ concatenatedStatement }}
+        </div>
 
-    <div v-else> -->
-      <!-- record the statement position-->
-      <div class="StatementRoot">
+        <div v-else>
          <!-- radio button format -->
         <div
           v-for="(segment, index) in this.data.content.originalFacts"
@@ -18,9 +19,9 @@
             {{ segment }}
           </div>
 
-          <!-- render the options -->
-          <div v-else>
-            <div v-for="item in segment">
+                <!-- render the options -->
+                <div v-else>
+                  <div v-for="item in segment">
               <div v-if="item.indexOf('--')"> 
                 <input type="radio" :id="item" :value="item" v-model="userSelected[index]">
                 <label :for="item in segment">{{item}}</label><br>
@@ -42,18 +43,21 @@
           <!-- render the options -->
           <!-- <div v-else>
             <select v-model="userSelected[index]">
-              <option v-for="item in segment" :value="item" :key="item">
-                {{ item }}
-              </option>
-            </select>
-          </div>
-        </div> -->
-        <!-- Display tooltips for this statement-->
-        <span v-if="data.visible" class="StatementRoot_tooltip">
-          This statement must be used.<br /><br />
-          It is a starting point for therest of the problem.
-        </span>
+                    <option v-for="item in segment" :value="item" :key="item">
+                      {{ item }}
+                    </option>
+                  </select>
+                </div>
+              </div> -->
+        </div>
+            <!-- Display tooltips for this statement-->
+            <span v-if="data.visible" class="StatementRoot_tooltip">
+              This statement must be used.<br /><br />
+              It is a starting point for the rest of the problem.
+            </span>
+        </div>
     </div>
+  </div>
   <!-- </div> -->
 </template>
 
@@ -64,6 +68,10 @@ export default {
   props: {
     data: Object,
     position: String,
+    showToggle: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {
@@ -73,27 +81,20 @@ export default {
       previousUserInput: this.data.content.userInput,
       userSelected: [],
       answeredData: null,
-      renderedText: "",
-      clickCount: 0,
+      showConcatenated: false,
     };
   },
+  computed: {
+    concatenatedStatement() {
+      return this.data.content.originalFacts.map((segment, index) => 
+        typeof segment === 'string' ? segment : this.userSelected[index] || segment[0]
+      ).join(" ");
+    }
+  },
   methods: {
-    handleDoubleClick() {
-      this.clickCount++;
-
-      if (this.clickCount % 2 !== 0) {
-        let constructedSentence = "";
-        for (let i = 0; i < this.data.content.originalFacts.length; i++) {
-          if (typeof this.data.content.originalFacts[i] === "string") {
-            constructedSentence += this.data.content.originalFacts[i] + " ";
-          } else {
-            constructedSentence += this.userSelected[i] + " ";
-          }
-        }
-        this.renderedText = constructedSentence.trim();
-      }
+    toggleView() {
+      this.showConcatenated = !this.showConcatenated;
     },
-
     handleSelectChange() {
       let studentContentText = "";
       // Concat all the texts
@@ -169,6 +170,20 @@ export default {
   text-align: center;
   position: relative;
   display: inline-block;
+}
+
+.content-wrapper {
+  display: flex;
+  align-items: flex-start;
+}
+
+.main-content {
+  flex: 1;
+  padding-left: 10px;
+}
+
+button {
+  margin-right: 10px;
 }
 .segmentString {
   min-height: inherit; 

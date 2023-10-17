@@ -1,21 +1,19 @@
 <template>
-  <!-- <div @dblclick="handleDoubleClick"> -->
-    <!-- if clickCount is odd，display the render text -->
-    <!-- <div v-if="clickCount % 2 !== 0">
-      {{ renderedText }}
-    </div> -->
+  <div class="StatementStudent">
+    <div class="content-wrapper">
+      <button v-if="showToggle" @click="toggleView">T</button>
+      
+      <div class="main-content">
+        <div v-if="showConcatenated">
+          {{ concatenatedStatement }}
+        </div>
 
-    <!-- if clickCount is even，display the text and the options -->
-    <!-- <div v-else> -->
-      <!-- record the statement position-->
-      <div class="StatementStudent">
-
-        <!-- radio button format -->
-        <div v-for="(segment, index) in this.data.content.originalFacts"
+        <div v-else>
+          <div v-for="(segment, index) in this.data.content.originalFacts"
            :key="index" style="float: left; ">
-          <div v-if="typeof segment === 'string'" class="segmentString">
-            {{ segment }}
-          </div>
+            <div v-if="typeof segment === 'string'" class="segmentString">
+              {{ segment }}
+            </div>
           <div v-else>
             <div v-for="item in segment" >
               <div v-if="item.indexOf('--')"> 
@@ -40,6 +38,8 @@
                 {{ item }}
               </option>
             </select>
+          
+
           </div>
         </div>
         <!-- Display tooltips for this statement-->
@@ -47,7 +47,8 @@
           You can use this statement to answer the question.
         </span>
       </div>
-  <!-- </div> -->
+    </div>
+  </div>
 </template>
 
 <script>
@@ -57,6 +58,10 @@ export default {
   props: {
     data: Object,
     position: String,
+    showToggle: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {
@@ -66,27 +71,20 @@ export default {
       previousUserInput: this.data.content.userInput,
       userSelected: [],
       answeredData: null,
-      renderedText: "",
-      clickCount: 0,
+      showConcatenated: false,
     };
   },
+  computed: {
+    concatenatedStatement() {
+      return this.data.content.originalFacts.map((segment, index) => 
+        typeof segment === 'string' ? segment : this.userSelected[index] || segment[0]
+      ).join(" ");
+    }
+  },
   methods: {
-    handleDoubleClick() {
-      this.clickCount++;
-
-      if (this.clickCount % 2 !== 0) {
-        let constructedSentence = "";
-        for (let i = 0; i < this.data.content.originalFacts.length; i++) {
-          if (typeof this.data.content.originalFacts[i] === "string") {
-            constructedSentence += this.data.content.originalFacts[i] + " ";
-          } else {
-            constructedSentence += this.userSelected[i] + " ";
-          }
-        }
-        this.renderedText = constructedSentence.trim();
-      }
+    toggleView() {
+      this.showConcatenated = !this.showConcatenated;
     },
-
     handleSelectChange() {
       let studentContentText = "";
       // Concat all the texts
@@ -168,4 +166,18 @@ export default {
   padding-top: 40%; 
   padding:  40% 10px;
 }
+.content-wrapper {
+  display: flex;
+  align-items: flex-start;
+}
+
+.main-content {
+  flex: 1;
+  padding-left: 10px;
+}
+
+button {
+  margin-right: 10px;
+}
 </style>
+
