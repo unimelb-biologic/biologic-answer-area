@@ -4,11 +4,11 @@
       <button v-if="showToggle" @click="toggleView">T</button>
       
       <div class="main-content">
-        <div v-if="showConcatenated">
+        <div v-if="clickCount % 3 === 2">
           {{ concatenatedStatement }}
         </div>
-
-        <div v-else>
+        
+        <div v-else-if="clickCount % 3 === 1">
           <!-- radio button format -->
           <div v-for="(segment, index) in this.data.content.originalFacts"
            :key="index" style="float: left; ">
@@ -24,7 +24,9 @@
               </div>
             </div>
           </div>
+        </div>
 
+        <div v-else>
           <!-- dropdown format -->
           <div v-for="(segment, index) in this.data.content.originalFacts"
             :key="index" >
@@ -73,7 +75,7 @@ export default {
       previousUserInput: this.data.content.userInput,
       userSelected: [],
       answeredData: null,
-      showConcatenated: false,
+      clickCount: 0,
     };
   },
   computed: {
@@ -85,7 +87,7 @@ export default {
   },
   methods: {
     toggleView() {
-      this.showConcatenated = !this.showConcatenated;
+      this.clickCount += 1;
     },
     handleSelectChange() {
       let studentContentText = "";
@@ -166,7 +168,7 @@ export default {
 .segmentString {
   min-height: inherit; 
   padding-top: 40%; 
-  padding:  40% 10px;
+  padding:  30% 10px 15%;
 }
 .content-wrapper {
   display: flex;
