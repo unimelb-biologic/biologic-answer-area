@@ -9,37 +9,39 @@
         </div>
 
         <div v-else>
+          <!-- radio button format -->
           <div v-for="(segment, index) in this.data.content.originalFacts"
            :key="index" style="float: left; ">
             <div v-if="typeof segment === 'string'" class="segmentString">
               {{ segment }}
             </div>
-          <div v-else>
-            <div v-for="item in segment" >
-              <div v-if="item.indexOf('--')"> 
-              <input type="radio" :id="item" :value="item" v-model="userSelected[index]">
-              <label :for="item in segment">{{item}}</label><br>
+            <div v-else>
+              <div v-for="item in segment" >
+                <div v-if="item.indexOf('--')"> 
+                <input type="radio" :id="item" :value="item" v-model="userSelected[index]">
+                <label :for="item in segment">{{item}}</label><br>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- dropdown format -->
-        <div v-for="(segment, index) in this.data.content.originalFacts"
-           :key="index" >
-          <!-- render the text from selection -->
-          <div v-if="typeof segment === 'string'" >
-            {{ segment }}
-          </div>
-          <!-- render the options -->
-          <div v-else>
-            <select v-model="userSelected[index]">
-              <option v-for="item in segment" :value="item" :key="item">
-                {{ item }}
-              </option>
-            </select>
-          
+          <!-- dropdown format -->
+          <div v-for="(segment, index) in this.data.content.originalFacts"
+            :key="index" >
+            <!-- render the text from selection -->
+            <div v-if="typeof segment === 'string'" >
+              {{ segment }}
+            </div>
+            <!-- render the options -->
+            <div v-else>
+              <select v-model="userSelected[index]">
+                <option v-for="item in segment" :value="item" :key="item">
+                  {{ item }}
+                </option>
+              </select>
+            
 
+            </div>
           </div>
         </div>
         <!-- Display tooltips for this statement-->
