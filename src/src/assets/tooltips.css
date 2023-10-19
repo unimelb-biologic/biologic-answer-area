@@ -67,7 +67,9 @@ margin-top: 5px;
 .StatementRoot:hover .StatementRoot_tooltip  {
 visibility: visible;
 }
-
+.StatementRoot:active .StatementRoot_tooltip  {
+  display: none;
+}
 /* statementStudent tooltips css style */
 .StatementStudent .StatementStudent_tooltip {
 visibility: hidden;
@@ -90,8 +92,8 @@ visibility: visible;
 }
 
 .StatementStudent:active .StatementStudent_tooltip  {
-  visibility: hidden;
-  }
+  display: none;
+}
 
 /* statementTruth tooltips css style */
 .StatementTruth .StatementTruth_tooltip {

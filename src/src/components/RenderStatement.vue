@@ -72,6 +72,8 @@ export default {
     },
     
     startDrag(e, data) {
+      // e.target.className = 'dragEffect';
+
       e.dataTransfer.dropEffect = "move";
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("data", JSON.stringify(this.data));
