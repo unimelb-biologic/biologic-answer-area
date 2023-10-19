@@ -2,7 +2,9 @@
   <div id="submitBtn">
     <button @click="convertToJson">Submit</button>
   </div>
-
+  <div id="submitBtn">
+    <button @click="feedback_re">Feedback</button>
+  </div>
   <div
     class="answer_area"
     @dragover.prevent
@@ -100,6 +102,9 @@ export default {
     };
   },
   methods: {
+    feedback_re(){
+      this.$emit("String_feedback");
+    },
     convertToJson() {
       console.log("button pressed");
       this.data_Object = {

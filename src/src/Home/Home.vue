@@ -93,6 +93,7 @@
                   @update-answer-area-content="handleUpdateAnswerContent"
                   @statement-used="handleStatementUsed"
                   @enable-area="(n) => toggleAnswerArea(n)"
+                  @String_feedback="click_feedback"
                 />
               </div>
             </pane>
@@ -156,6 +157,7 @@
         jsonOutput: {},
         jsonData: [],
         dataObject: {},
+        feedback: null
       };
     },
   
@@ -189,8 +191,77 @@
           window.alert("Submission successful!");
         }
         console.log("Submission response:", response);
+        this.sendGetStudentGrades(this.selectedQuestion).then(response=>{
+        if (response["success"] === true) {
+          this.feedback = response.client_feedback
+        }
+        })
       },
-  
+      click_feedback() {
+        const { gradingStatus, gradingInfo, overallScore } = JSON.parse(this.feedback);
+
+        const gradingInfoStr = gradingInfo.map(info => {
+          return `
+              <div>
+                <strong>Score:</strong> ${info.rubricScore},
+                <strong>Feedback:</strong> ${info.feedback},
+                <strong>Academic Note:</strong> ${info.academicNote},
+                <strong>Rubric Key:</strong> ${info.rubricKey},
+                <strong>Rubric Status:</strong> ${info.rubricStatus},
+                <strong>ExnetID:</strong> ${info.exnetID},
+                <strong>Statement Identifier:</strong> ${info.statementIdentifier},
+              </div>
+          `;
+        }).join('\n');
+        const str = `
+          <div>
+            <strong>gradingStatus:</strong> ${gradingStatus},
+          </div>
+          <div>  
+            <strong>gradingInfo:</strong> ${gradingInfoStr},
+          </div>
+          <br> 
+          <div style="font-weight: bold; color: red; font-size: 16px;">
+            <strong>overallScore:</strong> ${overallScore}
+          </div>
+        `;
+        const popup = window.open('', 'Custom Popup', 'width=600,height=400');
+        if (popup) {
+          popup.document.write(`
+            <html>
+            <head>
+              <style>
+                h7{
+                  font-family: Arial, sans-serif;
+                  font-size: 14px;
+                }
+                body {
+                  font-family: Arial, sans-serif;
+                  font-size: 14px;
+                }
+                div {
+                  margin: 5px 0;
+                }
+              </style>
+            </head>
+            <strong><h7>GradingStatus: Represents the overall grading status.<br>
+                C : indicates that the marking has been completed. <br>
+                IC : indicates that the marking has not been completed.</h7><strong>
+            <br><br>
+            <strong><h7>rubricStatus: Represents the status of the grading for this rubric item. Possible values:<br>
+                GC : Indicates that the Auto-grader marked this as correct.<br>
+                GIC : Indicates that the Auto-grader marked this as incorrect.<br>
+                GPC : Indicates that the Auto-grader marked this as partially correct.<br>
+                GNC : Indicates that the Auto-grader could not mark this.<br>
+                MG : Indicates that this has been manually graded by an educator. </h7><strong>
+            <br><br>
+            <body>${str}</body>
+            </html>
+          `);
+        } else {
+          alert('Error');
+        }
+      },
       // // Selects a specific question from the list.
       // questionSelected() {
       //     // console.log("Displaying question", this.selectedQuestion)
@@ -502,6 +573,45 @@
         } catch (error) {
           console.log(error);
         }
+      },
+      async sendGetStudentGrades(exnetName) {
+        console.log(this.jsonOutput,this.jsonOutput,'this.jsonOutput)')
+        console.log(  localStorage.getItem('userID'))
+        const params={
+          activeExNetQuestionPack:{
+            promptText: [this.promptText, this.dataObject],
+            ...this.dataObject,
+            "exNetRelativePath":this.exNetRelativePath,
+            "exNetName":exnetName,
+            statementElements:this.dataObject.statementElements
+          },
+          statementElements:this.dataObject.statementElements
+
+        };
+        try {
+          // FIXME: Endpoint URL here
+          let response = await fetch("http://localhost:5000/get-student-grades", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json"
+              },
+              body: 
+                JSON.stringify({
+                  "student_id":this.userID,
+                      "client_id": this.userID,
+                      "persistent_secret_key": this.secret_key,
+                      "exnet_name": exnetName,
+                      // "ex_net": JSON.stringify({activeExNetQuestionPack: this.promptText, ...this.dataObject}) }
+                      "ex_net": JSON.stringify(params),
+                      // "ex_flow":JSON.stringify(params)
+                    },
+                )
+            })
+            return await response.json()
+          } catch (error) {
+            console.log(`Failed to fetch ${exnetName}!`)
+          }
+          // print(JSON.stringify(params))
       },
       async getLastWorkingAnswer() {
         // 1. Send HTTP Request. Body needs client_id, persistent_secret_key, exnet_name using fetch
