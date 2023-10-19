@@ -1,29 +1,57 @@
 <template>
-  <!-- record the statement position-->
   <div class="StatementRoot">
-    <div
-      v-for="(segment, index) in this.data.content.originalFacts"
-      :key="index"
-    >
-      <!-- render the text from selection -->
-      <div v-if="typeof segment === 'string'">
-        {{ segment }}
-      </div>
+    <div class="content-wrapper">
+      <button v-if="showToggle" @click="toggleView">T</button>
+      
+      <div class="main-content">
+        <div v-if="clickCount % 3 === 2">
+          {{ concatenatedStatement }}
+        </div>
 
-      <!-- render the options -->
-      <div v-else>
-        <select v-model="userSelected[index]">
-          <option v-for="item in segment" :value="item" :key="item">
-            {{ item }}
-          </option>
-        </select>
+        <div v-else-if="clickCount % 3 === 1">
+          <!-- radio button format -->
+          <div v-for="(segment, index) in this.data.content.originalFacts"
+           :key="index" style="float: left; ">
+            <div v-if="typeof segment === 'string'" class="segmentString">
+              {{ segment }}
+            </div>
+            <div v-else>
+              <div v-for="item in segment" >
+                <div v-if="item.indexOf('--')"> 
+                <input type="radio" :id="item" :value="item" v-model="userSelected[index]">
+                <label :for="item in segment">{{item}}</label><br>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else>
+          <!-- dropdown format -->
+          <div
+            v-for="(segment, index) in this.data.content.originalFacts"
+            :key="index"
+          > 
+          <!-- render the text from selection -->
+            <div v-if="typeof segment === 'string'">
+              {{ segment }}
+            </div>
+            <!-- render the options -->
+            <div v-else>
+              <select v-model="userSelected[index]">
+                <option v-for="item in segment" :value="item" :key="item">
+                  {{ item }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <!-- Display tooltips for this statement-->
+        <span v-if="data.visible" class="StatementRoot_tooltip">
+          This statement must be used.<br /><br />
+          It is a starting point for the rest of the problem.
+        </span>
       </div>
     </div>
-    <!-- Display tooltips for this statement-->
-    <span v-if="data.visible" class="StatementRoot_tooltip">
-      This statement must be used.<br /><br />
-      It is a starting point for therest of the problem.
-    </span>
   </div>
 </template>
 
@@ -34,6 +62,10 @@ export default {
   props: {
     data: Object,
     position: String,
+    showToggle: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {
@@ -43,9 +75,20 @@ export default {
       previousUserInput: this.data.content.userInput,
       userSelected: [],
       answeredData: null,
+      clickCount: 0,
     };
   },
+  computed: {
+    concatenatedStatement() {
+      return this.data.content.originalFacts.map((segment, index) => 
+        typeof segment === 'string' ? segment : this.userSelected[index] || segment[0]
+      ).join(" ");
+    }
+  },
   methods: {
+    toggleView() {
+      this.clickCount += 1;
+    },
     handleSelectChange() {
       let studentContentText = "";
       // Concat all the texts
@@ -121,5 +164,23 @@ export default {
   text-align: center;
   position: relative;
   display: inline-block;
+}
+
+.content-wrapper {
+  display: flex;
+  align-items: flex-start;
+}
+
+.main-content {
+  flex: 1;
+  padding-left: 10px;
+}
+
+button {
+  margin-right: 10px;
+}
+.segmentString {
+  min-height: inherit; 
+  padding:  10% 10px;
 }
 </style>

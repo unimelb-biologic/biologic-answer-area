@@ -13,6 +13,7 @@
       v-for="item in rootStatementIDs"
       :key="item"
       :data="allStatements[item]"
+      :showToggle="true"
     />
 
     <Connector

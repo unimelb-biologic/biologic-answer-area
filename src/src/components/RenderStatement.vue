@@ -1,12 +1,12 @@
 <template>
   <div
-    class="statement-box"
-    :draggable="true"
-    @dragstart.stop="startDrag($event, data)"
-    @dragover.prevent
-    @dragenter.prevent
-    ref="mmStatementBox"
-    :style="{
+      class="statement-box"
+      :draggable="true"
+      @dragstart.stop="startDrag($event, data)"
+      @dragover.prevent
+      @dragenter.prevent
+      ref="mmStatementBox"
+      :style="{
       position: this.data.position,
       left: this.data.left + 'px',
       top: this.data.top + 'px',
@@ -14,28 +14,30 @@
   >
     <!-- <button v-if="!data.visible" class="delete-button" @click="deleteStatement(connectorID)">Delete</button> -->
     <StatementRoot
-      v-bind="$attrs"
-      v-if="this.data.statementType === 0"
-      :data="this.data"
-      @user-choice-changed="handleUserChoiceChanged"
+        v-bind="$attrs"
+        v-if="this.data.statementType === 0"
+        :data="this.data"
+        @user-choice-changed="handleUserChoiceChanged"
+        
     />
     <StatementTruth
-      v-bind="$attrs"
-      v-if="this.data.statementType === 1"
-      :data="this.data"
+        v-bind="$attrs"
+        v-if="this.data.statementType === 1"
+        :data="this.data"
     />
     <StatementStudent
-      v-bind="$attrs"
-      v-if="this.data.statementType === 2"
-      :data="this.data"
-      @user-choice-changed="handleUserChoiceChanged"
+        v-bind="$attrs"
+        v-if="this.data.statementType === 2"
+        :data="this.data"
+        @user-choice-changed="handleUserChoiceChanged"
     />
     <StatementFreeText
-      v-bind="$attrs"
-      v-if="this.data.statementType === 3"
-      :data="this.data"
-      @user-input-changed="handleUserInputChanged"
+        v-bind="$attrs"
+        v-if="this.data.statementType === 3"
+        :data="this.data"
+        @user-input-changed="handleUserInputChanged"
     />
+    <div v-if="renderedText">{{ renderedText }}</div>
   </div>
 </template>
 
@@ -65,7 +67,13 @@ export default {
     };
   },
   methods: {
+    handleDoubleClick(combinedText) {
+      this.renderedText = combinedText;
+    },
+    
     startDrag(e, data) {
+      // e.target.className = 'dragEffect';
+
       e.dataTransfer.dropEffect = "move";
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("data", JSON.stringify(this.data));
@@ -108,8 +116,8 @@ export default {
       if (this.data.statementType === 0 || this.data.statementType === 1) {
         // TODO: process the "xxx.jpg" in TRUTH statement
         this.contentText = this.data.content.originalFacts
-          .filter((fact) => !fact.includes(".jpg"))
-          .join(" ");
+            .filter((fact) => !fact.includes(".jpg"))
+            .join(" ");
       }
       // if (this.data.statementType === 2) {
       //     this.contentText = ""

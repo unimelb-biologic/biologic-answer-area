@@ -23,6 +23,7 @@
 
 .tooltips:hover .tooltip_info {
   visibility: visible;
+  /* change visible to hidden for opposite effect */
 }
 
 /* statementFreeText tooltips css style */
@@ -66,7 +67,9 @@ margin-top: 5px;
 .StatementRoot:hover .StatementRoot_tooltip  {
 visibility: visible;
 }
-
+.StatementRoot:active .StatementRoot_tooltip  {
+  display: none;
+}
 /* statementStudent tooltips css style */
 .StatementStudent .StatementStudent_tooltip {
 visibility: hidden;
@@ -86,6 +89,10 @@ margin-top: 5px;
 
 .StatementStudent:hover .StatementStudent_tooltip  {
 visibility: visible;
+}
+
+.StatementStudent:active .StatementStudent_tooltip  {
+  display: none;
 }
 
 /* statementTruth tooltips css style */
