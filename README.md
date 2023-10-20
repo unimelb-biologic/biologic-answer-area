@@ -40,7 +40,7 @@ GitHub	Manage and modify the project's code and to generate releases that will b
 ## Demonstration for Sprint 3
 A short recorded video which demonstrates our development progress after Sprint 3.
 
-Link: [https://youtu.be/c99gLT0rCrQ?si=tTGC375oh7ApCpui](https://www.youtube.com/watch?v=vwwQAcCnGHk)
+Link: https://www.youtube.com/watch?v=vwwQAcCnGHk
 
 ## Changelogs
 ### Sprint 1 (18/08/2023)
@@ -53,7 +53,12 @@ Link: [https://youtu.be/c99gLT0rCrQ?si=tTGC375oh7ApCpui](https://www.youtube.com
 
 ### Sprint 2 (21/09/2023)
 1. Implement different format to convert for the statement box.
-2. Add a new feedback UI interface. 
 3. Add new functionality for dragging the connector and directly drop onto the statement box in the Answer Area (still need bug fixing)
 4. Update the client with the recent progress made during Sprint2.   
 5. Planning tasks and goals for Sprint 3. 
+
+### Sprint 3 (20/10/2023)
+1. Finalize the switch between different formats for statements in the answer area, such as dropdowns, radio buttons, and one-sentence responses.
+2. Resolve the bug related to dragging by removing the hovering tooltip box when dragging starts.
+3. Implement instant feedback functionality and display feedback from the integration with the backend provided by the other team.
+4. Update the client on the recent progress made during Sprint 3.  
