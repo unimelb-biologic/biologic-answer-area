@@ -7,13 +7,21 @@
     @dragstart="startDragConnector($event)"
   >
     <div v-if="this.parent !== undefined" class="container">
-      <img
+      <img v-if="this.clickCount % 2 === 0"
         class="collapse-expand-button"
-        :src="getCollapseExpandIcon"
+        src="../assets/collapse_icon.png"
         alt="Rotate"
         width="20"
         style="margin-bottom: 5px;"
         @click="displayFormChanged"
+      />
+      <img v-if="this.clickCount % 2 === 1" 
+        class="collapse-expand-button"
+        src="../assets/expand_icon.png"
+        alt="Rotate"
+        width="20"
+        style="margin-bottom: 5px;"
+        @click="displayFormChanged" 
       />
       <img v-if="this.clickCount % 2 === 0"
         class="rotate-button"

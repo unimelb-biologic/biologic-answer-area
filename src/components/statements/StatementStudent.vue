@@ -2,10 +2,18 @@
   <div class="StatementStudent">
     <div class="content-wrapper">
       <div class="iconContainer">
-        <button v-if="showToggle" @click="toggleView">
+        <button v-if="showToggle && collapsed" @click="toggleView">
           <img 
           class="toggle-expand-collapse"
-          :src="getCollapseExpandIcon"
+          src="../../assets/expand_icon.png"
+          alt="ToggleExpandCollapse"
+          width="20"
+          />
+      </button>
+      <button v-if="showToggle && !collapsed" @click="toggleView">
+          <img 
+          class="toggle-expand-collapse"
+          src="../../assets/collapse_icon.png"
           alt="ToggleExpandCollapse"
           width="20"
           />
