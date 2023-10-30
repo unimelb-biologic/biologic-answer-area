@@ -17,10 +17,11 @@
           <div>
             <file-reader :title="'Browse ExNet File:'" @read-file="onExNetReadFile"></file-reader>
           </div>
+          <div><button @click="debugDump">Debug Dump</button></div>
           <div>
             <div style="display:flex; flex-direction:row; align-items: center;">
               <h3 style="padding-right: 10px;"><label for="save-file">Save ExNet File: </label></h3>
-              Under construction
+              Under constructionn
               <!-- <button id="save-file" type=" button" @click="onDownloadExNet">Save ExNet</button> -->
 
             </div>
@@ -31,7 +32,7 @@
         <Splitpanes>
           <pane max-size="20" class="statementContainer">
             <!-- Displays Statements -->
-            <h2 class="displayStatements">Statement Area</h2>
+            <h2 class="areaHeading">Statement Area</h2>
             <div class="tooltips">
               Please see the instruction here.
               <span class="tooltip_info">
@@ -47,8 +48,8 @@
               <pane>
                 <!-- Displays the question -->
                 <div class="displayQuery">
-                  <h2>
-                    Question
+                  <h2 class="areaHeading">
+                    Question:
                     {{ this.exNetName }}
                     <!-- <select @change="getLastWorkingAnswer" v-model="selectedQuestion">
                       <option v-for="item in questions" :value="item" :key="item">
@@ -74,7 +75,7 @@
                 <!-- Displays workspace -->
                 <div class="displayWorkspace" @drop="onDropWorkspace($event)" @dragover.prevent @dragenter.prevent>
                   <div id="answerArea" class="sectionTitle">
-                    <h2>Answer Area</h2>
+                    <h2 class="areaHeading">Answer Area</h2>
                     <div class="tooltips">
                       Please see the instruction here.
                       <span class="tooltip_info">
@@ -104,7 +105,7 @@
           <pane max-size="14" class="connectorContainer">
             <!-- Displays the connectors -->
             <div class="displayConnectors">
-              <h2>Connector Area</h2>
+              <h2 class="areaHeading">Connector Area</h2>
               <ConnectorArea />
             </div>
           </pane>
@@ -295,6 +296,27 @@ export default {
       this.draggedItem = item;
     },
 
+
+
+
+
+
+
+
+
+    debugDump() {
+//    alert(JSON.stringify(this.promptText)+JSON.stringify(this.statementElements)+);
+alert(JSON.stringify(this.statementElements));
+//alert(JSON.stringify(this.connectorElements));
+},
+
+
+
+
+
+
+
+
     //Record the coordinate of X,Y when it clicked
     onMousedown(e) {
       this.offsetX = e.offsetX;
@@ -326,7 +348,7 @@ export default {
     // Handle ExNetJson from FileREader
     onExNetReadFile(exNetRawData) {
       const exnetWorkingAnswerJson = JSON.parse(exNetRawData);
-      this.setCurrentExNet(exnetWorkingAnswerJson, true)
+      this.setCurrentExNet(exnetWorkingAnswerJson, true);
     },
     // Download ExNetJson
     onDownloadExNet() {
@@ -716,6 +738,7 @@ export default {
     //   }
     // }
   },
+
 };
 </script>
   
@@ -743,12 +766,12 @@ body {
 
 .splitpanes--vertical>.splitpanes__splitter {
   min-width: 8px;
-  background: gray;
+  background: rgb(198, 155, 155);
 }
 
 .splitpanes--horizontal>.splitpanes__splitter {
   min-height: 8px;
-  background: gray;
+  background: rgb(198, 155, 155);
 }
 
 .mainContainer {
@@ -778,6 +801,10 @@ body {
 
 .button-link:hover {
   background-color: #0056b3;
+}
+
+.areaHeading {
+  color: #9f0000;
 }
 </style>
   

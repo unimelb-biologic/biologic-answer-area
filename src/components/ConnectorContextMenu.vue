@@ -122,9 +122,10 @@ h1 {
 
 .connectorText {
   text-align: center;
-  font-size: 14px;
+  font-size: 20px;
   max-width: 80px;
   margin: 0px 5px 0px 5px;
+  color:#d50000;
 }
 
 #demo {

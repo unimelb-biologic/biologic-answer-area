@@ -1,14 +1,31 @@
 <template>
   <div class="StatementRoot">
     <div class="content-wrapper">
-      <button v-if="showToggle" @click="toggleView">T</button>
+      <div class="iconContainer">
+        <button v-if="showToggle" @click="toggleView">
+          <img 
+          class="toggle-expand-collapse"
+          :src="getCollapseExpandIcon"
+          alt="ToggleExpandCollapse"
+          width="20"
+          />
+      </button>
+      <button v-if="showToggle && !collapsed" @click="togglePopupRadio">
+        <img
+        class="radio-popup-toggle-button"
+        src="../../assets/popup_radio_icon.png"
+        alt="RadioPopupToggle"
+        width="20"
+        />
+      </button>
+    </div>
       
       <div class="main-content">
-        <div v-if="clickCount % 3 === 2">
+        <div v-if="collapsed"  class="concatenated-statement">
           {{ concatenatedStatement }}
         </div>
 
-        <div v-else-if="clickCount % 3 === 1">
+        <div v-else-if="!showPopup">
           <!-- radio button format -->
           <div v-for="(segment, index) in this.data.content.originalFacts"
            :key="index" style="float: left; ">
@@ -75,7 +92,8 @@ export default {
       previousUserInput: this.data.content.userInput,
       userSelected: [],
       answeredData: null,
-      clickCount: 0,
+      collapsed : false,
+      showPopup : true,
     };
   },
   computed: {
@@ -83,11 +101,18 @@ export default {
       return this.data.content.originalFacts.map((segment, index) => 
         typeof segment === 'string' ? segment : this.userSelected[index] || segment[0]
       ).join(" ");
+    },
+    getCollapseExpandIcon(){
+      return this.collapsed ? "src/assets/expand_icon.png" : "src/assets/collapse_icon.png";
     }
+
   },
   methods: {
     toggleView() {
-      this.clickCount += 1;
+      this.collapsed = !this.collapsed;
+    },
+    togglePopupRadio(){
+      this.showPopup = !this.showPopup;
     },
     handleSelectChange() {
       let studentContentText = "";
@@ -154,10 +179,9 @@ export default {
 <style scoped>
 @import "@/assets/tooltips.css";
 .StatementRoot {
-  background-color: LightSkyBlue;
-  border: 1px solid black;
-  padding: 10px;
-  margin: 10px;
+  background-color: rgb(213, 239, 255);
+  padding: 2px;
+  margin: 2px;
   font-size: 14px;
   width: fit-content;
   height: fit-content;
@@ -173,14 +197,26 @@ export default {
 
 .main-content {
   flex: 1;
-  padding-left: 10px;
+  padding-left: 2px;
 }
 
 button {
-  margin-right: 10px;
+  margin-right: 2px;
 }
 .segmentString {
   min-height: inherit; 
-  padding:  10% 10px;
+  padding:  10% 2px;
 }
+.concatenated-statement {
+  white-space: pre-wrap;
+  max-width: 100px;
+}
+.iconContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px;
+}
+
+
 </style>

@@ -7,12 +7,22 @@
     @dragstart="startDragConnector($event)"
   >
     <div v-if="this.parent !== undefined" class="container">
-      <button
+      <img
+        class="collapse-expand-button"
+        :src="getCollapseExpandIcon"
+        alt="Rotate"
+        width="20"
+        style="margin-bottom: 5px;"
         @click="displayFormChanged"
-        style="font-size: 10px; margin-bottom: 10px"
-      >
-        T
-      </button>
+      />
+      <img v-if="this.clickCount % 2 === 0"
+        class="rotate-button"
+        src="../assets/rotate_icon.png"
+        alt="Rotate"
+        width="20"
+        style="margin-bottom: 5px;"
+        @click="rotateConnector({ id: connectorID })"
+      />
       <img
         class="delete-button"
         src="../assets/recycle_bin.png"
@@ -27,6 +37,7 @@
     <div
       class="connectorBox"
       v-if="clickCount % 2 === 0 || clickCount === undefined"
+      :style="{ flexDirection: connectorFlexDirection }"
     >
       <div style="font-weight: bold" v-if="connectorContent[selectedPhrase][0]">
         <ConnectorContextMenu
@@ -263,7 +274,13 @@ export default {
       word: null,
       contentTextAll: null, // Record the contents in children and in itself
       // clickCountInConn: 0,
+      connectorFlexDirection: 'row',
     };
+  },
+  computed: {
+    getCollapseExpandIcon(){
+      return (this.clickCount % 2 === 0) ? 'src/assets/collapse_icon.png' : 'src/assets/expand_icon.png';
+    }
   },
   methods: {
     // Get the statement property inside the connector
@@ -687,6 +704,12 @@ export default {
       // Emit an event to the parent component indicating that this connector should be deleted
       this.$emit("delete-connector", { id });
     },
+    rotateConnector({ id }) {
+      // Emit an event to the parent component indicating that this connector should be deleted
+      //this.$el.querySelector('.connectorBox').style.flexDirection = 'column';
+      this.connectorFlexDirection = this.connectorFlexDirection === 'row' ? 'column' : 'row';
+      
+    },
     deleteStatement({ id, parentId = this.connectorID, position = "" }) {
       // Emit an event to the parent component indicating that this connector should be deleted
       this.$emit("delete-statement", { id, parentId, position });
@@ -788,6 +811,8 @@ export default {
 
 <style scoped>
 /* CSS for each of the connector */
+
+
 .connectorContainer {
   display: flex;
   flex-direction: row;
@@ -802,7 +827,7 @@ export default {
   align-items: center;
   border-radius: 6px;
   border: 1px solid black;
-  background-color: rgb(214, 233, 244);
+  background-color: rgb(228, 228, 228);
   padding: 0px 5px;
 }
 
@@ -814,7 +839,7 @@ export default {
   justify-content: space-around;
 }
 .onlyText {
-  background-color: rgb(214, 233, 244);
+  background-color: rgb(236, 236, 236);
   max-width: 250px;
   overflow-wrap: break-word;
 }

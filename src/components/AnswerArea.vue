@@ -5,6 +5,9 @@
   <div id="submitBtn">
     <button @click="feedback_re">Feedback</button>
   </div>
+  <div id="dumpToAlertButton">
+    <button @click="dumpToAlert">Dump To Alert</button>
+  </div>
   <div
     class="answer_area"
     @dragover.prevent
@@ -104,6 +107,9 @@ export default {
   methods: {
     feedback_re(){
       this.$emit("String_feedback");
+    },
+    dumpToAlert(){
+      alert(JSON.stringify(this.allStatements));
     },
     convertToJson() {
       console.log("button pressed");

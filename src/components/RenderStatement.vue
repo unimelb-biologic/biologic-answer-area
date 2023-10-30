@@ -5,6 +5,7 @@
       @dragstart.stop="startDrag($event, data)"
       @dragover.prevent
       @dragenter.prevent
+      @drop="onDrop($event)"
       ref="mmStatementBox"
       :style="{
       position: this.data.position,
@@ -73,7 +74,6 @@ export default {
     
     startDrag(e, data) {
       // e.target.className = 'dragEffect';
-
       e.dataTransfer.dropEffect = "move";
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("data", JSON.stringify(this.data));
@@ -92,6 +92,18 @@ export default {
       e.dataTransfer.setData("grabOffsetTop", grabOffsetTop.toString());
 
       this.$emit("onDragStart", data);
+    },
+
+    onDrop(e) 
+    {
+      e.stopImmediatePropagation();
+
+      const type = e.dataTransfer.getData("type");
+      const data = JSON.parse(e.dataTransfer.getData("data"));
+      console.log("dropped data: ", data);
+      // Receive the content text from the dropped object
+      const transContent = e.dataTransfer.getData("content");
+
     },
 
     handleUserChoiceChanged(info) {

@@ -62,15 +62,16 @@ export default {
 <style scoped>
 @import "@/assets/tooltips.css";
 .StatementTruth {
-  background-color: LawnGreen;
-  border: 1px solid black;
+  background-color: rgb(233, 255, 212);
   font-size: 14px;
   width: fit-content;
   height: fit-content;
   text-align: left;
-  padding: 10px;
-  margin: 10px;
+  padding: 2px;
+  margin: 2px;
   position: relative;
   display: inline-block;
+  white-space: pre-wrap;
+  max-width: 100px;
 }
 </style>
