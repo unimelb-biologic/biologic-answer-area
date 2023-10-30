@@ -7,36 +7,44 @@
     @dragstart="startDragConnector($event)"
   >
     <div v-if="this.parent !== undefined" class="container">
-      <img v-if="this.clickCount % 2 === 0"
+      <button v-if="this.clickCount % 2 === 0" @click="displayFormChanged" class="connectorButton">
+      <img 
         class="collapse-expand-button"
         src="../assets/collapse_icon.png"
         alt="Rotate"
         width="20"
         style="margin-bottom: 5px;"
-        @click="displayFormChanged"
+        
       />
-      <img v-if="this.clickCount % 2 === 1" 
+    </button>
+    <button v-if="this.clickCount % 2 === 1"  @click="displayFormChanged" class="connectorButton">
+      <img 
         class="collapse-expand-button"
         src="../assets/expand_icon.png"
         alt="Rotate"
         width="20"
         style="margin-bottom: 5px;"
-        @click="displayFormChanged" 
+        
       />
-      <img v-if="this.clickCount % 2 === 0"
+    </button>
+    <button  v-if="this.clickCount % 2 === 0" @click="rotateConnector({ id: connectorID })" class="connectorButton">
+      <img 
         class="rotate-button"
         src="../assets/rotate_icon.png"
         alt="Rotate"
         width="20"
         style="margin-bottom: 5px;"
-        @click="rotateConnector({ id: connectorID })"
+        
       />
+    </button>
+    <button @click="deleteConnector({ id: connectorID })" class="connectorButton">
       <img
         class="delete-button"
         src="../assets/recycle_bin.png"
         alt="Delete"
-        @click="deleteConnector({ id: connectorID })"
+        
       />
+    </button>
     </div>
     <div class="onlyText" v-if="clickCount % 2 === 1">
       <!-- TODO: The drag function need polish(or just drop this function) -->
@@ -903,5 +911,7 @@ export default {
   flex-direction: column;
   align-items: center;
   padding: 10px;
+}
+.connectorButton {
 }
 </style>
