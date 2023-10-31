@@ -226,5 +226,13 @@ button {
   padding: 2px;
 }
 
+.statementButton {
+  width: 24px;
+  height: 24px;
+  margin: 2px;
+  padding: 1px;
+  align-items: center;
+}
+
 
 </style>

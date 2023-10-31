@@ -13,7 +13,6 @@
         src="../assets/collapse_icon.png"
         alt="Rotate"
         width="20"
-        style="margin-bottom: 5px;"
         
       />
     </button>
@@ -23,7 +22,6 @@
         src="../assets/expand_icon.png"
         alt="Rotate"
         width="20"
-        style="margin-bottom: 5px;"
         
       />
     </button>
@@ -33,7 +31,6 @@
         src="../assets/rotate_icon.png"
         alt="Rotate"
         width="20"
-        style="margin-bottom: 5px;"
         
       />
     </button>
@@ -42,6 +39,7 @@
         class="delete-button"
         src="../assets/recycle_bin.png"
         alt="Delete"
+        width="20"
         
       />
     </button>
@@ -913,5 +911,10 @@ export default {
   padding: 10px;
 }
 .connectorButton {
+  width: 24px;
+  height: 24px;
+  margin: 2px;
+  padding: 1px;
+  align-items: center;
 }
 </style>
