@@ -75,7 +75,7 @@
                 <!-- Displays workspace -->
                 <div class="displayWorkspace" @drop="onDropWorkspace($event)" @dragover.prevent @dragenter.prevent>
                   <div id="answerArea" class="sectionTitle">
-                    <h2 class="areaHeading">Answer Area</h2>
+                    <h2 class="areaHeading">Answer</h2>
                     <div class="tooltips">
                       Please see the instruction here.
                       <span class="tooltip_info">

@@ -2,7 +2,7 @@
   <div class="StatementRoot">
     <div class="content-wrapper">
       <div class="iconContainer">
-        <button v-if="showToggle && collapsed" @click="toggleView">
+        <button v-if="showToggle && collapsed" @click="toggleView" class="statementButton">
           <img 
           class="toggle-expand-collapse"
           src="../../assets/expand_icon.png"
@@ -10,7 +10,7 @@
           width="20"
           />
       </button>
-      <button v-if="showToggle && !collapsed" @click="toggleView">
+      <button v-if="showToggle && !collapsed" @click="toggleView" class="statementButton">
           <img 
           class="toggle-expand-collapse"
           src="../../assets/collapse_icon.png"
@@ -18,7 +18,7 @@
           width="20"
           />
       </button>
-      <button v-if="showToggle && !collapsed" @click="togglePopupRadio">
+      <button v-if="showToggle && !collapsed" @click="togglePopupRadio" class="statementButton">
         <img
         class="radio-popup-toggle-button"
         src="../../assets/popup_radio_icon.png"
