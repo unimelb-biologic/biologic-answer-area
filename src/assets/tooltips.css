@@ -115,3 +115,7 @@ visibility: visible;
 .StatementTruth:hover .StatementTruth_tooltip  {
   visibility: visible;
 }
+
+.StatementTruth:active .StatementTruth_tooltip  {
+  display: none;
+}

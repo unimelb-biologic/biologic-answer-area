@@ -2,7 +2,7 @@
   <div class="StatementStudent">
     <div class="content-wrapper">
       <div class="iconContainer">
-        <button v-if="showToggle && collapsed" @click="toggleView" class="statementButton">
+      <button v-if="showToggle && this.data.collapsed" @click="toggleCollapsedStatement" class="statementButton">
           <img 
           class="toggle-expand-collapse"
           src="../../assets/expand_icon.png"
@@ -10,7 +10,7 @@
           width="20"
           />
       </button>
-      <button v-if="showToggle && !collapsed" @click="toggleView" class="statementButton">
+      <button v-if="showToggle && !this.data.collapsed" @click="toggleCollapsedStatement" class="statementButton">
           <img 
           class="toggle-expand-collapse"
           src="../../assets/collapse_icon.png"
@@ -18,7 +18,7 @@
           width="20"
           />
       </button>
-      <button v-if="showToggle && !collapsed" @click="togglePopupRadio" class="statementButton">
+      <button v-if="showToggle && !this.data.collapsed" @click="toggleShowPopup" class="statementButton">
         <img
         class="radio-popup-toggle-button"
         src="../../assets/popup_radio_icon.png"
@@ -26,18 +26,32 @@
         width="20"
         />
       </button>
+      <button v-if="showToggle" @click="duplicateMe" class="statementButton">
+        <img
+        class="duplicate-statement-button"
+        src="../../assets/duplicate_icon.png"
+        alt="DuplicateStatement"
+        width="20"
+        />
+      </button>
       </div>
       <div class="main-content">
-        <div v-if="collapsed" class="concatenated-statement">
+        <div v-if="this.data.collapsed" class="concatenated-statement">
           {{ concatenatedStatement }}
         </div>
         
-        <div v-else-if="!showPopup" >
+        <div v-else-if="!this.data.showPopup" class="radio-statement">
           <!-- radio button format -->
           <div v-for="(segment, index) in this.data.content.originalFacts"
-           :key="index" style="float: left; ">
-            <div v-if="typeof segment === 'string'" class="segmentString">
-              {{ segment }}
+           :key="index" >
+            <div v-if="typeof segment === 'string'" >
+
+              <div v-if="isImage(segment)">
+                <img :src="segment" class="biologicImage">
+              </div>
+              <div v-else class="segmentString">
+                  {{ segment }}
+              </div>
             </div>
             <div v-else class="statementRadioButtons">
               <div v-for="item in segment" >
@@ -50,13 +64,23 @@
           </div>
         </div>
 
-        <div v-else>
+        <div v-else class="dropdown-statement">
           <!-- dropdown format -->
           <div v-for="(segment, index) in this.data.content.originalFacts"
             :key="index" >
             <!-- render the text from selection -->
             <div v-if="typeof segment === 'string'" >
-              {{ segment }}
+
+
+
+              <div v-if="isImage(segment)">
+                <img :src="segment" class="biologicImage">
+              </div>
+              <div v-else>
+                  {{ segment }}
+              </div>
+
+
             </div>
             <!-- render the options -->
             <div v-else>
@@ -82,7 +106,7 @@
 <script>
 export default {
   name: "StatementStudent",
-  emits: ["user-choice-changed"],
+  emits: ["user-choice-changed","duplicate-statement","toggle-showPopup-fromstatementstudent","toggle-collapsed-statement-student"],
   props: {
     data: Object,
     position: String,
@@ -99,14 +123,14 @@ export default {
       previousUserInput: this.data.content.userInput,
       userSelected: [],
       answeredData: null,
-      collapsed : false,
-      showPopup : true,
+      hide_collapsed : false,
+      hide_showPopup : true,
     };
   },
   computed: {
     concatenatedStatement() {
       return this.data.content.originalFacts.map((segment, index) => 
-        typeof segment === 'string' ? segment : this.userSelected[index] || segment[0]
+        typeof segment === 'string' ? (this.isImage(segment)?"":segment) : this.userSelected[index] || segment[0]
       ).join(" ");
     },
     getCollapseExpandIcon(){
@@ -114,11 +138,20 @@ export default {
     }
   },
   methods: {
-    toggleView() {
-      this.collapsed = !this.collapsed;
+    isImage(fact) {
+      const isImg = fact.endsWith(".jpg") || fact.endsWith(".png") || fact.endsWith(".jpeg");
+      //console.log("testing if fact<",fact," is an image - result is ",isImg);
+      return ( isImg );
     },
-    togglePopupRadio(){
-      this.showPopup = !this.showPopup;
+    toggleCollapsedStatement() {
+      //this.collapsed = !this.collapsed;
+      console.log("StatementStudent:toggleCollapsedStatement")
+      this.$emit("toggle-collapsed-statement-student", this.id );
+    },
+    toggleShowPopup(){
+      //this.showPopup = !this.showPopup;
+      console.log("StatementStudent:toggleShowPopup emitting toggle-showPopup-fromstatementstudent")
+      this.$emit("toggle-showPopup-fromstatementstudent", [ this.id ]);
     },
     handleSelectChange() {
       let studentContentText = "";
@@ -145,6 +178,9 @@ export default {
         studentContentText,
         this.answeredData,
       ]);
+    },
+    duplicateMe(){
+      this.$emit("duplicate-statement", [ this.id ]);
     },
 
     initContent() {
@@ -220,8 +256,14 @@ button {
   padding: 2px;
 }
 
+.radio-statement {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
 .statementRadioButtons {
   border: 1px solid rgb(138, 138, 138);
+  align-items: middle;
 }
 
 .concatenated-statement {
@@ -236,6 +278,13 @@ button {
   padding: 1px;
   align-items: center;
 }
+
+.biologicImage {
+  max-width: 100%;
+  width: 100px;
+}
+
+
 
 </style>
 

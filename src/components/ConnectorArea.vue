@@ -37,12 +37,6 @@ export default {
             [undefined, " hence ", undefined],
             [undefined, ". Thus, ", undefined],
             [". Since ", ", ", undefined],
-          ],
-        ],
-
-        [
-          2,
-          [
             [undefined, " which suggests that ", undefined],
             [undefined, ". This suggests that ", undefined],
             [undefined, " indicating that ", undefined],
@@ -51,12 +45,21 @@ export default {
         ],
 
         [
+          2,
+          [
+            [undefined, " shows that ", undefined],
+            ["the figure ", " shows that ", undefined],
+            ["based on this figure ", " we can see that ", undefined],
+          ],
+        ],
+
+        [
           3,
           [
             [undefined, " and ", undefined],
             [undefined, ". In addition, ", undefined],
-            [undefined, " coupled with ", undefined],
-            [undefined, " together with ", undefined],
+            [undefined, " coupled with the fact that ", undefined],
+            [undefined, " together with the fact that ", undefined],
           ],
         ],
 
@@ -74,14 +77,28 @@ export default {
         [
           5,
           [
-            [undefined, " and not only that but ", undefined],
             [undefined, ". Furthermore, ", undefined],
+            [undefined, " and not only that but ", undefined],
             [undefined, ". Consider also the fact that ", undefined],
             [undefined, ". Moreover, ", undefined],
+            [undefined, ". Similarly, ", undefined],
           ],
         ],
 
         [6, [["if ", " then ", undefined]]],
+        [7, 
+          [
+          [undefined, " e.g. ", undefined],
+          [undefined, ". For example, ", undefined],
+          ],
+        ],
+        [8, 
+          [
+          [undefined, " i.e. ", undefined],
+          [undefined, ". In other words, ", undefined]
+          ]
+        ]
+
       ],
     };
   },

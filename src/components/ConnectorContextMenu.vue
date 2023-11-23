@@ -1,7 +1,8 @@
 <template>
-  <div id="demo" @click.right="openMenu($event)">
+  <div id="demo" >
     <div class="connectorTextContainer">
       <p class="connectorText">{{ options[choice][index] }}</p>
+      <button class="popupButton" @click="openMenu($event)"><span>&#8942;</span></button>
     </div>
 
     <ul
@@ -11,6 +12,7 @@
       v-if="viewMenu && parentID"
       @blur="closeMenu"
       :style="{ top: top, left: left }"
+      class = "connectorMenuUnorderedList"
     >
       <li
         v-for="(item, index) in options"
@@ -122,7 +124,7 @@ h1 {
 
 .connectorText {
   text-align: center;
-  font-size: 20px;
+  font-size: 30px;
   max-width: 80px;
   margin: 0px 5px 0px 5px;
   color:#d50000;
@@ -134,7 +136,7 @@ h1 {
 }
 
 #right-click-menu {
-  background: #fafafa;
+  background: #f8e2e2;
   border: 1px solid #bdbdbd;
   box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2),
     0 1px 5px 0 rgba(0, 0, 0, 0.12);
@@ -142,7 +144,7 @@ h1 {
   list-style: none;
   margin: 0;
   padding: 0;
-  position: fixed;
+  position: absolute;
   width: 250px;
   z-index: 999999;
 }
@@ -161,4 +163,21 @@ h1 {
   background: #1e88e5;
   color: #fafafa;
 }
+
+.connectorMenuUnorderedList{
+  font-size: 12px;
+}
+
+.popupButton{
+  color:#a60000;
+  background-color:rgb(219, 189, 189);
+  margin: 0px 15px 0px 0px;
+  font-weight:bolder;
+  padding:0px 2px 0px 2px;
+}
+.popupButton:hover {
+  background-color:rgb(252, 191, 191);
+}
+
+
 </style>

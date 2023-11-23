@@ -3,8 +3,11 @@
     v-for="statement in visibleStatements"
     :key="statement.id"
     :data="statement"
+    :showToggle="true"
     @onDragStart="onDragStart(statement)"
     @mousedown="$emit('onclick', $event)"
+    @toggle-collapsed="toggleCollapsed"
+    @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement"
   />
 </template>
 
@@ -25,6 +28,18 @@ export default {
       //let the statement know it start to drag
       this.$emit("onDragStart", item);
     },
+    toggleCollapsed(id)
+    {
+        console.log("StatementArea:toggleCollapsed");
+        this.statements[id]["collapsed"] = !this.statements[id]["collapsed"];
+    },
+
+    toggleShowPopupFromRenderStatement(id)
+    {
+        console.log("StatementArea:toggleShowPopupFromRenderStatement");
+        this.statements[id]["showPopup"] = !this.statements[id]["showPopup"];
+    },
+
   },
   computed: {
     // Returns an array of statements only if the "visible" property is true.

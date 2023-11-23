@@ -12,12 +12,11 @@
     </div>
 
     <splitpanes v-if="authorised" class="mainContainer" horizontal>
-      <pane max-size="10" style="height: 50px;">
+      <pane max-size="10" style="height: 50px;" min-size="5">
         <div style="display:flex;flex-direction: row; ">
           <div>
             <file-reader :title="'Browse ExNet File:'" @read-file="onExNetReadFile"></file-reader>
           </div>
-          <div><button @click="debugDump">Debug Dump</button></div>
           <div>
             <div style="display:flex; flex-direction:row; align-items: center;">
               <h3 style="padding-right: 10px;"><label for="save-file">Save ExNet File: </label></h3>
@@ -28,9 +27,9 @@
           </div>
         </div>
       </pane>
-      <pane max-size="100">
+      <pane min-size="5">
         <Splitpanes>
-          <pane max-size="20" class="statementContainer">
+          <pane max-size="14" class="statementContainer" min-size="5" >
             <!-- Displays Statements -->
             <h2 class="areaHeading">Statement Area</h2>
             <div class="tooltips">
@@ -43,9 +42,9 @@
 
             <StatementArea :statements="this.statementElements" @onDragStart="onDragStart" />
           </pane>
-          <pane>
+          <pane min-size="5">
             <splitpanes horizontal>
-              <pane>
+              <pane min-size="5">
                 <!-- Displays the question -->
                 <div class="displayQuery">
                   <h2 class="areaHeading">
@@ -71,7 +70,7 @@
                   <QuestionArea :prompttext="this.promptText" />
                 </div>
               </pane>
-              <pane>
+              <pane min-size="5">
                 <!-- Displays workspace -->
                 <div class="displayWorkspace" @drop="onDropWorkspace($event)" @dragover.prevent @dragenter.prevent>
                   <div id="answerArea" class="sectionTitle">
@@ -85,14 +84,25 @@
                     </div>
                   </div>
 
-                  <AnswerArea ref="workspace" :droppedItems="droppedItems" :draggedItem="draggedItem" :offsetX="offsetX"
-                    :offsetY="offsetY" :statements="statementElements" @answer-data="updateJsonOutput"
-                    @setDraggedItem="onDragStart" @addDroppedItems="addDroppedItems" @delDroppedItem="delDroppedItem"
-                    @update-answer-area-content="handleUpdateAnswerContent" @statement-used="handleStatementUsed"
-                    @enable-area="(n) => toggleAnswerArea(n)" @String_feedback="click_feedback" />
+                  <AnswerArea ref="workspace" 
+                    :droppedItems="droppedItems" 
+                    :draggedItem="draggedItem" 
+                    :offsetX="offsetX"
+                    :offsetY="offsetY" 
+                    :statements="statementElements" 
+                    
+                    @answer-data="updateJsonOutput"
+                    @setDraggedItem="onDragStart" 
+                    @addDroppedItems="addDroppedItems" 
+                    @delDroppedItem="delDroppedItem"
+                    @update-answer-area-content="handleUpdateAnswerContent" 
+                    @statement-used="handleStatementUsed"
+                    @enable-area="(n) => toggleAnswerArea(n)" 
+                    @String_feedback="click_feedback" 
+                  />
                 </div>
               </pane>
-              <pane>
+              <pane min-size="5">
                 <!-- Displays worded answer, automatically formed -->
                 <div class="displayWordedOutput">
                   <h4>Check your answer here</h4>
@@ -102,7 +112,7 @@
               </pane>
             </splitpanes>
           </pane>
-          <pane max-size="14" class="connectorContainer">
+          <pane max-size="14" class="connectorContainer" min-size="5">
             <!-- Displays the connectors -->
             <div class="displayConnectors">
               <h2 class="areaHeading">Connector Area</h2>
@@ -175,6 +185,8 @@ export default {
     // TODO: put this to the statements added later.
     for (let statement of this.statementElements) {
       statement["visible"] = true;
+      statement["showPopup"] = true;
+      statement["collapsed"] = false;
     }
   },
 
@@ -301,22 +313,6 @@ export default {
 
 
 
-
-
-
-    debugDump() {
-//    alert(JSON.stringify(this.promptText)+JSON.stringify(this.statementElements)+);
-alert(JSON.stringify(this.statementElements));
-//alert(JSON.stringify(this.connectorElements));
-},
-
-
-
-
-
-
-
-
     //Record the coordinate of X,Y when it clicked
     onMousedown(e) {
       this.offsetX = e.offsetX;
@@ -350,6 +346,9 @@ alert(JSON.stringify(this.statementElements));
       const exnetWorkingAnswerJson = JSON.parse(exNetRawData);
       this.setCurrentExNet(exnetWorkingAnswerJson, true);
     },
+
+    
+
     // Download ExNetJson
     onDownloadExNet() {
       console.log(this.dataObject)
@@ -380,6 +379,8 @@ alert(JSON.stringify(this.statementElements));
         exNetData.activeExNetQuestionPack.statementElements;
       for (let statement of this.statementElements) {
         statement["visible"] = true;
+        statement["collapsed"] = false;
+        statement["showPopup"] = true;
         // this.statements.push(statement);
       }
 
@@ -389,6 +390,7 @@ alert(JSON.stringify(this.statementElements));
         this.droppedItems = [];
       }
     },
+
     // TODO: Remove this once hashing is not required.
     async digestMessage(msg) {
       const message = "pre_salt_jkBVJcT9h8" + msg + "EirlCrW8P6_post_salt";

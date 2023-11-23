@@ -1,46 +1,64 @@
 <template>
-  <div class="StatementRoot">
+  <div class="StatementRoot"
+  >
     <div class="content-wrapper">
       <div class="iconContainer">
-        <button v-if="showToggle && collapsed" @click="toggleView" class="statementButton">
+        <button v-if="showToggle && this.data.collapsed" @click="toggleCollapsedStatement" class="statementButton">
           <img 
-          class="toggle-expand-collapse"
+          class="statementButtonImage"
           src="../../assets/expand_icon.png"
           alt="ToggleExpandCollapse"
-          width="20"
+          
           />
       </button>
-      <button v-if="showToggle && !collapsed" @click="toggleView" class="statementButton">
+      <button v-if="showToggle && !this.data.collapsed" @click="toggleCollapsedStatement" class="statementButton">
           <img 
-          class="toggle-expand-collapse"
+          class="statementButtonImage"
           src="../../assets/collapse_icon.png"
           alt="ToggleExpandCollapse"
-          width="20"
+    
           />
       </button>
-      <button v-if="showToggle && !collapsed" @click="togglePopupRadio" class="statementButton">
+      <button v-if="showToggle && !this.data.collapsed" @click="toggleShowPopup" class="statementButton">
         <img
-        class="radio-popup-toggle-button"
+        class="statementButtonImage"
         src="../../assets/popup_radio_icon.png"
         alt="RadioPopupToggle"
-        width="20"
+  
         />
       </button>
+      <button v-if="showToggle" @click="duplicateMe" class="statementButton">
+        <img
+        class="statementButtonImage"
+        src="../../assets/duplicate_icon.png"
+        alt="DuplicateStatement"
+
+        />
+      </button>
+
     </div>
       
       <div class="main-content">
-        <div v-if="collapsed"  class="concatenated-statement">
+        <div v-if="this.data.collapsed"  class="concatenated-statement">
           {{ concatenatedStatement }}
         </div>
 
-        <div v-else-if="!showPopup">
+        <div v-else-if="!this.data.showPopup" class="radio-statement">
           <!-- radio button format -->
           <div v-for="(segment, index) in this.data.content.originalFacts"
            :key="index" style="float: left; ">
             <div v-if="typeof segment === 'string'" class="segmentString">
-              {{ segment }}
+
+
+              <div v-if="isImage(segment)">
+                <img :src="segment" class="biologicImage">
+              </div>
+              <div v-else class="segmentString">
+                  {{ segment }}
+              </div>
+
             </div>
-            <div v-else>
+            <div v-else class="statementRadioButtons">
               <div v-for="item in segment" >
                 <div v-if="item.indexOf('--')"> 
                 <input type="radio" :id="item" :value="item" v-model="userSelected[index]">
@@ -58,7 +76,14 @@
           > 
           <!-- render the text from selection -->
             <div v-if="typeof segment === 'string'">
-              {{ segment }}
+
+              <div v-if="isImage(segment)">
+                <img :src="segment" class="biologicImage">
+              </div>
+              <div v-else>
+                  {{ segment }}
+              </div>
+
             </div>
             <!-- render the options -->
             <div v-else>
@@ -83,13 +108,13 @@
 <script>
 export default {
   name: "StatementRoot",
-  emits: ["user-choice-changed"],
+  emits: ["user-choice-changed","duplicate-statement","toggle-showPopup-fromstatementroot","toggle-collapsed-statement-root"],
   props: {
     data: Object,
     position: String,
     showToggle: {
       type: Boolean,
-      default: false
+      default: true
     }
   },
   data() {
@@ -100,14 +125,14 @@ export default {
       previousUserInput: this.data.content.userInput,
       userSelected: [],
       answeredData: null,
-      collapsed : false,
-      showPopup : true,
+      hide_collapsed : false,
+      hide_showPopup : true,
     };
   },
   computed: {
     concatenatedStatement() {
       return this.data.content.originalFacts.map((segment, index) => 
-        typeof segment === 'string' ? segment : this.userSelected[index] || segment[0]
+        typeof segment === 'string' ? (this.isImage(segment)?"":segment) : this.userSelected[index] || segment[0]
       ).join(" ");
     },
     getCollapseExpandIcon(){
@@ -116,11 +141,30 @@ export default {
 
   },
   methods: {
-    toggleView() {
-      this.collapsed = !this.collapsed;
+    handleDragEnteringStatementRoot(e){
+      console.log("statementRoot enter event");
+//      e.preventDefault();
+            // Prevent child events from reaching the parent
+      e.stopPropagation();
     },
-    togglePopupRadio(){
-      this.showPopup = !this.showPopup;
+    handleDragLeavingStatementRoot(e){
+      console.log("statementRoot leave event");
+//      e.preventDefault();
+    },
+    isImage(fact) {
+      const isImg = fact.endsWith(".jpg") || fact.endsWith(".png") || fact.endsWith(".jpeg");
+      //console.log("testing if fact<",fact," is an image - result is ",isImg);
+      return ( isImg );
+    },
+    toggleCollapsedStatement() {
+      //this.collapsed = !this.collapsed;
+      console.log("StatementRoot:toggleCollapsedStatement")
+      this.$emit("toggle-collapsed-statement-root", this.id );
+    },
+    toggleShowPopup(){
+      //this.showPopup = !this.showPopup;
+      console.log("StatementRoot:toggleShowPopup emitting toggle-showPopup-fromstatementroot")
+      this.$emit("toggle-showPopup-fromstatementroot", [ this.id ]);
     },
     handleSelectChange() {
       let studentContentText = "";
@@ -148,6 +192,10 @@ export default {
         this.answeredData,
       ]);
     },
+    duplicateMe(){
+      this.$emit("duplicate-statement", [ this.id ]);
+    },
+
 
     initContent() {
       this.statementType = this.data.statementType;
@@ -229,10 +277,33 @@ button {
 .statementButton {
   width: 24px;
   height: 24px;
-  margin: 2px;
+  margin: 1px;
   padding: 1px;
   align-items: center;
 }
+
+.statementButtonImage {
+  width: 20px;
+}
+
+.radio-statement {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.statementRadioButtons {
+  border: 1px solid rgb(138, 138, 138);
+  align-items: middle;
+}
+
+
+.biologicImage {
+  max-width: 100%;
+  width: 100px;
+}
+
+
 
 
 </style>

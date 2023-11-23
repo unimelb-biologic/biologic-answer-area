@@ -1,6 +1,17 @@
 <template>
   <!-- record the statement position-->
   <div class="StatementFreeText">
+    <div class="iconContainer">
+      <button v-if="showToggle" @click="duplicateMe" class="statementButton">
+        <img
+        class="duplicate-statement-button"
+        src="../../assets/duplicate_icon.png"
+        alt="DuplicateStatement"
+        width="20"
+        />
+      </button>
+    </div>
+
     <div class="text">Free text entry...</div>
     <textarea v-model="userInputText" id="input" class="textarea"></textarea>
     <!-- Display tooltips for this statement-->
@@ -13,10 +24,14 @@
 <script>
 export default {
   name: "StatementFreeText",
-  emits: ["user-input-changed"],
+  emits: ["user-input-changed","duplicate-statement"],
   props: {
     data: Object,
     position: String,
+    showToggle: {
+      type: Boolean,
+      default: true
+    }
   },
 
   data() {
@@ -39,6 +54,10 @@ export default {
       this.userInputText = this.previousUserInput;
       this.answeredData = this.data;
     },
+    duplicateMe(){
+      this.$emit("duplicate-statement", [ this.id ]);
+    },
+
   },
   watch: {
     // Pass the new input to other component

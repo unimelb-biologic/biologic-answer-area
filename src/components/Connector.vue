@@ -1,12 +1,15 @@
 <template>
   <div
     class="connectorContainer"
-    :style="{ transform: `translate(${connleft}px, ${conntop}px)` }"
-    ref="mmConnBox"
+    :style="{ left: connleft + 'px', top: conntop + 'px' }"
+    ref="connectorContainerRef"
     draggable="true"
     @dragstart="startDragConnector($event)"
+    @drop="onDrop($event, 'x')"
+
   >
     <div v-if="this.parent !== undefined" class="container">
+      <!--button @click="call_connectorString">call connector String</button-->
       <button v-if="this.clickCount % 2 === 0" @click="displayFormChanged" class="connectorButton">
       <img 
         class="collapse-expand-button"
@@ -25,7 +28,7 @@
         
       />
     </button>
-    <button  v-if="this.clickCount % 2 === 0" @click="rotateConnector({ id: connectorID })" class="connectorButton">
+    <button  v-if="this.clickCount % 2 === 0" @click="handleToggleOrientation({ id: connectorID })" class="connectorButton">
       <img 
         class="rotate-button"
         src="../assets/rotate_icon.png"
@@ -51,7 +54,7 @@
     <div
       class="connectorBox"
       v-if="clickCount % 2 === 0 || clickCount === undefined"
-      :style="{ flexDirection: connectorFlexDirection }"
+      :style="{ flexDirection: orientation }"
     >
       <div style="font-weight: bold" v-if="connectorContent[selectedPhrase][0]">
         <ConnectorContextMenu
@@ -74,12 +77,24 @@
           v-if="this.leftType === undefined"
           @drop="onDrop($event, 'a')"
           @dragover.prevent
-          @dragenter.prevent
+          @dragleave.prevent="handleDragLeaveTarget"
+          @dragenter.prevent="handleDragEnterTarget"
           @dropped-aconn="handleAConnectorDrop"
           @dropped-bconn="handleBConnectorDrop"
           @dropped-astat="handleAStatementDrop"
           @dropped-bstat="handleBStatementDrop"
-        ></div>
+        >
+          <div v-if="this.connectorContentID==2" class="connector-a-picture-parent">
+            <img 
+              class="connector-a-picture"
+              src="../assets/connector_A_picture.png"
+              alt="Image"
+            />
+          </div>
+          <div v-else class="connector-target-box">
+             <!-- just to provide the inner box -->
+          </div>
+        </div>
 
         <!-- TODO: implement delete -->
         <div class="connector-sections" v-if="this.leftType === 'statement'">
@@ -88,14 +103,19 @@
               deleteStatement({ id: this.leftID, position: 'left' })
             "
             :data="this.allStatements[this.leftID]"
+            :showToggle="true"
             @update-statement-content="handleUpdateStatContentA"
             @mousedown="onMousedown('leftType')"
+            @duplicate-statement="duplicateStatement"
+            @connector-dropped-on-statement="connectorDroppedOnStatement"
+            @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
+            @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement"
           />
         </div>
         <!--                    <span class="tooltiptext" v-if="this.leftID !== undefined">Drag to recycle bin to remove</span>-->
 
         <div class="connector-sections" v-if="this.leftType === 'connector'">
-          <Connector
+          <Connector ref="leftChildConnector"
             :connector-i-d="this.leftID"
             :connector-content-i-d="
               allConnectors[this.leftID].connectorContentID
@@ -112,6 +132,7 @@
             :right-type="allConnectors[this.leftID].rightType"
             :right-content="allConnectors[this.leftID].rightContent"
             :click-count="allConnectors[this.leftID].clickCount"
+            :orientation="allConnectors[this.leftID].orientation"
             :selected-phrase="allConnectors[this.leftID].selectedPhrase"
             @delete-connector="
               deleteChildConnector({
@@ -128,9 +149,15 @@
             @dropped-bstat="handleBStatementDrop"
             @link-word-changed="handleChildLinkWordChange"
             @update-connector-content="handleUpdateConnectorContentA"
+            @toggle-orientation="handleToggleOrientation"
             @update-click-count="handleUpdateChildClickCount"
             @update-child-connector-content="handleUpdateChildConnector"
             @update-child-stat="handleUpdateChildStat"
+            @new-connector-dropped-on-connector="handleNewConnectorDroppedOnConnector"
+            @connector-dropped-on-statement="connectorDroppedOnStatement"
+            @duplicate-statement="duplicateStatement"
+            @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
+            @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
           />
         </div>
       </div>
@@ -161,7 +188,12 @@
           @dropped-bconn="handleBConnectorDrop"
           @dropped-astat="handleAStatementDrop"
           @dropped-bstat="handleBStatementDrop"
-        ></div>
+        >
+          <div class="connector-target-box">
+             <!-- just to provide the inner box -->
+          </div>
+
+        </div>
 
         <!-- TODO: implement delete -->
         <div class="connector-sections" v-if="this.rightType === 'statement'">
@@ -170,14 +202,19 @@
               deleteStatement({ id: this.rightID, position: 'right' })
             "
             :data="this.allStatements[this.rightID]"
+            :showToggle="true"
             @update-statement-content="handleUpdateStatContentB"
             @mousedown="onMousedown('rightType')"
+            @connector-dropped-on-statement="connectorDroppedOnStatement"
+            @duplicate-statement="duplicateStatement"
+            @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
+            @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement"
           />
         </div>
 
         <!-- <span class="tooltiptext" v-if="this.b !== null">Drag to recycle bin to remove</span> -->
         <div class="connector-sections" v-if="this.rightType === 'connector'">
-          <Connector
+          <Connector  ref="rightChildConnector"
             :connector-i-d="this.rightID"
             :connector-content-i-d="
               allConnectors[this.rightID].connectorContentID
@@ -193,6 +230,7 @@
             :right-type="allConnectors[this.rightID].rightType"
             :right-content="allConnectors[this.rightID].rightContent"
             :click-count="allConnectors[this.rightID].clickCount"
+            :orientation="allConnectors[this.rightID].orientation"
             :selected-phrase="allConnectors[this.rightID].selectedPhrase"
             :rootConnectorID="rootConnectorID"
             @delete-connector="
@@ -211,8 +249,14 @@
             @link-word-changed="handleChildLinkWordChange"
             @update-connector-content="handleUpdateConnectorContentB"
             @update-click-count="handleUpdateChildClickCount"
+            @toggle-orientation="handleToggleOrientation"
             @update-child-connector-content="handleUpdateChildConnector"
             @update-child-stat="handleUpdateChildStat"
+            @new-connector-dropped-on-connector="handleNewConnectorDroppedOnConnector"
+            @connector-dropped-on-statement="connectorDroppedOnStatement"
+            @duplicate-statement="duplicateStatement"
+            @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
+            @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
           />
         </div>
       </div>
@@ -255,6 +299,12 @@ export default {
     "delDroppedItem",
     "update-child-connector-content",
     "update-child-stat",
+    "toggle-orientation",
+    "new-connector-dropped-on-connector",
+    "duplicate-statement",
+    "toggle-collapsed-renderstatement-from-connector",
+    "toggle-showPopup-fromconnector",
+    "connector-dropped-on-statement",
   ],
   props: {
     connectorContentID: Number,
@@ -276,6 +326,7 @@ export default {
     allConnectors: Object,
     allStatements: Object,
     clickCount: Number,
+    orientation: String,
   },
   data() {
     return {
@@ -288,7 +339,6 @@ export default {
       word: null,
       contentTextAll: null, // Record the contents in children and in itself
       // clickCountInConn: 0,
-      connectorFlexDirection: 'row',
     };
   },
   computed: {
@@ -297,7 +347,59 @@ export default {
     }
   },
   methods: {
+
+    duplicateStatement(id)
+    {
+        // emission from either a child RenderStatement or a Connector.
+        // just pass this on up the tree for the AnswerArea to deal with
+        console.log("Connector:duplicateStatement")
+        this.$emit("duplicate-statement", id);
+    },
+  
+    toggleCollapsedRenderStatement(id){
+        // emission from  a child RenderStatement.
+        // just pass this on up the tree for the AnswerArea to deal with
+        console.log("Connector:toggleCollapsedRenderStatementFromRenderStatement")
+        this.$emit("toggle-collapsed-renderstatement-from-connector", id);
+    },
+    toggleCollapsedRenderStatementFromConnector(id){
+        // emission from  a child Connector.
+        // just pass this on up the tree for the AnswerArea to deal with
+        console.log("Connector:toggleCollapsedRenderStatementFromConnector")
+        this.$emit("toggle-collapsed-renderstatement-from-connector", id);
+    },
+    toggleShowPopupFromRenderStatement(id){
+        // emission from  a child RenderStatement .
+        // just pass this on up the tree for the parent Connector OR AnswerArea to deal with
+        console.log("Connector:toggleShowPopupFromRenderStatement emitting toggle-showPopup-fromconnector")
+        this.$emit("toggle-showPopup-fromconnector", id);
+    },
+    toggleShowPopupFromConnector(id){
+        // emission from  a child Connector .
+        // just pass this on up the tree for the parent Connector OR AnswerArea to deal with
+        console.log("Connector:toggleShowPopupFromConnector emitting toggle-showPopup-fromconnector")
+        this.$emit("toggle-showPopup-fromconnector", id);
+    },
+
+    connectorDroppedOnStatement( info )
+    {
+      console.log("Connector:connectorDroppedOnStatement");
+      // pass it up the chain and let the AnswerArea deal with it
+      this.$emit("connector-dropped-on-statement", info ); 
+    },
+
     // Get the statement property inside the connector
+    handleDragEnterTarget(event){
+      console.log("Connector:handleDragEnterTarget");
+      event.preventDefault();
+//      const connectorContainer = this.$refs.connectorContainerRef;
+//      connectorContainer.classList.add('drag-over');
+    },
+    handleDragLeaveTarget(event){
+      console.log("Connector:handleDragLeaveTarget");
+//     const connectorContainer = this.$refs.connectorContainerRef;
+//      connectorContainer.classList.remove('drag-over');
+    }, 
     onMousedown(type) {
       let item = null;
       if (type === "rightType") {
@@ -312,7 +414,19 @@ export default {
 
       // this.$emit()
     },
-
+    call_connectorString(){
+      alert(this.connectorString())
+    },
+      connectorString() {
+        let resultString = "connectorString";
+        if (this.leftType === 'connector') {
+          resultString = this.$refs.leftChildConnector.connectorString()+resultString;
+        }
+        if (this.rightType === 'connector') {
+          resultString = resultString + this.$refs.rightChildConnector.connectorString();
+        }
+        return resultString;
+      },
     // delDroppedItem() {
     //     this.$emit('delDroppedItem', this.moveItem)
     // },
@@ -373,16 +487,10 @@ export default {
       e.dataTransfer.setData("content", this.contentTextAll);
 
       // Pass the click offset
-      const mmConnBox = this.$refs.mmConnBox;
-      console.log("\n\n##########const mmConnBox = ", mmConnBox);
-      var rect = mmConnBox.getBoundingClientRect();
-      const grabOffsetLeft = e.clientX - rect.left;
-      const grabOffsetTop = e.clientY - rect.top;
-      console.log(
-        "startDragConnector grab Offset =",
-        grabOffsetLeft,
-        grabOffsetTop
-      );
+      const connectorContainerRef = this.$refs.connectorContainerRef;
+      var rectInViewport = connectorContainerRef.getBoundingClientRect();
+      const grabOffsetLeft = e.clientX - rectInViewport.left;
+      const grabOffsetTop = e.clientY - rectInViewport.top;
       e.dataTransfer.setData("grabOffsetLeft", grabOffsetLeft.toString());
       e.dataTransfer.setData("grabOffsetTop", grabOffsetTop.toString());
 
@@ -390,7 +498,8 @@ export default {
       const currentY = e.clientY;
       const currentConnectorX = e.target.offsetLeft;
       const currentConnectorY = e.target.offsetTop;
-
+      const myRef = this.$refs.connectorContainerRef;
+/*
       const dragListener = (e) => {
         const newConnectorX = currentConnectorX + e.clientX - currentX;
         const newConnectorY = currentConnectorY + e.clientY - currentY;
@@ -402,6 +511,16 @@ export default {
         document.removeEventListener("drag", dragListener);
       };
       e.target.addEventListener("dragend", dragEndListener);
+      */
+    },
+
+    updateContentTextAll(){
+      this.contentTextAll =
+          (this.currConnectorContent[0] === null ? "" : this.currConnectorContent[0]) +
+          (this.acontent === null ? "" : this.acontent) +
+          (this.currConnectorContent[1] === null  ? "" : this.currConnectorContent[1]) +
+          (this.bcontent === null ? "" : this.bcontent) +
+          (this.currConnectorContent[2] === null ? "" : this.currConnectorContent[2]);
     },
 
     onDrop(e, side) {
@@ -409,7 +528,7 @@ export default {
 
       const type = e.dataTransfer.getData("type");
       const data = JSON.parse(e.dataTransfer.getData("data"));
-      console.log("dropped data: ", data);
+      console.log("Connector:onDrop  side:",side,"  dropped data: ", data);
       // Receive the content text from the dropped object
       const transContent = e.dataTransfer.getData("content");
 
@@ -429,6 +548,9 @@ export default {
         // Update content
         this.acontent = transContent;
         // this.leftContent = transContent
+
+        this.updateContentTextAll()
+        /*
         this.contentTextAll =
           (this.currConnectorContent[0] === null
             ? ""
@@ -441,7 +563,10 @@ export default {
           (this.currConnectorContent[2] === null
             ? ""
             : this.currConnectorContent[2]);
+        */
+
         // console.log(this.contentTextAll)
+        console.log("Connector:onDrop  emitting SIGNAL droppedAstat");
 
         this.$emit("droppedAstat", [
           this.connectorID,
@@ -458,6 +583,9 @@ export default {
 
         // Update Connector content
         this.bcontent = transContent;
+        this.updateContentTextAll()
+
+        /*
         this.contentTextAll =
           (this.currConnectorContent[0] === null
             ? ""
@@ -470,8 +598,13 @@ export default {
           (this.currConnectorContent[2] === null
             ? ""
             : this.currConnectorContent[2]);
+        */
+
       } else if (side === "a" && type === "connector") {
         this.acontent = transContent;
+        this.updateContentTextAll()
+
+        /*
         this.contentTextAll =
           (this.currConnectorContent[0] === null
             ? ""
@@ -484,10 +617,14 @@ export default {
           (this.currConnectorContent[2] === null
             ? ""
             : this.currConnectorContent[2]);
+        */
 
         this.$emit("droppedAconn", [this.connectorID, data, transContent]);
       } else if (side === "b" && type === "connector") {
         this.bcontent = transContent;
+        this.updateContentTextAll()
+
+        /*
         this.contentTextAll =
           (this.currConnectorContent[0] === null
             ? ""
@@ -500,26 +637,42 @@ export default {
           (this.currConnectorContent[2] === null
             ? ""
             : this.currConnectorContent[2]);
+        */
+
 
         this.$emit("droppedBconn", [this.connectorID, data, transContent]);
+      } else if (side === "x" && type === "connector") {
+        // the connector needs to be a new connector - i.e. undefined parent and no children.
+        // we need to insert it into the tree. So this connector becomes the dropped connectors childA
+        // and whoever is the parent of this connector needs to become the parent of the new one.
+        // since we don't know about our parent we need to send a signal upwards.
+
+        this.$emit("new-connector-dropped-on-connector", [undefined, this.connectorID, e]);
       }
     },
 
     handleAStatementDrop(info) {
-      // console.log("passing data up")
+      console.log("Connector:handleAStatementDrop:  emitting signal droppedAstat")
       this.$emit("droppedAstat", info);
     },
 
     handleBStatementDrop(info) {
-      // console.log("passing data up")
+      console.log("Connector:handleBStatementDrop:  passing data up")
       this.$emit("droppedBstat", info);
     },
 
     handleAConnectorDrop(info) {
+      console.log("Connector:handleAConnectorDrop:  passing data up")
       this.$emit("droppedAconn", info);
     },
 
+    handleNewConnectorDroppedOnConnector(info) {
+      console.log("Connector:handleAConnectorDrop:  passing data up")
+      this.$emit("new-connector-dropped-on-connector", info);
+    },
+
     handleBConnectorDrop(info) {
+      console.log("Connector:handleBConnectorDrop:  passing data up")
       this.$emit("droppedBconn", info);
     },
 
@@ -641,6 +794,12 @@ export default {
       this.$emit("update-click-count", info);
     },
 
+    handleToggleOrientation( {id} ) {
+      // Emit an event to the parent component indicating that this connector should 
+      //switch from row to column
+      this.$emit("toggle-orientation", {id} );
+    },
+
     handleUpdateChildConnector(info) {
       this.$emit("update-child-connector-content", info);
     },
@@ -718,12 +877,6 @@ export default {
       // Emit an event to the parent component indicating that this connector should be deleted
       this.$emit("delete-connector", { id });
     },
-    rotateConnector({ id }) {
-      // Emit an event to the parent component indicating that this connector should be deleted
-      //this.$el.querySelector('.connectorBox').style.flexDirection = 'column';
-      this.connectorFlexDirection = this.connectorFlexDirection === 'row' ? 'column' : 'row';
-      
-    },
     deleteStatement({ id, parentId = this.connectorID, position = "" }) {
       // Emit an event to the parent component indicating that this connector should be deleted
       this.$emit("delete-statement", { id, parentId, position });
@@ -732,7 +885,7 @@ export default {
   watch: {
     // Pass new content texts once there are changes
     contentTextAll(newConnectorContent) {
-      console.log("Content changed");
+      //console.log("Content changed");
       this.$emit("update-connector-content", [
         this.connectorID,
         newConnectorContent,
@@ -750,12 +903,12 @@ export default {
     // },
 
     connectorID(newValue, oldValue) {
-      console.log("connectorID changed!", oldValue, "to", newValue);
+      //console.log("connectorID changed!", oldValue, "to", newValue);
       this.initContent();
     },
 
     leftContent(newValue, oldValue) {
-      console.log("leftContent changed!", oldValue, "to", newValue);
+      //console.log("leftContent changed!", oldValue, "to", newValue);
 
       this.acontent =
         this.allConnectors[this.connectorID].leftContent === undefined
@@ -776,7 +929,7 @@ export default {
     },
 
     rightContent(newValue, oldValue) {
-      console.log("rightContent changed!", oldValue, "to", newValue);
+      //console.log("rightContent changed!", oldValue, "to", newValue);
       this.bcontent =
         this.allConnectors[this.connectorID].rightContent === undefined
           ? "[B]"
@@ -840,9 +993,30 @@ export default {
   margin-bottom: 10px;
   align-items: center;
   border-radius: 6px;
-  border: 1px solid black;
-  background-color: rgb(228, 228, 228);
+  border: 1px solid rgb(171, 173, 144);
+  background-color: #fafaef;
   padding: 0px 5px;
+  overflow:visible;
+}
+
+.connectorContainer:hover {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  flex-basis: auto;
+  /* TODO: These will need to be modified to have dynamic sizes */
+  width: fit-content;
+  min-width: 160px;
+  min-height: 80px;
+  margin-bottom: 10px;
+  align-items: center;
+  border-radius: 6px;
+  border: 4px solid rgb(255, 0, 0);
+  transform: translate(-3px, -3px);
+  background-color: #fafaef;
+  padding: 0px 5px;
+  overflow:visible;
 }
 
 .connectorBox {
@@ -860,9 +1034,15 @@ export default {
 
 .connector-sections {
   display: flex;
-  padding: 10px;
-  border: 2px black;
+  padding: 0px;
+  border: 2px rgb(255, 0, 174);
   height: 100%;
+  align-items: center;
+}
+
+.connector-target-box {
+  display: flex;
+  padding: 10px;
 }
 
 .connectorMenu {
@@ -873,7 +1053,7 @@ export default {
 .tooltip {
   position: relative;
   display: inline-block;
-  border: 1px solid black;
+  border: 1px solid rgb(188, 176, 123);
 }
 
 /* Tooltip text */
@@ -917,4 +1097,22 @@ export default {
   padding: 1px;
   align-items: center;
 }
+
+.connector-a-picture-parent {
+  width: 20px;
+  height: 20px;
+  align-items: center;
+}
+.connector-a-picture {
+  width: 20px;
+  height: 20px;
+  margin: 1px;
+  padding: 1px;
+  align-items: center;
+}
+
+.drag-over {
+  border: 10px solid rgb(246, 3, 43);
+}
+
 </style>
