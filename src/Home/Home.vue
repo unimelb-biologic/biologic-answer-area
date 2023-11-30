@@ -21,7 +21,7 @@
             <div style="display:flex; flex-direction:row; align-items: center;">
               <h3 style="padding-right: 10px;"><label for="save-file">Save ExNet File: </label></h3>
               Under constructionn
-              <!-- <button id="save-file" type=" button" @click="onDownloadExNet">Save ExNet</button> -->
+              <button id="save-file" type=" button" @click="onDownloadExNet">Save ExNet</button>
 
             </div>
           </div>
@@ -40,7 +40,12 @@
               </span>
             </div>
 
-            <StatementArea :statements="this.statementElements" @onDragStart="onDragStart" />
+            <StatementArea 
+              :statements="this.statementElements" 
+              :sharedData="this.sharedData"
+              @onDragStart="onDragStart"
+              @update-shared-data="updateSharedData"
+              />
           </pane>
           <pane min-size="5">
             <splitpanes horizontal>
@@ -56,9 +61,9 @@
                       </option>
                     </select> -->
 
-                    <div class="button-container">
+                    <!--div class="button-container">
                       <router-link to="/feedback" class="button-link">link to feedback</router-link>
-                    </div>
+                    </div -->
                   </h2>
 
                   <div class="tooltips">
@@ -90,6 +95,7 @@
                     :offsetX="offsetX"
                     :offsetY="offsetY" 
                     :statements="statementElements" 
+                    :sharedData="this.sharedData"
                     
                     @answer-data="updateJsonOutput"
                     @setDraggedItem="onDragStart" 
@@ -99,6 +105,7 @@
                     @statement-used="handleStatementUsed"
                     @enable-area="(n) => toggleAnswerArea(n)" 
                     @String_feedback="click_feedback" 
+                    @update-shared-data="updateSharedData"
                   />
                 </div>
               </pane>
@@ -116,7 +123,10 @@
             <!-- Displays the connectors -->
             <div class="displayConnectors">
               <h2 class="areaHeading">Connector Area</h2>
-              <ConnectorArea />
+              <ConnectorArea 
+                :sharedData="this.sharedData"
+                @update-shared-data="updateSharedData"
+              />
             </div>
           </pane>
         </Splitpanes>
@@ -166,7 +176,9 @@ export default {
       jsonOutput: {},
       jsonData: [],
       dataObject: {},
-      feedback: null
+      feedback: null,
+
+      sharedData: "" // awful solution to passing information during drag!
     };
   },
 
@@ -198,6 +210,9 @@ export default {
       this.dataObject["statementElements"] = this.statementElements;
       this.jsonOutput = this.dataObject;
 
+      download(JSON.stringify(this.dataObject), "mm_exnet_question.json", "application/json");
+
+      /*
       let response = await this.StoreLastWorkingAnswer(this.selectedQuestion);
       if (response["success"] === true) {
         window.alert("Submission successful!");
@@ -208,6 +223,7 @@ export default {
           this.feedback = response.client_feedback
         }
       })
+      */
     },
     click_feedback() {
       const { gradingStatus, gradingInfo, overallScore } = JSON.parse(this.feedback);
@@ -309,7 +325,9 @@ export default {
     },
 
 
-
+    updateSharedData(newValue){
+      this.sharedData = newValue;
+    },
 
 
 
@@ -342,7 +360,8 @@ export default {
       }
     },
     // Handle ExNetJson from FileREader
-    onExNetReadFile(exNetRawData) {
+    onExNetReadFile(exNetRawData) 
+    {
       const exnetWorkingAnswerJson = JSON.parse(exNetRawData);
       this.setCurrentExNet(exnetWorkingAnswerJson, true);
     },
@@ -364,7 +383,7 @@ export default {
         connectorElements: []
       }
       console.log(exNetTemplate)
-      // download(JSON.stringify(exNetTemplate), this.exNetName + "_exnet_question.json", "application/json");
+      download(JSON.stringify(exNetTemplate), this.exNetName + "_exnet_question.json", "application/json");
 
     },
     setCurrentExNet(exNetData, clear = false) {
@@ -382,6 +401,17 @@ export default {
         statement["collapsed"] = false;
         statement["showPopup"] = true;
         // this.statements.push(statement);
+
+        // if the userInput object is empty we need to initialise it with the first option of each popup
+        console.log("statement original=",statement)
+        for (let i = 0; i < statement.content.originalFacts.length; i++) {
+          if (typeof(statement.content.originalFacts[i]) !== 'string') {
+            // if not a string then it is an array of popup options
+            // we assume it has at least one element and take the first as default.
+            statement.content.userInput.push(statement.content.originalFacts[i][0]);
+          }
+        }
+        console.log("statement after initialising userInput=",statement)
       }
 
       this.showQuestionList = false;

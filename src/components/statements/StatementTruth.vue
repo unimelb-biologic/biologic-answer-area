@@ -138,6 +138,9 @@ export default {
   max-width: 150px;
 }
 
+.StatementTruth:hover .iconContainer {
+  opacity:1;
+}
 .statementButton {
   width: 24px;
   height: 24px;
@@ -161,6 +164,8 @@ export default {
   flex-direction: column;
   align-items: center;
   padding: 2px;
+  opacity: 0.05;
+  transition: opacity 0.3s ease;
 }
 
 .biologicImage {

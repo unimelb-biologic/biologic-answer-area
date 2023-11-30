@@ -66,10 +66,20 @@ export default {
     StatementTruth,
     StatementRoot,
   },
-  emits: ["update-statement-content", "onDragStart", "delete-statement","connector-dropped-on-statement","duplicate-statement","toggle-collapsed-renderstatement","toggle-showPopup-fromrenderstatement"],
+  emits: [
+    "update-statement-content", 
+    "onDragStart", 
+    "delete-statement",
+    "connector-dropped-on-statement",
+    "duplicate-statement",
+    "toggle-collapsed-renderstatement",
+    "toggle-showPopup-fromrenderstatement",
+    "update-shared-data"
+  ],
   inheritAttrs: false,
   props: {
     data: Object,
+    sharedData: Object,
   },
   data() {
     return {
@@ -139,6 +149,18 @@ export default {
       e.dataTransfer.setData("grabOffsetTop", grabOffsetTop.toString());
 
       this.$emit("onDragStart", data);
+
+      // set the global sharedData (YUK!)
+      // only because dragEnter can't see insides of the dataTransfer object
+      const draggedWidth = e.currentTarget.offsetWidth;
+      const draggedHeight = e.currentTarget.offsetHeight;
+      const draggedSize = JSON.stringify({
+        "draggedWidth": draggedWidth,
+        "draggedHeight": draggedHeight,
+        })
+      console.log("SETTING SIZE = ",draggedSize);
+      this.$emit("update-shared-data",draggedSize);
+
     },
 
     onDrop(e) 

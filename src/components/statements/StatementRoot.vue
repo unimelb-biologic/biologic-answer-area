@@ -246,6 +246,9 @@ export default {
   display: inline-block;
 }
 
+.StatementRoot:hover .iconContainer {
+  opacity:1;
+}
 .content-wrapper {
   display: flex;
   align-items: flex-start;
@@ -272,6 +275,8 @@ button {
   flex-direction: column;
   align-items: center;
   padding: 2px;
+  opacity: 0.05;
+  transition: opacity 0.3s ease;
 }
 
 .statementButton {

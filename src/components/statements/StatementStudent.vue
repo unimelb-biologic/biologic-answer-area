@@ -71,15 +71,12 @@
             <!-- render the text from selection -->
             <div v-if="typeof segment === 'string'" >
 
-
-
               <div v-if="isImage(segment)">
                 <img :src="segment" class="biologicImage">
               </div>
               <div v-else>
                   {{ segment }}
               </div>
-
 
             </div>
             <!-- render the options -->
@@ -231,6 +228,10 @@ export default {
   position: relative;
   display: inline-block;
 }
+
+.StatementStudent:hover .iconContainer {
+  opacity:1;
+}
 .segmentString {
   min-height: inherit; 
   padding-top: 40%; 
@@ -254,6 +255,8 @@ button {
   flex-direction: column;
   align-items: center;
   padding: 2px;
+  opacity: 0.05;
+  transition: opacity 0.3s ease;
 }
 
 .radio-statement {

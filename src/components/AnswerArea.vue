@@ -28,10 +28,12 @@
       :key="item"
       :data="allStatements[item]"
       :showToggle="true"
+      :sharedData="sharedData"
       @duplicate-statement="duplicateStatement"
       @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething"
       @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
       @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement"
+      @update-shared-data="updateSharedData"
     />
 
     <Connector
@@ -56,6 +58,7 @@
       :connleft="allConnectors[rootConnectorID].left"
       :moveItem="moveItem"
       :rootConnectorID="rootConnectorID"
+      :sharedData="sharedData"
       @delete-child-connector="deleteChildConnector"
       @delete-connector="deleteConnector"
       @delete-statement="deleteStatement"
@@ -75,6 +78,7 @@
       @duplicate-statement="duplicateStatement"
       @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
       @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
+      @update-shared-data="updateSharedData"
     />
   </div>
 </template>
@@ -96,6 +100,7 @@ export default {
     "connector-deleted",
     "answer-data",
     "get-last-working-answer",
+    "update-shared-data"
   ],
   props: {
     statements: Object, // this is a reference to the statementElements in Home.vue MM
@@ -105,6 +110,7 @@ export default {
     offsetX: Number, // record the coordinate of x
     offsetY: Number, // record the coordinate of y
     dataObject: Object, // I don't think this is used MM
+    sharedData: Object,
   },
   data() {
     return {
@@ -148,6 +154,9 @@ export default {
   },
 
   methods: {
+    updateSharedData(newValue) {
+      this.$emit("update-shared-data",newValue);
+    },
     feedback_re(){
       this.$emit("String_feedback");
     },

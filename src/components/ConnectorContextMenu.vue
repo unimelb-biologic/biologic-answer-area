@@ -122,6 +122,11 @@ h1 {
   width: 80px;
 }
 
+.connectorTextContainer:hover .popupButton {
+  opacity:1;
+  background-color:rgb(252, 191, 191);
+}
+
 .connectorText {
   text-align: center;
   font-size: 30px;
@@ -174,10 +179,8 @@ h1 {
   margin: 0px 15px 0px 0px;
   font-weight:bolder;
   padding:0px 2px 0px 2px;
+  opacity: 0.05;
+  transition: opacity 0.3s ease;
 }
-.popupButton:hover {
-  background-color:rgb(252, 191, 191);
-}
-
 
 </style>

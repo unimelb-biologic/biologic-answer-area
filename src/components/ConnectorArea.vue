@@ -6,6 +6,8 @@
     :selected-phrase="0"
     :connector-content-i-d="connector[0]"
     :connector-content="connector[1]"
+    :sharedData="sharedData"
+    @update-shared-data="updateSharedData"
   />
 </template>
 
@@ -14,7 +16,16 @@ import Connector from "@/components/Connector.vue";
 
 export default {
   name: "ConnectorArea",
+  props: {
+    sharedData: Object,
+  },
+  emits: ["update-shared-data"],
   components: { Connector },
+  methods: {
+    updateSharedData(newValue) {
+      this.$emit("update-shared-data",newValue);
+    }
+  },
   data() {
     return {
       connectors: [

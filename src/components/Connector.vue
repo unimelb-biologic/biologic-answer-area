@@ -7,8 +7,8 @@
     @dragstart="startDragConnector($event)"
     @drop="onDrop($event, 'x')"
 
-  >
-    <div v-if="this.parent !== undefined" class="container">
+    >
+    <div v-if="this.parent !== undefined" class="buttons-container">
       <!--button @click="call_connectorString">call connector String</button-->
       <button v-if="this.clickCount % 2 === 0" @click="displayFormChanged" class="connectorButton">
       <img 
@@ -77,21 +77,27 @@
           v-if="this.leftType === undefined"
           @drop="onDrop($event, 'a')"
           @dragover.prevent
-          @dragleave.prevent="handleDragLeaveTarget"
-          @dragenter.prevent="handleDragEnterTarget"
           @dropped-aconn="handleAConnectorDrop"
           @dropped-bconn="handleBConnectorDrop"
           @dropped-astat="handleAStatementDrop"
           @dropped-bstat="handleBStatementDrop"
         >
-          <div v-if="this.connectorContentID==2" class="connector-a-picture-parent">
+          <div v-if="this.connectorContentID==2" class="connector-a-picture-parent" ref="targetBoxRefLeft"
+            @dragover.prevent
+            @dragleave.prevent="handleDragLeaveTargetBoxLeft"
+            @dragenter.prevent="handleDragEnterTargetBoxLeft"
+          >
             <img 
               class="connector-a-picture"
               src="../assets/connector_A_picture.png"
               alt="Image"
             />
           </div>
-          <div v-else class="connector-target-box">
+          <div v-else class="connector-target-box" ref="targetBoxRefLeft"
+            @dragover.prevent
+            @dragleave.prevent="handleDragLeaveTargetBoxLeft"
+            @dragenter.prevent="handleDragEnterTargetBoxLeft"
+          >
              <!-- just to provide the inner box -->
           </div>
         </div>
@@ -104,12 +110,14 @@
             "
             :data="this.allStatements[this.leftID]"
             :showToggle="true"
+            :sharedData="sharedData"
             @update-statement-content="handleUpdateStatContentA"
             @mousedown="onMousedown('leftType')"
             @duplicate-statement="duplicateStatement"
             @connector-dropped-on-statement="connectorDroppedOnStatement"
             @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
             @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement"
+            @update-shared-data="updateSharedData"
           />
         </div>
         <!--                    <span class="tooltiptext" v-if="this.leftID !== undefined">Drag to recycle bin to remove</span>-->
@@ -134,6 +142,7 @@
             :click-count="allConnectors[this.leftID].clickCount"
             :orientation="allConnectors[this.leftID].orientation"
             :selected-phrase="allConnectors[this.leftID].selectedPhrase"
+            :sharedData="sharedData"
             @delete-connector="
               deleteChildConnector({
                 id: this.leftID,
@@ -158,6 +167,7 @@
             @duplicate-statement="duplicateStatement"
             @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
             @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
+            @update-shared-data="updateSharedData"
           />
         </div>
       </div>
@@ -189,7 +199,11 @@
           @dropped-astat="handleAStatementDrop"
           @dropped-bstat="handleBStatementDrop"
         >
-          <div class="connector-target-box">
+          <div class="connector-target-box" ref="targetBoxRefRight"
+            @dragover.prevent
+            @dragleave.prevent="handleDragLeaveTargetBoxRight"
+            @dragenter.prevent="handleDragEnterTargetBoxRight"
+          >
              <!-- just to provide the inner box -->
           </div>
 
@@ -203,12 +217,14 @@
             "
             :data="this.allStatements[this.rightID]"
             :showToggle="true"
+            :sharedData="sharedData"
             @update-statement-content="handleUpdateStatContentB"
             @mousedown="onMousedown('rightType')"
             @connector-dropped-on-statement="connectorDroppedOnStatement"
             @duplicate-statement="duplicateStatement"
             @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
             @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement"
+            @update-shared-data="updateSharedData"
           />
         </div>
 
@@ -233,6 +249,8 @@
             :orientation="allConnectors[this.rightID].orientation"
             :selected-phrase="allConnectors[this.rightID].selectedPhrase"
             :rootConnectorID="rootConnectorID"
+            :sharedData="sharedData"
+
             @delete-connector="
               deleteChildConnector({
                 id: this.rightID,
@@ -257,6 +275,7 @@
             @duplicate-statement="duplicateStatement"
             @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
             @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
+            @update-shared-data="updateSharedData"
           />
         </div>
       </div>
@@ -305,6 +324,7 @@ export default {
     "toggle-collapsed-renderstatement-from-connector",
     "toggle-showPopup-fromconnector",
     "connector-dropped-on-statement",
+    "update-shared-data"
   ],
   props: {
     connectorContentID: Number,
@@ -327,6 +347,7 @@ export default {
     allStatements: Object,
     clickCount: Number,
     orientation: String,
+    sharedData: Object,
   },
   data() {
     return {
@@ -347,6 +368,9 @@ export default {
     }
   },
   methods: {
+    updateSharedData(newValue) {
+      this.$emit("update-shared-data",newValue);
+    },
 
     duplicateStatement(id)
     {
@@ -389,16 +413,65 @@ export default {
     },
 
     // Get the statement property inside the connector
-    handleDragEnterTarget(event){
-      console.log("Connector:handleDragEnterTarget");
+    handleDragEnterTargetBoxLeft(event){
+      console.log("Connector:handleDragEnterTargetBoxLeft----------");
+      console.log("EVENT=",event);
       event.preventDefault();
+      var draggedElement = event.currentTarget;
+
+      console.log('Dragged Size:', this.sharedData);
+      const draggedSize = JSON.parse(this.sharedData);
+      console.log('Dragged Width:', draggedSize.draggedWidth);
+      console.log('Dragged Height:', draggedSize.draggedHeight);
+  
+      const targetRef = this.$refs.targetBoxRefLeft;
+      // Set the size of the dragged element
+      const widthStr = draggedSize.draggedWidth + 'px';
+      const heightStr = draggedSize.draggedHeight + 'px';
+      targetRef.style.width = widthStr;
+      targetRef.style.height = heightStr;
+      targetRef.style.border = '10px solid green';
+
 //      const connectorContainer = this.$refs.connectorContainerRef;
 //      connectorContainer.classList.add('drag-over');
     },
-    handleDragLeaveTarget(event){
-      console.log("Connector:handleDragLeaveTarget");
-//     const connectorContainer = this.$refs.connectorContainerRef;
-//      connectorContainer.classList.remove('drag-over');
+    handleDragLeaveTargetBoxLeft(event){
+      console.log("Connector:handleDragLeaveTargetBoxLeft***********");
+      event.preventDefault();
+      const targetRef = this.$refs.targetBoxRefLeft;
+      targetRef.style.width = 20 + 'px';
+      targetRef.style.height = 20 + 'px';
+      targetRef.style.border = '';
+    }, 
+    // Get the statement property inside the connector
+    handleDragEnterTargetBoxRight(event){
+      console.log("Connector:handleDragEnterTargetBoxRight----------");
+      console.log("EVENT=",event);
+      event.preventDefault();
+      var draggedElement = event.currentTarget;
+
+      console.log('Dragged Size:', this.sharedData);
+      const draggedSize = JSON.parse(this.sharedData);
+      console.log('Dragged Width:', draggedSize.draggedWidth);
+      console.log('Dragged Height:', draggedSize.draggedHeight);
+  
+      const targetRef = this.$refs.targetBoxRefRight;
+      // Set the size of the dragged element
+      const widthStr = draggedSize.draggedWidth + 'px';
+      const heightStr = draggedSize.draggedHeight + 'px';
+      targetRef.style.width = widthStr;
+      targetRef.style.height = heightStr;
+      targetRef.style.border = '10px solid green';
+//      const connectorContainer = this.$refs.connectorContainerRef;
+//      connectorContainer.classList.add('drag-over');
+    },
+    handleDragLeaveTargetBoxRight(event){
+      console.log("Connector:handleDragLeaveTargetBoxRight***********");
+      event.preventDefault();
+      const targetRef = this.$refs.targetBoxRefRight;
+      targetRef.style.width = 20 + 'px';
+      targetRef.style.height = 20 + 'px';
+      targetRef.style.border = '';
     }, 
     onMousedown(type) {
       let item = null;
@@ -461,6 +534,8 @@ export default {
     },
 
     startDragConnector(e) {
+      console.log("START DRAG ",e);
+
       e.stopImmediatePropagation();
       e.dataTransfer.dropEffect = "move";
       e.dataTransfer.effectAllowed = "move";
@@ -493,6 +568,15 @@ export default {
       const grabOffsetTop = e.clientY - rectInViewport.top;
       e.dataTransfer.setData("grabOffsetLeft", grabOffsetLeft.toString());
       e.dataTransfer.setData("grabOffsetTop", grabOffsetTop.toString());
+
+      // set the global sharedData (YUK!) to hold the size
+      // only because dragEnter can't see insides of the dataTransfer object
+      const draggedSize = JSON.stringify({
+        draggedWidth: e.currentTarget.offsetWidth,
+        draggedHeight: e.currentTarget.offsetHeight,
+        })
+      console.log("SETTING SIZE = ",draggedSize);
+      this.$emit("update-shared-data",draggedSize);
 
       const currentX = e.clientX;
       const currentY = e.clientY;
@@ -532,6 +616,11 @@ export default {
       // Receive the content text from the dropped object
       const transContent = e.dataTransfer.getData("content");
 
+      var elementWidthStr = e.dataTransfer.getData("fredWidth");
+      var elementHeightStr = e.dataTransfer.getData("fredWidth");
+      console.log('Element Size Str:', elementWidthStr, 'x', elementHeightStr);
+
+
       // // remove the dragged statements
       //  this.$emit('setDraggedItem', null)
       // //Store the dropped element's data to the sessionStorage
@@ -540,6 +629,9 @@ export default {
       // if (this.moveItem) {
       //     this.$emit('delDroppedItem', this.moveItem)
       // }
+
+      this.$el.classList.remove('drag-over-happening');
+
 
       if (side === "a" && type === "statement") {
         const statementID = data.id;
@@ -999,7 +1091,11 @@ export default {
   overflow:visible;
 }
 
-.connectorContainer:hover {
+.connectorContainer:hover .buttons-container {
+      opacity: 1; /* Show childA when hovering over the parent */
+}
+
+.connectorContainerHide:hover {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -1043,6 +1139,8 @@ export default {
 .connector-target-box {
   display: flex;
   padding: 10px;
+  width:100%;
+  height:100%;
 }
 
 .connectorMenu {
@@ -1084,11 +1182,13 @@ export default {
   height: 20px;
   cursor: pointer;
 }
-.container {
+.buttons-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 10px;
+  opacity: 0.05;
+  transition: opacity 0.3s ease;
 }
 .connectorButton {
   width: 24px;
@@ -1111,8 +1211,9 @@ export default {
   align-items: center;
 }
 
-.drag-over {
-  border: 10px solid rgb(246, 3, 43);
+.drag-over-happening {
+  border: 2px solid rgb(0, 178, 42);
+  transform: translate(-1px, -1px);
 }
 
 </style>
