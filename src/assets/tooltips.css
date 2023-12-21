@@ -45,6 +45,7 @@ margin-top: 5px;
 
 .StatementFreeText:hover .StatementFreeText_tooltip  {
 visibility: visible;
+transition-delay: 1s;
 }
 
 /* statementRoot tooltips css style */
@@ -52,7 +53,7 @@ visibility: visible;
 visibility: hidden;
 width: fit-content;
 background-color: black;
-color: white;
+color: rgb(255, 255, 255);
 text-align: left;
 padding: 5px;
 border-radius: 6px;
@@ -61,11 +62,11 @@ left: 0;
 position:absolute;
 z-index: 1;
 margin-top: 5px;
-  
 }
 
 .StatementRoot:hover .StatementRoot_tooltip  {
 visibility: visible;
+transition-delay: 1s;
 }
 .StatementRoot:active .StatementRoot_tooltip  {
   display: none;
@@ -84,11 +85,11 @@ left: 0;
 position:absolute;
 z-index: 1;
 margin-top: 5px;
-
 }
 
 .StatementStudent:hover .StatementStudent_tooltip  {
 visibility: visible;
+transition-delay: 1s;
 }
 
 .StatementStudent:active .StatementStudent_tooltip  {
@@ -114,6 +115,7 @@ visibility: visible;
   
 .StatementTruth:hover .StatementTruth_tooltip  {
   visibility: visible;
+  transition-delay: 1s;
 }
 
 .StatementTruth:active .StatementTruth_tooltip  {

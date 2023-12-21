@@ -3,7 +3,7 @@
   <div class="StatementTruth">
     <div class = "content-wrapper">
     <div class="iconContainer">
-      <button v-if="showToggle && this.data.collapsed" @click="toggleCollapsedStatement" class="statementButton">
+      <button v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement" class="statementButton">
           <img 
           class="toggle-expand-collapse"
           src="../../assets/expand_icon.png"
@@ -11,7 +11,7 @@
           width="20"
           />
       </button>
-      <button v-if="showToggle && !this.data.collapsed" @click="toggleCollapsedStatement" class="statementButton">
+      <button v-if="showToggle && !this.statementData.collapsed" @click="toggleCollapsedStatement" class="statementButton">
           <img 
           class="toggle-expand-collapse"
           src="../../assets/collapse_icon.png"
@@ -30,12 +30,12 @@
       </button>
     </div>
     <div class="main-content">
-      <div v-if="this.data.collapsed" class="concatenated-statement">
+      <div v-if="this.statementData.collapsed" class="concatenated-statement">
           {{ concatenatedStatement }}
       </div>
       <div v-else>
         <div
-          v-for="(segment, index) in this.data.content.originalFacts"
+          v-for="(segment, index) in this.statementData.content.originalFacts"
           :key="index"
         >
           <!-- render the text from selection -->
@@ -59,7 +59,7 @@
     </div>
   </div>
     <!-- Display tooltips for this statement-->
-    <span v-if="data.visible" class="StatementTruth_tooltip">
+    <span v-if="statementData.visible" class="StatementTruth_tooltip">
       The content in this statement is a fact. It is always correct.
     </span>
   </div>
@@ -70,7 +70,7 @@ export default {
   name: "StatementTruth",
   emits: ["duplicate-statement","toggle-collapsed-statement-truth"],
   props: {
-    data: Object,
+    statementData: Object,
     position: String,
     showToggle: {
       type: Boolean,
@@ -80,13 +80,13 @@ export default {
   data() {
     return {
       //TODO: confirm that the first entry is text, 2nd entry is image.
-      userInput: this.data.content.userInput,
-      id: this.data.id,
+      userInput: this.statementData.content.userInput,
+      id: this.statementData.id,
     };
   },
   computed: {
     concatenatedStatement() {
-      return this.data.content.originalFacts.map((segment, index) => 
+      return this.statementData.content.originalFacts.map((segment, index) => 
         typeof segment === 'string' ? (this.isImage(segment)?"":segment) : this.userSelected[index] || segment[0]
       ).join(" ");
     },
@@ -111,12 +111,12 @@ export default {
     },
 
     initContent() {
-      this.statementType = this.data.statementType;
-      this.id = this.data.id;
-      this.originalFacts = this.data.content.originalFacts;
-      this.previousUserInput = this.data.content.userInput;
+      this.statementType = this.statementData.statementType;
+      this.id = this.statementData.id;
+      this.originalFacts = this.statementData.content.originalFacts;
+      this.previousUserInput = this.statementData.content.userInput;
       this.userInputText = this.previousUserInput;
-      this.answeredData = this.data;
+      this.answeredData = this.statementData;
     },
   },
 };
