@@ -10,16 +10,15 @@
       @drop="onDrop($event)"
       ref="mmStatementBox"
       :style="{
-      position: this.data.position,
-      left: this.data.left + 'px',
-      top: this.data.top + 'px',
+      position: this.statementData.position,
+      left: this.statementData.left + 'px',
+      top: this.statementData.top + 'px',
     }"
   >
-    <!-- <button v-if="!data.visible" class="delete-button" @click="deleteStatement(connectorID)">Delete</button> -->
     <StatementRoot
         v-bind="$attrs"
-        v-if="this.data.statementType === 0"
-        :data="this.data"
+        v-if="this.statementData.statementType === 0"
+        :statement-data="this.statementData"
         @user-choice-changed="handleUserChoiceChanged"
         @duplicate-statement="duplicateStatement"
         @toggle-collapsed-statement-root="toggleCollapsedStatementRoot"
@@ -27,15 +26,15 @@
     />
     <StatementTruth
         v-bind="$attrs"
-        v-if="this.data.statementType === 1"
-        :data="this.data"
+        v-if="this.statementData.statementType === 1"
+        :statement-data="this.statementData"
         @duplicate-statement="duplicateStatement"
         @toggle-collapsed-statement-truth="toggleCollapsedStatementTruth"
     />
     <StatementStudent
         v-bind="$attrs"
-        v-if="this.data.statementType === 2"
-        :data="this.data"
+        v-if="this.statementData.statementType === 2"
+        :statement-data="this.statementData"
         @user-choice-changed="handleUserChoiceChanged"
         @duplicate-statement="duplicateStatement"
         @toggle-collapsed-statement-student="toggleCollapsedStatementStudent"
@@ -43,8 +42,8 @@
     />
     <StatementFreeText
         v-bind="$attrs"
-        v-if="this.data.statementType === 3"
-        :data="this.data"
+        v-if="this.statementData.statementType === 3"
+        :statement-statementData="this.statementData"
         @user-input-changed="handleUserInputChanged"
         @duplicate-statement="duplicateStatement"
     />
@@ -71,6 +70,7 @@ export default {
     "onDragStart", 
     "delete-statement",
     "connector-dropped-on-statement",
+    "statement-dropped-on-statement",
     "duplicate-statement",
     "toggle-collapsed-renderstatement",
     "toggle-showPopup-fromrenderstatement",
@@ -78,7 +78,7 @@ export default {
   ],
   inheritAttrs: false,
   props: {
-    data: Object,
+    statementData: Object,
     sharedData: Object,
   },
   data() {
@@ -97,43 +97,17 @@ export default {
       console.log("render over event");
     },
     handleDragEnteringRenderStatement(e){
-      
-      console.log("render enter event");
-      /*
-      e.preventDefault();
-      const statementRoot = this.$el.querySelector('.StatementRoot');
-      if (statementRoot) {
-        // some issues with these approaches so comment out for now MM.
-//        console.log("adding no-pointer-events class to StatementRoot");
-//        statementRoot.classList.add('no-pointer-events');
-//        statementRoot.style.pointerEvents = 'none';
-      }
-      //const classArray = Array.from(statementRoot.classList);
-      // Log the array of classes
-      //console.log('CLASSES=',classArray);
-      */
+            console.log("render enter event");
     },
     handleDragLeavingRenderStatement(e){
       console.log("render leave event");
-      /*
-      const statementRoot = this.$el.querySelector('.StatementRoot');
-//      console.log("statementRoot = ",statementRoot);
-      if (statementRoot) {
-        //console.log("removing no-pointer-events class to StatementRoot")
-        //statementRoot.classList.remove('no-pointer-events');
-//        statementRoot.style.pointerEvents = 'auto';
-      }
-      //const classArray = Array.from(statementRoot.classList);
-      // Log the array of classes
-      //console.log('CLASSES=',classArray);
-      */
     },
     
     startDrag(e, data) {
       // e.target.className = 'dragEffect';
       e.dataTransfer.dropEffect = "move";
       e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("data", JSON.stringify(this.data));
+      e.dataTransfer.setData("data", JSON.stringify(this.statementData));
       e.dataTransfer.setData("type", "statement");
       // Pass the statement content through drag event
       e.dataTransfer.setData("content", this.contentText);
@@ -144,7 +118,9 @@ export default {
       const grabOffsetLeft = e.clientX - rect.left;
       const grabOffsetTop = e.clientY - rect.top;
 
-      console.log("---START DRAG grabOffset---", grabOffsetLeft, grabOffsetTop);
+      console.log("---START DRAG e.client (X,Y)---", e.clientX, e.clientY );
+      console.log("---START DRAG rect position=---", rect.left, rect.top);
+      console.log("---START DRAG grabOffset is diff---", grabOffsetLeft, grabOffsetTop);
       e.dataTransfer.setData("grabOffsetLeft", grabOffsetLeft.toString());
       e.dataTransfer.setData("grabOffsetTop", grabOffsetTop.toString());
 
@@ -154,12 +130,14 @@ export default {
       // only because dragEnter can't see insides of the dataTransfer object
       const draggedWidth = e.currentTarget.offsetWidth;
       const draggedHeight = e.currentTarget.offsetHeight;
-      const draggedSize = JSON.stringify({
-        "draggedWidth": draggedWidth,
-        "draggedHeight": draggedHeight,
+      const dragInformation = JSON.stringify({
+        draggedWidth: draggedWidth,
+        draggedHeight: draggedHeight,
+        drageeType : "render_statement",
+        drageeConnectorID : undefined,
         })
-      console.log("SETTING SIZE = ",draggedSize);
-      this.$emit("update-shared-data",draggedSize);
+      console.log("SETTING DRAG INFORMATION = ",dragInformation);
+      this.$emit("update-shared-data",dragInformation);
 
     },
 
@@ -170,7 +148,10 @@ export default {
       console.log("RenderStatement:onDrop type=",type);
       if (type=="connector") { // ignore if it was statement droopped on statement
         console.log(" emitting connector-dropped-on-statement");
-        this.$emit("connector-dropped-on-statement", [this.data.id, undefined, e] ); // let the Parent deal with it
+        this.$emit("connector-dropped-on-statement", [this.statementData.id, undefined, e] ); // let the Parent deal with it
+      } else if (type=="statement"){
+        console.log(" emitting statement-dropped-on-statement");
+        this.$emit("statement-dropped-on-statement", [this.statementData.id, e] ); // let the Parent deal with it
       }
     },
 
@@ -221,45 +202,13 @@ export default {
     },
 
     initContent() {
-      if (this.data.statementType === 0 || this.data.statementType === 1) {
+      if (this.statementData.statementType === 0 || this.statementData.statementType === 1) {
         // TODO: process the "xxx.jpg" in TRUTH statement
-        this.contentText = this.data.content.originalFacts
+        this.contentText = this.statementData.content.originalFacts
             .filter((fact) => !fact.includes(".jpg"))
             .join(" ");
-    }
-
-    /*
-      const renderStatementElement =
-            document.getElementById("renderStatementElement");
-      alert(renderStatementElement)
-      renderStatementElement.addEventListener("dragover", function (e) {
-          e.preventDefault(); // Allow drop
-          renderStatementElement.classList.add("drag-over"); // Add a CSS class to change appearance
-        });
-
-        renderStatementElement.addEventListener("dragleave", function () {
-          renderStatementElement.classList.remove("drag-over"); // Remove the CSS class when leaving
-        });
-      */
-      // if (this.data.statementType === 2) {
-      //     this.contentText = ""
-      //     for (let i = 0; i < this.data.content.originalFacts.length; i++) {
-      //         if (typeof(this.data.content.originalFacts[i]) === 'string') {
-      //             this.contentText += this.data.content.originalFacts[i]
-      //             this.contentText += ' '
-      //         }
-      //         else {
-      //             this.contentText += "Unselected"
-      //             this.contentText += ' '
-      //         }
-      //     }
-      //     // console.log(this.contentText);
-      // }
-      // if (this.data.statementType === 3) {
-      //     this.contentText = ""
-      // }
-
-      this.answeredStat = this.data;
+      }
+      this.answeredStat = this.statementData;
     },
 
     deleteStatement() {
@@ -279,7 +228,7 @@ export default {
   },
 
   created() {
-    // this.answeredStat = this.data;
+    // this.answeredStat = this.statementData;
     this.initContent();
   },
 };

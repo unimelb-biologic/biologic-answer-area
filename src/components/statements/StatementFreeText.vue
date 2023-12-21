@@ -15,7 +15,7 @@
     <div class="text">Free text entry...</div>
     <textarea v-model="userInputText" id="input" class="textarea"></textarea>
     <!-- Display tooltips for this statement-->
-    <span v-if="data.visible" class="StatementFreeText_tooltip">
+    <span v-if="statementData.visible" class="StatementFreeText_tooltip">
       You can use this statement to answer the question.
     </span>
   </div>
@@ -26,7 +26,7 @@ export default {
   name: "StatementFreeText",
   emits: ["user-input-changed","duplicate-statement"],
   props: {
-    data: Object,
+    statementData: Object,
     position: String,
     showToggle: {
       type: Boolean,
@@ -36,10 +36,10 @@ export default {
 
   data() {
     return {
-      statementType: this.data.statementType,
-      id: this.data.id,
-      originalFacts: this.data.content.originalFacts,
-      previousUserInput: this.data.content.userInput,
+      statementType: this.statementData.statementType,
+      id: this.statementData.id,
+      originalFacts: this.statementData.content.originalFacts,
+      previousUserInput: this.statementData.content.userInput,
       userInputText: "",
 
       answeredData: null,
@@ -47,12 +47,12 @@ export default {
   },
   methods: {
     initContent() {
-      this.statementType = this.data.statementType;
-      this.id = this.data.id;
-      this.originalFacts = this.data.content.originalFacts;
-      this.previousUserInput = this.data.content.userInput;
+      this.statementType = this.statementData.statementType;
+      this.id = this.statementData.id;
+      this.originalFacts = this.statementData.content.originalFacts;
+      this.previousUserInput = this.statementData.content.userInput;
       this.userInputText = this.previousUserInput;
-      this.answeredData = this.data;
+      this.answeredData = this.statementData;
     },
     duplicateMe(){
       this.$emit("duplicate-statement", [ this.id ]);

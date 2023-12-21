@@ -2,7 +2,7 @@
   <RenderStatement
     v-for="statement in visibleStatements"
     :key="statement.id"
-    :data="statement"
+    :statement-data="statement"
     :showToggle="true"
     :sharedData = "sharedData"
     @onDragStart="onDragStart(statement)"

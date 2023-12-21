@@ -210,9 +210,6 @@ export default {
       this.dataObject["statementElements"] = this.statementElements;
       this.jsonOutput = this.dataObject;
 
-      download(JSON.stringify(this.dataObject), "mm_exnet_question.json", "application/json");
-
-      /*
       let response = await this.StoreLastWorkingAnswer(this.selectedQuestion);
       if (response["success"] === true) {
         window.alert("Submission successful!");
@@ -223,7 +220,7 @@ export default {
           this.feedback = response.client_feedback
         }
       })
-      */
+
     },
     click_feedback() {
       const { gradingStatus, gradingInfo, overallScore } = JSON.parse(this.feedback);
@@ -326,6 +323,12 @@ export default {
 
 
     updateSharedData(newValue){
+      // newValue is a JSON.stringified version of
+      // {
+      //    "draggedWidth" : value;
+      //    "draggedHeight" : value;
+      //    "drageeType" : "connector";      (or could be "render_statement")
+      // }
       this.sharedData = newValue;
     },
 

@@ -3,7 +3,7 @@
   >
     <div class="content-wrapper">
       <div class="iconContainer">
-        <button v-if="showToggle && this.data.collapsed" @click="toggleCollapsedStatement" class="statementButton">
+        <button v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement" class="statementButton">
           <img 
           class="statementButtonImage"
           src="../../assets/expand_icon.png"
@@ -11,7 +11,7 @@
           
           />
       </button>
-      <button v-if="showToggle && !this.data.collapsed" @click="toggleCollapsedStatement" class="statementButton">
+      <button v-if="showToggle && !this.statementData.collapsed" @click="toggleCollapsedStatement" class="statementButton">
           <img 
           class="statementButtonImage"
           src="../../assets/collapse_icon.png"
@@ -19,7 +19,7 @@
     
           />
       </button>
-      <button v-if="showToggle && !this.data.collapsed" @click="toggleShowPopup" class="statementButton">
+      <button v-if="showToggle && !this.statementData.collapsed" @click="toggleShowPopup" class="statementButton">
         <img
         class="statementButtonImage"
         src="../../assets/popup_radio_icon.png"
@@ -39,13 +39,13 @@
     </div>
       
       <div class="main-content">
-        <div v-if="this.data.collapsed"  class="concatenated-statement">
+        <div v-if="this.statementData.collapsed"  class="concatenated-statement">
           {{ concatenatedStatement }}
         </div>
 
-        <div v-else-if="!this.data.showPopup" class="radio-statement">
+        <div v-else-if="!this.statementData.showPopup" class="radio-statement">
           <!-- radio button format -->
-          <div v-for="(segment, index) in this.data.content.originalFacts"
+          <div v-for="(segment, index) in this.statementData.content.originalFacts"
            :key="index" style="float: left; ">
             <div v-if="typeof segment === 'string'" class="segmentString">
 
@@ -71,7 +71,7 @@
         <div v-else>
           <!-- dropdown format -->
           <div
-            v-for="(segment, index) in this.data.content.originalFacts"
+            v-for="(segment, index) in this.statementData.content.originalFacts"
             :key="index"
           > 
           <!-- render the text from selection -->
@@ -96,7 +96,7 @@
           </div>
         </div>
         <!-- Display tooltips for this statement-->
-        <span v-if="data.visible" class="StatementRoot_tooltip">
+        <span v-if="statementData.visible" class="StatementRoot_tooltip">
           This statement must be used.<br /><br />
           It is a starting point for the rest of the problem.
         </span>
@@ -110,7 +110,7 @@ export default {
   name: "StatementRoot",
   emits: ["user-choice-changed","duplicate-statement","toggle-showPopup-fromstatementroot","toggle-collapsed-statement-root"],
   props: {
-    data: Object,
+    statementData: Object,
     position: String,
     showToggle: {
       type: Boolean,
@@ -119,10 +119,10 @@ export default {
   },
   data() {
     return {
-      statementType: this.data.statementType,
-      id: this.data.id,
-      originalFacts: this.data.content.originalFacts,
-      previousUserInput: this.data.content.userInput,
+      statementType: this.statementData.statementType,
+      id: this.statementData.id,
+      originalFacts: this.statementData.content.originalFacts,
+      previousUserInput: this.statementData.content.userInput,
       userSelected: [],
       answeredData: null,
       hide_collapsed : false,
@@ -131,7 +131,7 @@ export default {
   },
   computed: {
     concatenatedStatement() {
-      return this.data.content.originalFacts.map((segment, index) => 
+      return this.statementData.content.originalFacts.map((segment, index) => 
         typeof segment === 'string' ? (this.isImage(segment)?"":segment) : this.userSelected[index] || segment[0]
       ).join(" ");
     },
@@ -198,10 +198,10 @@ export default {
 
 
     initContent() {
-      this.statementType = this.data.statementType;
-      this.id = this.data.id;
-      this.originalFacts = this.data.content.originalFacts;
-      this.previousUserInput = this.data.content.userInput;
+      this.statementType = this.statementData.statementType;
+      this.id = this.statementData.id;
+      this.originalFacts = this.statementData.content.originalFacts;
+      this.previousUserInput = this.statementData.content.userInput;
 
       let userInputID = 0;
       this.userSelected = [];
@@ -214,7 +214,7 @@ export default {
         }
       }
 
-      this.answeredData = this.data;
+      this.answeredData = this.statementData;
     },
   },
   watch: {

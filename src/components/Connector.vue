@@ -84,8 +84,8 @@
         >
           <div v-if="this.connectorContentID==2" class="connector-a-picture-parent" ref="targetBoxRefLeft"
             @dragover.prevent
-            @dragleave.prevent="handleDragLeaveTargetBoxLeft"
-            @dragenter.prevent="handleDragEnterTargetBoxLeft"
+            @dragleave.prevent="handleDragLeaveTargetBoxLeft($event)"
+            @dragenter.prevent="handleDragEnterTargetBoxLeft($event)"
           >
             <img 
               class="connector-a-picture"
@@ -95,8 +95,8 @@
           </div>
           <div v-else class="connector-target-box" ref="targetBoxRefLeft"
             @dragover.prevent
-            @dragleave.prevent="handleDragLeaveTargetBoxLeft"
-            @dragenter.prevent="handleDragEnterTargetBoxLeft"
+            @dragleave.prevent="handleDragLeaveTargetBoxLeft($event)"
+            @dragenter.prevent="handleDragEnterTargetBoxLeft($event)"
           >
              <!-- just to provide the inner box -->
           </div>
@@ -108,7 +108,7 @@
             @delete-statement="
               deleteStatement({ id: this.leftID, position: 'left' })
             "
-            :data="this.allStatements[this.leftID]"
+            :statement-data="this.allStatements[this.leftID]"
             :showToggle="true"
             :sharedData="sharedData"
             @update-statement-content="handleUpdateStatContentA"
@@ -201,8 +201,8 @@
         >
           <div class="connector-target-box" ref="targetBoxRefRight"
             @dragover.prevent
-            @dragleave.prevent="handleDragLeaveTargetBoxRight"
-            @dragenter.prevent="handleDragEnterTargetBoxRight"
+            @dragleave.prevent="handleDragLeaveTargetBoxRight($event)"
+            @dragenter.prevent="handleDragEnterTargetBoxRight($event)"
           >
              <!-- just to provide the inner box -->
           </div>
@@ -215,7 +215,7 @@
             @delete-statement="
               deleteStatement({ id: this.rightID, position: 'right' })
             "
-            :data="this.allStatements[this.rightID]"
+            :statement-data="this.allStatements[this.rightID]"
             :showToggle="true"
             :sharedData="sharedData"
             @update-statement-content="handleUpdateStatContentB"
@@ -405,6 +405,47 @@ export default {
         this.$emit("toggle-showPopup-fromconnector", id);
     },
 
+
+    connector1IsInTreeOfconnector2( conn1, conn2 ){
+      // if left OR right side is a connector call recursively
+      let inLeftTree = false;
+      console.log("connector1IsInTreeOfconnector2: is conn1=",conn1,"  in the tree of conn2=",conn2);
+      if (this.allConnectors[conn2]["leftType"]=="connector") {
+        const leftConnID = this.allConnectors[conn2]["leftID"];
+        console.log("leftside type=",this.allConnectors[conn2]["leftType"]," connID=",leftConnID);
+        inLeftTree = (
+            (leftConnID!==undefined) && 
+            ((conn1===leftConnID) || this.connector1IsInTreeOfconnector2(conn1,leftConnID))
+            );
+      }
+      let inRightTree = false;
+      if (this.allConnectors[conn2]["rightType"]=="connector") {
+        const rightConnID = this.allConnectors[conn2]["rightID"];
+        console.log("rightside type=",this.allConnectors[conn2]["rightType"]," connID=",rightConnID);
+        inRightTree = (
+          (rightConnID!==undefined) && 
+          ((conn1===rightConnID) ||this.connector1IsInTreeOfconnector2(conn1,rightConnID))
+        );
+      }
+      const finalResult = inLeftTree || inRightTree;
+      console.log(" FINAL result = inLeftTree=",inLeftTree," || inRightTree=",inRightTree," =>",finalResult);
+      return finalResult;
+    },
+
+    dropIsPermissible(connectorBeingDroppedOn,connectorBeingDropped) {
+      console.log("checking if ",connectorBeingDropped," can be dropped on ",connectorBeingDroppedOn);
+      if (connectorBeingDroppedOn === connectorBeingDropped) {
+        console.log("theyre the same, so NO");
+        return false;
+      } else {
+        console.log("check inTree");
+        const inTree = this.connector1IsInTreeOfconnector2(connectorBeingDroppedOn,connectorBeingDropped);
+        console.log("inTree = ",inTree);
+        return ! inTree;
+      }
+    },
+
+
     connectorDroppedOnStatement( info )
     {
       console.log("Connector:connectorDroppedOnStatement");
@@ -414,20 +455,31 @@ export default {
 
     // Get the statement property inside the connector
     handleDragEnterTargetBoxLeft(event){
-      console.log("Connector:handleDragEnterTargetBoxLeft----------");
-      console.log("EVENT=",event);
+
+      console.log("Connector:handleDragEnterTargetBoxLeft----------event=",event);
+      console.log("this.sharedData=",this.sharedData);
+      const dragInformation = JSON.parse(this.sharedData);
+      console.log('Draginformation:', dragInformation);
+
+      if (dragInformation.drageeType==="connector") 
+      {
+        if (this.dropIsPermissible(this.connectorID,dragInformation.drageeConnectorID)) {
+          console.log("DROP IS PERMISSIBLE");
+        } else {
+          console.log("DROP IS NOT PERMISSIBLE");
+          return;
+        }
+      }
+
+//      console.log("EVENT=",event);
       event.preventDefault();
       var draggedElement = event.currentTarget;
 
-      console.log('Dragged Size:', this.sharedData);
-      const draggedSize = JSON.parse(this.sharedData);
-      console.log('Dragged Width:', draggedSize.draggedWidth);
-      console.log('Dragged Height:', draggedSize.draggedHeight);
   
       const targetRef = this.$refs.targetBoxRefLeft;
       // Set the size of the dragged element
-      const widthStr = draggedSize.draggedWidth + 'px';
-      const heightStr = draggedSize.draggedHeight + 'px';
+      const widthStr = dragInformation.draggedWidth + 'px';
+      const heightStr = dragInformation.draggedHeight + 'px';
       targetRef.style.width = widthStr;
       targetRef.style.height = heightStr;
       targetRef.style.border = '10px solid green';
@@ -445,20 +497,29 @@ export default {
     }, 
     // Get the statement property inside the connector
     handleDragEnterTargetBoxRight(event){
-      console.log("Connector:handleDragEnterTargetBoxRight----------");
-      console.log("EVENT=",event);
+
+      console.log("Connector:handleDragEnterTargetBoxRight----------event=",event);
+      console.log("this.sharedData=",this.sharedData);
+      const dragInformation = JSON.parse(this.sharedData);
+      console.log('Draginformation:', dragInformation);
+
+      if (dragInformation.drageeType==="connector") {
+        if (this.dropIsPermissible(this.connectorID,dragInformation.drageeConnectorID)) {
+          console.log("DROP IS PERMISSIBLE");
+        } else {
+          console.log("DROP IS NOT PERMISSIBLE");
+          return;
+        }
+      }
+
+//      console.log("EVENT=",event);
       event.preventDefault();
       var draggedElement = event.currentTarget;
-
-      console.log('Dragged Size:', this.sharedData);
-      const draggedSize = JSON.parse(this.sharedData);
-      console.log('Dragged Width:', draggedSize.draggedWidth);
-      console.log('Dragged Height:', draggedSize.draggedHeight);
   
       const targetRef = this.$refs.targetBoxRefRight;
       // Set the size of the dragged element
-      const widthStr = draggedSize.draggedWidth + 'px';
-      const heightStr = draggedSize.draggedHeight + 'px';
+      const widthStr = dragInformation.draggedWidth + 'px';
+      const heightStr = dragInformation.draggedHeight + 'px';
       targetRef.style.width = widthStr;
       targetRef.style.height = heightStr;
       targetRef.style.border = '10px solid green';
@@ -534,6 +595,7 @@ export default {
     },
 
     startDragConnector(e) {
+
       console.log("START DRAG ",e);
 
       e.stopImmediatePropagation();
@@ -556,7 +618,6 @@ export default {
         selectedPhrase: this.selectedPhrase,
         connectorID: this.connectorID,
       });
-
       e.dataTransfer.setData("type", "connector");
       // Pass the contained content texts
       e.dataTransfer.setData("content", this.contentTextAll);
@@ -571,12 +632,14 @@ export default {
 
       // set the global sharedData (YUK!) to hold the size
       // only because dragEnter can't see insides of the dataTransfer object
-      const draggedSize = JSON.stringify({
+      const dragInformation = JSON.stringify({
         draggedWidth: e.currentTarget.offsetWidth,
         draggedHeight: e.currentTarget.offsetHeight,
+        drageeType: "connector",
+        drageeConnectorID : this.connectorID,
         })
-      console.log("SETTING SIZE = ",draggedSize);
-      this.$emit("update-shared-data",draggedSize);
+      console.log("SETTING Information = ",dragInformation);
+      this.$emit("update-shared-data",dragInformation);
 
       const currentX = e.clientX;
       const currentY = e.clientY;
@@ -596,6 +659,7 @@ export default {
       };
       e.target.addEventListener("dragend", dragEndListener);
       */
+
     },
 
     updateContentTextAll(){
@@ -620,44 +684,15 @@ export default {
       var elementHeightStr = e.dataTransfer.getData("fredWidth");
       console.log('Element Size Str:', elementWidthStr, 'x', elementHeightStr);
 
-
-      // // remove the dragged statements
-      //  this.$emit('setDraggedItem', null)
-      // //Store the dropped element's data to the sessionStorage
-      // sessionStorage.setItem("users",  JSON.stringify(data.id) )
-      // // console.log(this.moveItem)
-      // if (this.moveItem) {
-      //     this.$emit('delDroppedItem', this.moveItem)
-      // }
-
       this.$el.classList.remove('drag-over-happening');
 
 
       if (side === "a" && type === "statement") {
         const statementID = data.id;
-        // this.$emit('droppedAstat', [this.connectorID, statementID])
-
         // Update content
         this.acontent = transContent;
         // this.leftContent = transContent
-
         this.updateContentTextAll()
-        /*
-        this.contentTextAll =
-          (this.currConnectorContent[0] === null
-            ? ""
-            : this.currConnectorContent[0]) +
-          this.acontent +
-          (this.currConnectorContent[1] === null
-            ? ""
-            : this.currConnectorContent[1]) +
-          (this.bcontent === null ? "" : this.bcontent) +
-          (this.currConnectorContent[2] === null
-            ? ""
-            : this.currConnectorContent[2]);
-        */
-
-        // console.log(this.contentTextAll)
         console.log("Connector:onDrop  emitting SIGNAL droppedAstat");
 
         this.$emit("droppedAstat", [
@@ -672,72 +707,31 @@ export default {
           statementID,
           transContent,
         ]);
-
         // Update Connector content
         this.bcontent = transContent;
         this.updateContentTextAll()
-
-        /*
-        this.contentTextAll =
-          (this.currConnectorContent[0] === null
-            ? ""
-            : this.currConnectorContent[0]) +
-          (this.acontent === null ? "" : this.acontent) +
-          (this.currConnectorContent[1] === null
-            ? ""
-            : this.currConnectorContent[1]) +
-          this.bcontent +
-          (this.currConnectorContent[2] === null
-            ? ""
-            : this.currConnectorContent[2]);
-        */
-
       } else if (side === "a" && type === "connector") {
         this.acontent = transContent;
         this.updateContentTextAll()
-
-        /*
-        this.contentTextAll =
-          (this.currConnectorContent[0] === null
-            ? ""
-            : this.currConnectorContent[0]) +
-          this.acontent +
-          (this.currConnectorContent[1] === null
-            ? ""
-            : this.currConnectorContent[1]) +
-          (this.bcontent === null ? "" : this.bcontent) +
-          (this.currConnectorContent[2] === null
-            ? ""
-            : this.currConnectorContent[2]);
-        */
-
         this.$emit("droppedAconn", [this.connectorID, data, transContent]);
       } else if (side === "b" && type === "connector") {
         this.bcontent = transContent;
         this.updateContentTextAll()
-
-        /*
-        this.contentTextAll =
-          (this.currConnectorContent[0] === null
-            ? ""
-            : this.currConnectorContent[0]) +
-          (this.acontent === null ? "" : this.acontent) +
-          (this.currConnectorContent[1] === null
-            ? ""
-            : this.currConnectorContent[1]) +
-          this.bcontent +
-          (this.currConnectorContent[2] === null
-            ? ""
-            : this.currConnectorContent[2]);
-        */
-
-
         this.$emit("droppedBconn", [this.connectorID, data, transContent]);
       } else if (side === "x" && type === "connector") {
-        // the connector needs to be a new connector - i.e. undefined parent and no children.
-        // we need to insert it into the tree. So this connector becomes the dropped connectors childA
+        // a connector has been dropped on the body of a connector.
+        //
+        // we deal with two scenarios.
+        // 1. if the connector is a new connector from the palette (i.e. undefined parent and no children.)
+        // and it's been dropped  on a connector that is part of a tree. 
+        // Then it needs to be inserted into the tree.
+        //  So this connector becomes the dropped connectors childA
         // and whoever is the parent of this connector needs to become the parent of the new one.
         // since we don't know about our parent we need to send a signal upwards.
+        //
+        // 2. a top level connector (i.e. one with a parentID of -1, is being moved a bit and
+        //    has been dropped within it's own area - i.e. onto itself or one of it's children.
+        //    in this instance we just pass a signal up the tree.
 
         this.$emit("new-connector-dropped-on-connector", [undefined, this.connectorID, e]);
       }
