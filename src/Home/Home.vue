@@ -144,7 +144,8 @@ import AnswerTextGeneratorArea from "@/components/AnswerTextGeneratorArea.vue";
 import FileReader from "@/components/FileReader.vue";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
-import download from 'downloadjs'
+import download from 'downloadjs';
+import {BASE_URL, API_ENDPOINTS, API_BODY_PARAMS} from '../config/constants'
 
 export default {
   name: "App",
@@ -211,17 +212,17 @@ export default {
       this.jsonOutput = this.dataObject;
 
       let response = await this.StoreLastWorkingAnswer(this.selectedQuestion);
+      // console.log("Submission response:", response);
+
       if (response["success"] === true) {
         window.alert("Submission successful!");
-      }
-      console.log("Submission response:", response);
-      this.sendGetStudentGrades(this.selectedQuestion).then(response => {
-        if (response["success"] === true) {
-          this.feedback = response.client_feedback
-        }
-      })
 
+        this.sendGetFeedback(this.selectedQuestion).then(response => {
+            this.feedback = response.client_feedback
+        })
+      }
     },
+
     click_feedback() {
       const { gradingStatus, gradingInfo, overallScore } = JSON.parse(this.feedback);
 
@@ -287,6 +288,7 @@ export default {
         alert('Error');
       }
     },
+
     // // Selects a specific question from the list.
     // questionSelected() {
     //     // console.log("Displaying question", this.selectedQuestion)
@@ -332,8 +334,6 @@ export default {
       this.sharedData = newValue;
     },
 
-
-
     //Record the coordinate of X,Y when it clicked
     onMousedown(e) {
       this.offsetX = e.offsetX;
@@ -369,8 +369,6 @@ export default {
       this.setCurrentExNet(exnetWorkingAnswerJson, true);
     },
 
-    
-
     // Download ExNetJson
     onDownloadExNet() {
       console.log(this.dataObject)
@@ -389,6 +387,7 @@ export default {
       download(JSON.stringify(exNetTemplate), this.exNetName + "_exnet_question.json", "application/json");
 
     },
+
     setCurrentExNet(exNetData, clear = false) {
       this.promptText =
         exNetData.activeExNetQuestionPack.promptText;
@@ -406,7 +405,7 @@ export default {
         // this.statements.push(statement);
 
         // if the userInput object is empty we need to initialise it with the first option of each popup
-        console.log("statement original=",statement)
+        //console.log("statement original=",statement)
         for (let i = 0; i < statement.content.originalFacts.length; i++) {
           if (typeof(statement.content.originalFacts[i]) !== 'string') {
             // if not a string then it is an array of popup options
@@ -414,7 +413,7 @@ export default {
             statement.content.userInput.push(statement.content.originalFacts[i][0]);
           }
         }
-        console.log("statement after initialising userInput=",statement)
+        //console.log("statement after initialising userInput=",statement)
       }
 
       this.showQuestionList = false;
@@ -437,11 +436,11 @@ export default {
 
     // Sends the login HTTP request to the server.
     async sendLoginRequest() {
-      let userID = window.prompt("Enter your user ID.", "dummy_1");
+      let userID = window.prompt("Enter your user ID.", "9999999");
 
       //FIXME: will the client ID be hashed or plaintext???
       this.clientID = userID;
-      console.log(this.clientID, '  this.clientID')
+      // console.log(this.clientID, '  this.clientID')
       // FIXME: remove this to stop hashing client ID.
       await this.digestMessage(userID).then((digestHex) => {
         userID = digestHex;
@@ -451,7 +450,8 @@ export default {
 
       try {
         // FIXME: Server URL here
-        let response = await fetch("http://localhost:5000/verify-client", {
+        let login_url = BASE_URL + API_ENDPOINTS.LOGIN_ENDPOINT;
+        let response = await fetch(login_url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -470,10 +470,11 @@ export default {
       if (response && response["success"] === true) {
         this.secret_key = response["persistent_secret_key"]
         this.authorised = true
-        console.log('userlogin', response)
+        // console.log('userlogin', response)
         // Store authorization status to session storage
         sessionStorage.setItem('authStatus', 'authorized');
         sessionStorage.setItem('secretKey', this.secret_key);
+        sessionStorage.setItem('clientID', this.clientID);
 
         window.alert("Successfully authorised!")
       } else {
@@ -484,19 +485,24 @@ export default {
     async sendGetQuestionsListRequest() {
       try {
         // FIXME: HTTP request here.
+        let questionsListUrl = BASE_URL + API_ENDPOINTS.GET_QUESTIONS_LIST;
+        // console.log("list exnet", this.clientID);
+        let body = {
+            [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
+            [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
+        }
+
         let response = await fetch(
-          "http://localhost:5000/list-available-exnet",
+          questionsListUrl,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: `{
-                                "client_id": "${this.clientID}",
-                                "persistent_secret_key": "${this.secret_key}"
-                             }`,
+            body: JSON.stringify(body)
           }
         );
+
         return await response.json();
       } catch (error) {
         console.log(error);
@@ -506,7 +512,7 @@ export default {
     async getQuestions() {
       // TODO: re-enable this
       let response = await this.sendGetQuestionsListRequest();
-      console.log(response);
+      // console.log(response);
 
       // TODO: Remove sample server response.
       // let response = {
@@ -539,16 +545,19 @@ export default {
       try {
         // FIXME: HTTP request here.
         // Is this GET or POST?
-        let response = await fetch("http://localhost:5000/get-exnet", {
+        let getQuestionsUrl = BASE_URL + API_ENDPOINTS.GET_EXNET;
+        let body = {
+            [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
+            [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
+            [API_BODY_PARAMS.EXNET_NAME]: exnetName
+        }
+
+        let response = await fetch(getQuestionsUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: `{
-                                "client_id": "${this.clientID}",
-                                "persistent_secret_key": "${this.secret_key}",
-                                "exnet_name": "${exnetName}"
-                             }`,
+          body: JSON.stringify(body)
         });
         return await response.json();
       } catch (error) {
@@ -575,8 +584,10 @@ export default {
       } else {
         // What to do if failed?
       }
+
       return response;
     },
+
     async StoreLastWorkingAnswer(exnetName) {
       try {
         let response = await this.getExnet(exnetName, false);
@@ -585,54 +596,48 @@ export default {
         // console.log(JSON.parse(exnetQuestionPack))
         exnetQuestionPack = JSON.parse(exnetQuestionPack);
 
-        let activeExNetQuestionPack =
-          exnetQuestionPack["activeExNetQuestionPack"];
-
+        let activeExNetQuestionPack = exnetQuestionPack["activeExNetQuestionPack"];
         let promptText = activeExNetQuestionPack["promptText"];
-
-        console.log(typeof promptText);
-
         promptText = [promptText, this.dataObject];
 
         activeExNetQuestionPack["promptText"] = promptText;
-
         exnetQuestionPack["activeExNetQuestionPack"] = activeExNetQuestionPack;
-
         exnetQuestionPack = JSON.stringify(exnetQuestionPack);
-        console.log("working answer data")
-        console.log(exnetQuestionPack)
+        // console.log("working answer data")
+        // console.log(exnetQuestionPack)
 
         let msgBody = {
-          client_id: this.clientID,
-          persistent_secret_key: this.secret_key,
-          exnet_name: exnetName,
+          [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
+          [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
+          [API_BODY_PARAMS.EXNET_NAME]: exnetName,
           working_answer_data: exnetQuestionPack,
         };
 
-        console.log("msgBody", msgBody);
+        // console.log("msgBody", msgBody);
         msgBody = JSON.stringify(msgBody);
-        // console.log(msgBody)
 
-        // let postResponse = await fetch(
-        //   "http://localhost:5000/store-working-answer",
-        //   {
-        //     method: "POST",
-        //     headers: {
-        //       "Content-Type": "application/json",
-        //     },
-        //     body: msgBody,
-        //   }
-        // );
+        let storeWorkingAnswerUrl = BASE_URL + API_ENDPOINTS.STORE_WORKING_ANSWER;
+        let postResponse = await fetch(
+          storeWorkingAnswerUrl,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: msgBody,
+          }
+        );
 
-        // if (!postResponse.ok) {
-        //   throw new Error(`HTTP error! status: ${postResponse.status}`);
-        // }
+        if (!postResponse.ok) {
+          throw new Error(`HTTP error! status: ${postResponse.status}`);
+        }
 
-        // return await postResponse.json();
+        return await postResponse.json();
       } catch (error) {
         console.log(error);
       }
     },
+
     async sendGetExnetAnswer(exnetName) {
       try {
         // FIXME: HTTP request here.
@@ -656,9 +661,8 @@ export default {
         console.log(error);
       }
     },
-    async sendGetStudentGrades(exnetName) {
-      console.log(this.jsonOutput, this.jsonOutput, 'this.jsonOutput)')
-      console.log(localStorage.getItem('userID'))
+    async sendGetFeedback(exnetName) {
+      // console.log(this.jsonOutput, this.jsonOutput, 'this.jsonOutput)')
       const params = {
         activeExNetQuestionPack: {
           promptText: [this.promptText, this.dataObject],
@@ -668,26 +672,25 @@ export default {
           statementElements: this.dataObject.statementElements
         },
         statementElements: this.dataObject.statementElements
-
       };
+
       try {
         // FIXME: Endpoint URL here
-        let response = await fetch("http://localhost:5000/get-student-grades", {
+        let getGradesUrl = BASE_URL + API_ENDPOINTS.GET_FEEDBACK;
+        let response = await fetch(getGradesUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
           body:
             JSON.stringify({
-              "student_id": this.userID,
-              "client_id": this.userID,
-              "persistent_secret_key": this.secret_key,
-              "exnet_name": exnetName,
+              [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
+              [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
+              [API_BODY_PARAMS.EXNET_NAME]: exnetName,
               // "ex_net": JSON.stringify({activeExNetQuestionPack: this.promptText, ...this.dataObject}) }
-              "ex_net": JSON.stringify(params),
+              "working_answer_data": JSON.stringify(params),
               // "ex_flow":JSON.stringify(params)
             },
-
             )
 
         })
@@ -696,8 +699,10 @@ export default {
       } catch (error) {
         console.log(`Failed to fetch ${exnetName}!`)
       }
-      print(JSON.stringify(params))
+
+      //console.log(JSON.stringify(params))
     },
+
     async getLastWorkingAnswer() {
       // 1. Send HTTP Request. Body needs client_id, persistent_secret_key, exnet_name using fetch
       let response = await this.sendGetExnetAnswer(this.selectedQuestion);
@@ -749,8 +754,8 @@ export default {
   async mounted() {
 
     // TODO remove following login bypass when backend communication is re-eatablished
-    sessionStorage.setItem('authStatus', 'authorized');
-    sessionStorage.setItem('secretKey', 'dummySecretKey');
+    // sessionStorage.setItem('authStatus', 'authorized');
+    // sessionStorage.setItem('secretKey', 'dummySecretKey');
 
     // Check if there is login status in session storage
     const storedAuthStatus = sessionStorage.getItem('authStatus');
@@ -759,19 +764,19 @@ export default {
       // If there is an authorized state in the session storage, login is no longer required.
       this.authorised = true;
       this.secret_key = sessionStorage.getItem('secretKey');
+      this.clientID = sessionStorage.getItem('clientID');
     } else {
       await this.logIn()
     }
 
     // TODO uncomment question fetching when backend communication is re-established
-    // if (this.authorised) {
-    //   await this.getQuestions();
-
-    //   if (!this.questions !== null) {
-    //     this.selectedQuestion = this.questions[0]
-    //     await this.getExnet(this.selectedQuestion, true)
-    //   }
-    // }
+    if (this.authorised) {
+      await this.getQuestions();
+      if (!this.questions !== null) {
+        this.selectedQuestion = this.questions[0]
+        await this.getExnet(this.selectedQuestion, true)
+      }
+    }
   },
 
 };
