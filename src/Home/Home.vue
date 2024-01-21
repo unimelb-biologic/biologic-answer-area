@@ -677,22 +677,21 @@ export default {
       try {
         // FIXME: Endpoint URL here
         let getGradesUrl = BASE_URL + API_ENDPOINTS.GET_FEEDBACK;
+        let body = {
+              [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
+              [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
+              [API_BODY_PARAMS.EXNET_NAME]: exnetName,
+              // "ex_net": JSON.stringify({activeExNetQuestionPack: this.promptText, ...this.dataObject}) }
+              "working_answer_data": params,
+              // "ex_flow":JSON.stringify(params)
+            };
+    
         let response = await fetch(getGradesUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body:
-            JSON.stringify({
-              [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
-              [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
-              [API_BODY_PARAMS.EXNET_NAME]: exnetName,
-              // "ex_net": JSON.stringify({activeExNetQuestionPack: this.promptText, ...this.dataObject}) }
-              "working_answer_data": JSON.stringify(params),
-              // "ex_flow":JSON.stringify(params)
-            },
-            )
-
+          body: JSON.stringify(body)
         })
         return await response.json()
 
