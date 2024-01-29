@@ -439,7 +439,6 @@ export default {
       let userID = window.prompt("Enter your user ID.", "9999999");
 
       //FIXME: will the client ID be hashed or plaintext???
-      this.clientID = userID;
       // console.log(this.clientID, '  this.clientID')
       // FIXME: remove this to stop hashing client ID.
       await this.digestMessage(userID).then((digestHex) => {
@@ -447,7 +446,7 @@ export default {
         this.userID = userID//save userID
       });
 
-
+      this.clientID = userID;
       try {
         // FIXME: Server URL here
         let login_url = BASE_URL + API_ENDPOINTS.LOGIN_ENDPOINT;
@@ -666,7 +665,7 @@ export default {
       const params = {
         activeExNetQuestionPack: {
           promptText: [this.promptText, this.dataObject],
-          ...this.dataObject,
+          //...this.dataObject,
           "exNetRelativePath": this.exNetRelativePath,
           "exNetName": exnetName,
           statementElements: this.dataObject.statementElements
@@ -676,7 +675,7 @@ export default {
 
       try {
         // FIXME: Endpoint URL here
-        let getGradesUrl = BASE_URL + API_ENDPOINTS.GET_FEEDBACK;
+        let getFeedbackUrl = BASE_URL + API_ENDPOINTS.GET_FEEDBACK;
         let body = {
               [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
               [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
@@ -686,7 +685,7 @@ export default {
               // "ex_flow":JSON.stringify(params)
             };
     
-        let response = await fetch(getGradesUrl, {
+        let response = await fetch(getFeedbackUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
