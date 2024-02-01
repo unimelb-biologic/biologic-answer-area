@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
     GET_QUESTIONS_LIST: 'list-available-exnet',
     GET_EXNET: 'get-exnet',
     STORE_WORKING_ANSWER: 'store-working-answer',
+    GET_LAST_WORKING_ANSWER: 'get-last-working-answer',
     GET_FEEDBACK :'get-exnet-feedback'
   }
 

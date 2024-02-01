@@ -54,12 +54,12 @@
                 <div class="displayQuery">
                   <h2 class="areaHeading">
                     Question:
-                    {{ this.exNetName }}
-                    <!-- <select @change="getLastWorkingAnswer" v-model="selectedQuestion">
+                    <!-- {{ this.exNetName }} -->
+                    <select @change="getLastWorkingAnswer" v-model="selectedQuestion">
                       <option v-for="item in questions" :value="item" :key="item">
                         {{ item.slice(0, -".data".length) }}
                       </option>
-                    </select> -->
+                    </select>
 
                     <!--div class="button-container">
                       <router-link to="/feedback" class="button-link">link to feedback</router-link>
@@ -145,7 +145,9 @@ import FileReader from "@/components/FileReader.vue";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import download from 'downloadjs';
-import {BASE_URL, API_ENDPOINTS, API_BODY_PARAMS} from '../config/constants'
+import {BASE_URL, API_ENDPOINTS, API_BODY_PARAMS} from '../config/constants';
+import { buildFeedbackRubricMap } from "../components/utils/common";
+import { computed } from 'vue';
 
 export default {
   name: "App",
@@ -178,7 +180,6 @@ export default {
       jsonData: [],
       dataObject: {},
       feedback: null,
-
       sharedData: "" // awful solution to passing information during drag!
     };
   },
@@ -212,19 +213,18 @@ export default {
       this.jsonOutput = this.dataObject;
 
       let response = await this.StoreLastWorkingAnswer(this.selectedQuestion);
-      // console.log("Submission response:", response);
 
       if (response["success"] === true) {
         window.alert("Submission successful!");
 
         this.sendGetFeedback(this.selectedQuestion).then(response => {
-            this.feedback = response.client_feedback
+            this.feedback = response.client_feedback;
         })
       }
     },
 
     click_feedback() {
-      const { gradingStatus, gradingInfo, overallScore } = JSON.parse(this.feedback);
+      const { gradingStatus, gradingInfo, overallScore } = this.feedback;
 
       const gradingInfoStr = gradingInfo.map(info => {
         return `
@@ -437,10 +437,6 @@ export default {
     // Sends the login HTTP request to the server.
     async sendLoginRequest() {
       let userID = window.prompt("Enter your user ID.", "9999999");
-
-      //FIXME: will the client ID be hashed or plaintext???
-      // console.log(this.clientID, '  this.clientID')
-      // FIXME: remove this to stop hashing client ID.
       await this.digestMessage(userID).then((digestHex) => {
         userID = digestHex;
         this.userID = userID//save userID
@@ -448,7 +444,6 @@ export default {
 
       this.clientID = userID;
       try {
-        // FIXME: Server URL here
         let login_url = BASE_URL + API_ENDPOINTS.LOGIN_ENDPOINT;
         let response = await fetch(login_url, {
           method: "POST",
@@ -469,7 +464,7 @@ export default {
       if (response && response["success"] === true) {
         this.secret_key = response["persistent_secret_key"]
         this.authorised = true
-        // console.log('userlogin', response)
+
         // Store authorization status to session storage
         sessionStorage.setItem('authStatus', 'authorized');
         sessionStorage.setItem('secretKey', this.secret_key);
@@ -485,7 +480,6 @@ export default {
       try {
         // FIXME: HTTP request here.
         let questionsListUrl = BASE_URL + API_ENDPOINTS.GET_QUESTIONS_LIST;
-        // console.log("list exnet", this.clientID);
         let body = {
             [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
             [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
@@ -509,31 +503,9 @@ export default {
     },
 
     async getQuestions() {
-      // TODO: re-enable this
       let response = await this.sendGetQuestionsListRequest();
-      // console.log(response);
-
-      // TODO: Remove sample server response.
-      // let response = {
-      //     "success": true,
-      //     "available_exnets": [
-      //         "CAL_Q1_question.data",
-      //         "CAL_Q2_question.data",
-      //         "CAL_Q3_question.data",
-      //         "fur_question.data",
-      //         "hemophilia_question.data",
-      //         "leucine_question.data",
-      //         "oocyte_question.data",
-      //         "pcr_Q1_question.data",
-      //         "pcr_Q2_question.data",
-      //         "pcr_Q3_question.data",
-      //         "promoter_question.data",
-      //         "sky_question.data"
-      //     ]
-      // }
 
       if (response && response["success"] === true) {
-        // Successful response code here.
         this.questions = response.available_exnets;
       } else {
         console.error("Failed to fetch available questions");
@@ -590,7 +562,7 @@ export default {
     async StoreLastWorkingAnswer(exnetName) {
       try {
         let response = await this.getExnet(exnetName, false);
-        console.log("Get exnet response\n", response);
+        // console.log("Get exnet response\n", response);
         let exnetQuestionPack = response["exnet_working_answer_json"];
         // console.log(JSON.parse(exnetQuestionPack))
         exnetQuestionPack = JSON.parse(exnetQuestionPack);
@@ -638,28 +610,34 @@ export default {
     },
 
     async sendGetExnetAnswer(exnetName) {
+
       try {
         // FIXME: HTTP request here.
         // Is this GET or POST?
-        let response = await fetch(
-          "http://localhost:5000/get-last-working-answer",
+
+        let getLastWorkingAnswerUrl = BASE_URL + API_ENDPOINTS.GET_LAST_WORKING_ANSWER;
+        let bodyParams = {
+          [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
+          [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
+          [API_BODY_PARAMS.EXNET_NAME]: exnetName,
+        }
+
+        let response = await fetch(getLastWorkingAnswerUrl,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: `{
-                        "client_id": "${this.clientID}",
-                        "persistent_secret_key": "${this.secret_key}",
-                        "exnet_name": "${exnetName}"
-                      }`,
+            body: JSON.stringify(bodyParams)
           }
         );
         return await response.json();
       } catch (error) {
         console.log(error);
       }
+
     },
+
     async sendGetFeedback(exnetName) {
       // console.log(this.jsonOutput, this.jsonOutput, 'this.jsonOutput)')
       const params = {
@@ -702,50 +680,44 @@ export default {
     },
 
     async getLastWorkingAnswer() {
-      // 1. Send HTTP Request. Body needs client_id, persistent_secret_key, exnet_name using fetch
       let response = await this.sendGetExnetAnswer(this.selectedQuestion);
-      console.log(response);
-      console.log(response["succcess"]);
-      // 2. confirm server responds with "success" : true
+
       // FIX ME: Success spell is wrong!
-      if (response["succcess"] === true) {
-        console.log("ddas");
-        let last_working_answer_data = await JSON.parse(
-          response["last_working_answer_data"]
-        );
-        // 3. activeExNetQuestionPack is from "last_working_answer_data" entry.
-        let activeExNetQuestionPack =
-          last_working_answer_data["activeExNetQuestionPack"];
-        console.log("questionpack", activeExNetQuestionPack);
+      if (response["succcess"]) {
+        let lastWorkingAnswerData = await JSON.parse(response["last_working_answer_data"]);
+        let activeExNetQuestionPack = lastWorkingAnswerData["activeExNetQuestionPack"];
+
         // 4. get the query entry via activeExNetQuestionPack > promptText
         let promptText = activeExNetQuestionPack["promptText"];
-        console.log("promptText", promptText);
-        console.log(typeof promptText);
+ 
         // 5. Check promptText is a LIST and not just a string. If it is a string - there is no information
         // that has been stored. Display the question similar to the getExnet above.
         await this.getExnet(this.selectedQuestion, true);
         if (typeof promptText === "string") {
-          console.log(promptText);
+          //console.log(promptText);
         }
+
         // 6. If promptText is a LIST, LIST[0] is the query itself - display directly.
         // 7. LIST[1] contains all the parameters passed when saving. Extract entries and replace those in App.vue.
         // let data = LIST[1];
         // this.offSetX = data["offSetX"]
         else if (typeof promptText === "object") {
           let data = promptText[1];
-          console.log("data", typeof data);
           this.offsetX = parseInt(data["offsetX"]);
           this.offsetY = parseInt(data["offsetY"]);
           this.statementElements = data["statementElements"];
-          this.$refs.workspace.loadPreviousAnswer(data);
 
-          console.log(data);
+          // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
+
+          this.$refs.workspace.loadPreviousAnswer(data);
         }
+
       } else {
         await this.getExnet(this.selectedQuestion, true);
       }
 
-      // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
+      // TODO
+      this.feedback = null;
     },
   },
 
@@ -774,6 +746,22 @@ export default {
         this.selectedQuestion = this.questions[0]
         await this.getExnet(this.selectedQuestion, true)
       }
+    }
+  },
+
+  computed: {
+    feedbackRubricMap() {
+      return buildFeedbackRubricMap(this.feedback)
+    }
+  },
+
+  provide() {
+    return {
+      feedbackRubricMap: computed(() => function() { 
+        console.log("inside provide map");
+        return this.feedbackRubricMap;
+        }
+      )
     }
   },
 

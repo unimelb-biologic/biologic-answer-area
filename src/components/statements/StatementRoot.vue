@@ -1,6 +1,7 @@
 <template>
-  <div class="StatementRoot"
-  >
+  <div class="StatementRoot">
+    <FeedbackRubric :isVisible=showFeedback :exnetID=id />
+
     <div class="content-wrapper">
       <div class="iconContainer">
         <button v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement" class="statementButton">
@@ -34,6 +35,14 @@
         alt="DuplicateStatement"
 
         />
+      </button>
+
+      <button v-if="showToggle" @click="showFeedback = !showFeedback" class="statementButton">
+          <img
+            src="../../assets/feedback-rubric.png"
+            alt="FeedbackStatement"
+            width="20"
+          />
       </button>
 
     </div>
@@ -106,8 +115,13 @@
 </template>
 
 <script>
-export default {
+import FeedbackRubric from '../FeedbackRubric.vue';
+
+export default {  
   name: "StatementRoot",
+  components: {
+    FeedbackRubric
+  },
   emits: ["user-choice-changed","duplicate-statement","toggle-showPopup-fromstatementroot","toggle-collapsed-statement-root"],
   props: {
     statementData: Object,
@@ -127,6 +141,7 @@ export default {
       answeredData: null,
       hide_collapsed : false,
       hide_showPopup : true,
+      showFeedback: false
     };
   },
   computed: {
