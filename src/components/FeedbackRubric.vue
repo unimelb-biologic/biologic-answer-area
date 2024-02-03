@@ -3,7 +3,11 @@
     <div>
         <div v-if="isVisible" class="tooltips active feedback-info">
             <span class="" v-if="gradingInfo">
-                {{ gradingInfo.feedback }}
+                {{ gradingInfo.feedback ? gradingInfo.feedback : "No Feedback" }}
+            </span>
+
+            <span v-if="!gradingInfo">
+              No feedback provided
             </span>
         </div>
     </div>
@@ -33,25 +37,15 @@ export default {
   },
 
   mounted() {
-    if (this.feedbackRubricMap[this.exnetID] != undefined) {
-        this.gradingInfo = this.feedbackRubricMap[this.exnetID] 
-    }
 
-    this.gradingInfo = {
-      "rubricScore": 0,
-      "maxRubricScore": "1",
-      "feedback": "No Sorry try again. Remember the GOLDEN RULE!",
-      "academicNote": null,
-      "rubricStatus": "GC",
-      "rubricKey": "-lower to higher-",
-      "exnetID": "997293734303811",
-      "statementIdentifier": "297731945677955",
-      "alias": "water-flows-from-choose-direction-water-potential"
-    }
   },
 
   watch: {
-
+    isVisible() {
+      if (this.isVisible && this.feedbackRubricMap && this.feedbackRubricMap[this.exnetID] != undefined) {
+        this.gradingInfo = this.feedbackRubricMap[this.exnetID] 
+      }
+    }
   }
 
 };

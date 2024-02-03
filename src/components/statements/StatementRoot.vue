@@ -37,7 +37,7 @@
         />
       </button>
 
-      <button v-if="showToggle" @click="showFeedback = !showFeedback" class="statementButton">
+      <button v-if="showToggle && isFeedbackAvailable" @click="showFeedback = !showFeedback" class="statementButton">
           <img
             src="../../assets/feedback-rubric.png"
             alt="FeedbackStatement"
@@ -131,6 +131,7 @@ export default {
       default: true
     }
   },
+  inject: ['isFeedbackAvailable'],
   data() {
     return {
       statementType: this.statementData.statementType,

@@ -147,7 +147,7 @@ import "splitpanes/dist/splitpanes.css";
 import download from 'downloadjs';
 import {BASE_URL, API_ENDPOINTS, API_BODY_PARAMS} from '../config/constants';
 import { buildFeedbackRubricMap } from "../components/utils/common";
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 export default {
   name: "App",
@@ -180,8 +180,19 @@ export default {
       jsonData: [],
       dataObject: {},
       feedback: null,
+      isFeedbackAvailable: false,
+      feedbackRubricMap: ref({}),
       sharedData: "" // awful solution to passing information during drag!
     };
+  },
+  
+  provide() {
+    return {
+      feedbackRubricMap: computed(() => {
+       return this.feedbackRubricMap.value;
+      }),
+      isFeedbackAvailable: computed(() => this.isFeedbackAvailable),
+    }
   },
 
   components: {
@@ -215,11 +226,9 @@ export default {
       let response = await this.StoreLastWorkingAnswer(this.selectedQuestion);
 
       if (response["success"] === true) {
+        await this.sendGetFeedback(this.selectedQuestion);
         window.alert("Submission successful!");
 
-        this.sendGetFeedback(this.selectedQuestion).then(response => {
-            this.feedback = response.client_feedback;
-        })
       }
     },
 
@@ -615,23 +624,23 @@ export default {
         // FIXME: HTTP request here.
         // Is this GET or POST?
 
-        let getLastWorkingAnswerUrl = BASE_URL + API_ENDPOINTS.GET_LAST_WORKING_ANSWER;
-        let bodyParams = {
-          [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
-          [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
-          [API_BODY_PARAMS.EXNET_NAME]: exnetName,
-        }
+      let getLastWorkingAnswerUrl = BASE_URL + API_ENDPOINTS.GET_LAST_WORKING_ANSWER;
+      let bodyParams = {
+      [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
+      [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
+      [API_BODY_PARAMS.EXNET_NAME]: exnetName,
+      }
 
-        let response = await fetch(getLastWorkingAnswerUrl,
-          {
+      let response = await fetch(getLastWorkingAnswerUrl,
+      {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(bodyParams)
-          }
+      headers: {
+      "Content-Type": "application/json",
+      },
+      body: JSON.stringify(bodyParams)
+      }
         );
-        return await response.json();
+      return await response.json();
       } catch (error) {
         console.log(error);
       }
@@ -670,7 +679,8 @@ export default {
           },
           body: JSON.stringify(body)
         })
-        return await response.json()
+        const data = await response.json();
+        this.updateFeedback(data.client_feedback);
 
       } catch (error) {
         console.log(`Failed to fetch ${exnetName}!`)
@@ -680,45 +690,49 @@ export default {
     },
 
     async getLastWorkingAnswer() {
+      this.updateFeedback(null);
       let response = await this.sendGetExnetAnswer(this.selectedQuestion);
 
       // FIX ME: Success spell is wrong!
       if (response["succcess"]) {
-        let lastWorkingAnswerData = await JSON.parse(response["last_working_answer_data"]);
-        let activeExNetQuestionPack = lastWorkingAnswerData["activeExNetQuestionPack"];
+      let lastWorkingAnswerData = await JSON.parse(response["last_working_answer_data"]);
+      let activeExNetQuestionPack = lastWorkingAnswerData["activeExNetQuestionPack"];
 
-        // 4. get the query entry via activeExNetQuestionPack > promptText
-        let promptText = activeExNetQuestionPack["promptText"];
+      // 4. get the query entry via activeExNetQuestionPack > promptText
+      let promptText = activeExNetQuestionPack["promptText"];
  
-        // 5. Check promptText is a LIST and not just a string. If it is a string - there is no information
-        // that has been stored. Display the question similar to the getExnet above.
-        await this.getExnet(this.selectedQuestion, true);
-        if (typeof promptText === "string") {
-          //console.log(promptText);
-        }
+      // 5. Check promptText is a LIST and not just a string. If it is a string - there is no information
+      // that has been stored. Display the question similar to the getExnet above.
+      await this.getExnet(this.selectedQuestion, true);
+      if (typeof promptText === "string") {
+      //console.log(promptText);
+      }
 
-        // 6. If promptText is a LIST, LIST[0] is the query itself - display directly.
-        // 7. LIST[1] contains all the parameters passed when saving. Extract entries and replace those in App.vue.
-        // let data = LIST[1];
-        // this.offSetX = data["offSetX"]
-        else if (typeof promptText === "object") {
-          let data = promptText[1];
-          this.offsetX = parseInt(data["offsetX"]);
-          this.offsetY = parseInt(data["offsetY"]);
-          this.statementElements = data["statementElements"];
+      // 6. If promptText is a LIST, LIST[0] is the query itself - display directly.
+      // 7. LIST[1] contains all the parameters passed when saving. Extract entries and replace those in App.vue.
+      // let data = LIST[1];
+      // this.offSetX = data["offSetX"]
+      else if (typeof promptText === "object") {
+      let data = promptText[1];
+      this.offsetX = parseInt(data["offsetX"]);
+      this.offsetY = parseInt(data["offsetY"]);
+      this.statementElements = data["statementElements"];
 
-          // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
+      // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
 
-          this.$refs.workspace.loadPreviousAnswer(data);
-        }
+      this.$refs.workspace.loadPreviousAnswer(data);
+      }
 
       } else {
         await this.getExnet(this.selectedQuestion, true);
       }
-
-      // TODO
-      this.feedback = null;
     },
+
+    updateFeedback(feedback) {
+      this.feedbackRubricMap.value = buildFeedbackRubricMap(feedback);
+      this.feedback = feedback;
+      this.isFeedbackAvailable = feedback ? true : false;
+    }
   },
 
   async mounted() {
@@ -746,22 +760,6 @@ export default {
         this.selectedQuestion = this.questions[0]
         await this.getExnet(this.selectedQuestion, true)
       }
-    }
-  },
-
-  computed: {
-    feedbackRubricMap() {
-      return buildFeedbackRubricMap(this.feedback)
-    }
-  },
-
-  provide() {
-    return {
-      feedbackRubricMap: computed(() => function() { 
-        console.log("inside provide map");
-        return this.feedbackRubricMap;
-        }
-      )
     }
   },
 
