@@ -680,7 +680,7 @@ export default {
         this.authorised = true;
         this.secret_key = sessionStorage.getItem('secretKey');
         this.clientID = sessionStorage.getItem('clientID');
-        this.userID = sessionStorage.getItem('userId');
+        this.userID = sessionStorage.getItem('userID');
       } else {
         await this.logIn()
       }

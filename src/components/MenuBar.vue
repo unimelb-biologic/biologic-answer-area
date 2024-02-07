@@ -1,21 +1,21 @@
 <template>
 
-    <div  style="display:flex;flex-direction: row;" > 
-        <div v-if="show">
+    <div  style="position: relative;display:flex;flex-direction: row; justify-content: space-between;" > 
+        <div v-if="show" style="display:flex;flex-direction: row;">
             <div>
                 <file-reader :title="'Browse ExNet File:'" @read-file="onExNetReadFile"></file-reader>
             </div>
             <div>
                 <div style="display:flex; flex-direction:row; align-items: center;">
                 <h3 style="padding-right: 10px;"><label for="save-file">Save ExNet File: </label></h3>
-                Under constructionn
                 <button id="save-file" type=" button" @click="onDownloadExNet">Save ExNet</button>
                 </div>
             </div>
         </div>
 
-        <div>
-            <span> Hi {{userID}}</span>
+        <div class="right_menu">
+            <h3> Student:  {{userID}}</h3>
+
             <button @click="show = !show"> Show offline features</button>
         </div>
     </div>
@@ -58,4 +58,15 @@ export default {
 </script>
 
 <style scoped>
+
+.right_menu {
+    position: absolute;
+    right: 16px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    height: 50px;
+ }
+
 </style>

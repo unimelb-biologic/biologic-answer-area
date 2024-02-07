@@ -1,16 +1,22 @@
 <template>
 
     <div>
-        <div v-if="isVisible" class="tooltips active feedback-info" :class="getGradeColor">
-            <span v-if="gradingInfo">
-                {{ gradingInfo.feedback ? gradingInfo.feedback + " - " + getScore : "No Feedback" }}
-            </span>
 
-            <span v-if="!gradingInfo">
-              No feedback provided
-            </span>
+      <div v-if="isVisible" class="tooltips active feedback-info" :class="getGradeColor">
+          <img v-if = "gradingInfo" class="feedback-icon" :src="getFeedbackIcon"/>
+
+          <span v-if="gradingInfo">
+              {{ gradingInfo.feedback ? gradingInfo.feedback + " - " + getScore : "No Feedback" }}
+          </span>
+
+          <span v-if="!gradingInfo">
+            No feedback provided
+          </span>
+          
         </div>
-    </div>
+
+      </div>
+
 
 </template>
 
@@ -68,7 +74,27 @@ export default {
         return '0/0';
 
       return this.gradingInfo.rubricScore + "/" + this.gradingInfo.maxRubricScore;
+    },
+
+    getFeedbackIcon() {
+
+      if (!this.gradingInfo)
+        return '';
+
+      switch (this.gradingInfo.rubricStatus) {
+        case 'GC':
+          return 'src/assets/correct_icon.png'
+        case 'GIC':
+          return 'src/assets/wrong_icon.png'
+        case 'GPC':
+          return ''  
+        default:
+          break
+      }
+
+      return '';
     }
+  
   },
 
   watch: {
@@ -87,23 +113,30 @@ export default {
 .feedback-info {
   position: absolute;
   /* background-color: lightskyblue; */
-  padding: 16px;
+  padding: 24px;
   color: black;
   bottom: 100%;
   height: fit-content;
   margin-bottom: 16px;
 }
 
+.feedback-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  height: 24px;
+}
+
 .correct {
-  background-color: greenyellow;
+  background-color: lightgreen;
 }
 
 .wrong {
-  background-color: red;
+  background-color: lightcoral;
 }
 
 .partial {
-  background-color: lightgreen;
+  background-color: lightyellow;
 }
 
 .default {
