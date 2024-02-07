@@ -13,19 +13,11 @@
 
     <splitpanes v-if="authorised" class="mainContainer" horizontal>
       <pane max-size="10" style="height: 50px;" min-size="5">
-        <div style="display:flex;flex-direction: row; ">
-          <div>
-            <file-reader :title="'Browse ExNet File:'" @read-file="onExNetReadFile"></file-reader>
-          </div>
-          <div>
-            <div style="display:flex; flex-direction:row; align-items: center;">
-              <h3 style="padding-right: 10px;"><label for="save-file">Save ExNet File: </label></h3>
-              Under constructionn
-              <button id="save-file" type=" button" @click="onDownloadExNet">Save ExNet</button>
-
-            </div>
-          </div>
-        </div>
+        <MenuBar 
+          :userID = "userID"
+          @onDownloadExNet = "onDownloadExNet"
+          @setCurrentExNet = "setCurrentExNet"
+        />
       </pane>
       <pane min-size="5">
         <Splitpanes>
@@ -104,7 +96,6 @@
                     @update-answer-area-content="handleUpdateAnswerContent" 
                     @statement-used="handleStatementUsed"
                     @enable-area="(n) => toggleAnswerArea(n)" 
-                    @String_feedback="click_feedback" 
                     @update-shared-data="updateSharedData"
                   />
                 </div>
@@ -142,11 +133,12 @@ import ConnectorArea from "@/components/ConnectorArea.vue";
 import AnswerArea from "@/components/AnswerArea.vue";
 import AnswerTextGeneratorArea from "@/components/AnswerTextGeneratorArea.vue";
 import FileReader from "@/components/FileReader.vue";
+import MenuBar from "@/components/MenuBar.vue";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import download from 'downloadjs';
-import {BASE_URL, API_ENDPOINTS, API_BODY_PARAMS} from '../config/constants';
-import { buildFeedbackRubricMap } from "../components/utils/common";
+import {BASE_URL, API_ENDPOINTS, API_BODY_PARAMS, DEFAULT_USER_ID} from '../config/constants';
+import { buildFeedbackRubricMap } from "@/utils/common";
 import { computed, ref } from 'vue';
 
 export default {
@@ -203,7 +195,8 @@ export default {
     AnswerTextGeneratorArea,
     Splitpanes,
     Pane,
-    FileReader
+    FileReader,
+    MenuBar,
   },
 
   created() {
@@ -229,72 +222,6 @@ export default {
         await this.sendGetFeedback(this.selectedQuestion);
         window.alert("Submission successful!");
 
-      }
-    },
-
-    click_feedback() {
-      const { gradingStatus, gradingInfo, overallScore } = this.feedback;
-
-      const gradingInfoStr = gradingInfo.map(info => {
-        return `
-        <div>
-          <strong>Score:</strong> ${info.rubricScore},
-          <strong>Feedback:</strong> ${info.feedback},
-          <strong>Academic Note:</strong> ${info.academicNote},
-          <strong>Rubric Key:</strong> ${info.rubricKey},
-          <strong>Rubric Status:</strong> ${info.rubricStatus},
-          <strong>ExnetID:</strong> ${info.exnetID},
-          <strong>Statement Identifier:</strong> ${info.statementIdentifier},
-        </div>
-    `;
-      }).join('\n');
-      const str = `
-    <div>
-      <strong>gradingStatus:</strong> ${gradingStatus},
-    </div>
-    <div>  
-      <strong>gradingInfo:</strong> ${gradingInfoStr},
-    </div>
-    <br> 
-    <div style="font-weight: bold; color: red; font-size: 16px;">
-      <strong>overallScore:</strong> ${overallScore}
-    </div>
-  `;
-      const popup = window.open('', 'Custom Popup', 'width=600,height=400');
-      if (popup) {
-        popup.document.write(`
-      <html>
-      <head>
-        <style>
-          h7{
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-          }
-          body {
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-          }
-          div {
-            margin: 5px 0;
-          }
-        </style>
-      </head>
-      <strong><h7>GradingStatus: Represents the overall grading status.<br>
-          C : indicates that the marking has been completed. <br>
-          IC : indicates that the marking has not been completed.</h7><strong>
-      <br><br>
-      <strong><h7>rubricStatus: Represents the status of the grading for this rubric item. Possible values:<br>
-          GC : Indicates that the Auto-grader marked this as correct.<br>
-          GIC : Indicates that the Auto-grader marked this as incorrect.<br>
-          GPC : Indicates that the Auto-grader marked this as partially correct.<br>
-          GNC : Indicates that the Auto-grader could not mark this.<br>
-          MG : Indicates that this has been manually graded by an educator. </h7><strong>
-      <br><br>
-      <body>${str}</body>
-      </html>
-    `);
-      } else {
-        alert('Error');
       }
     },
 
@@ -374,6 +301,7 @@ export default {
     // Handle ExNetJson from FileREader
     onExNetReadFile(exNetRawData) 
     {
+      console.log(exNetRawData);
       const exnetWorkingAnswerJson = JSON.parse(exNetRawData);
       this.setCurrentExNet(exnetWorkingAnswerJson, true);
     },
@@ -444,11 +372,12 @@ export default {
     },
 
     // Sends the login HTTP request to the server.
-    async sendLoginRequest() {
-      let userID = window.prompt("Enter your user ID.", "9999999");
+    async sendLoginRequest(user_name = DEFAULT_USER_ID) {
+      let userID = window.prompt("Enter your user ID.", user_name);
+      this.userID = userID;
       await this.digestMessage(userID).then((digestHex) => {
         userID = digestHex;
-        this.userID = userID//save userID
+        // this.userID = userID//save userID
       });
 
       this.clientID = userID;
@@ -468,8 +397,8 @@ export default {
     },
 
     // Sends login request and processes returned promise.
-    async logIn() {
-      let response = await this.sendLoginRequest()
+    async logIn(userId) {
+      let response = await this.sendLoginRequest(userId)
       if (response && response["success"] === true) {
         this.secret_key = response["persistent_secret_key"]
         this.authorised = true
@@ -478,6 +407,7 @@ export default {
         sessionStorage.setItem('authStatus', 'authorized');
         sessionStorage.setItem('secretKey', this.secret_key);
         sessionStorage.setItem('clientID', this.clientID);
+        sessionStorage.setItem('userID', this.userID);
 
         window.alert("Successfully authorised!")
       } else {
@@ -691,6 +621,8 @@ export default {
 
     async getLastWorkingAnswer() {
       this.updateFeedback(null);
+
+      // TODO: check if this call is required, as we all already getting exnet on changing question
       let response = await this.sendGetExnetAnswer(this.selectedQuestion);
 
       // FIX ME: Success spell is wrong!
@@ -737,28 +669,32 @@ export default {
 
   async mounted() {
 
-    // TODO remove following login bypass when backend communication is re-eatablished
-    // sessionStorage.setItem('authStatus', 'authorized');
-    // sessionStorage.setItem('secretKey', 'dummySecretKey');
-
-    // Check if there is login status in session storage
-    const storedAuthStatus = sessionStorage.getItem('authStatus');
-
-    if (storedAuthStatus === 'authorized') {
-      // If there is an authorized state in the session storage, login is no longer required.
-      this.authorised = true;
-      this.secret_key = sessionStorage.getItem('secretKey');
-      this.clientID = sessionStorage.getItem('clientID');
+    const urlParams = this.$route.query;
+    if (urlParams.userId) {
+      await this.logIn(urlParams.userId);
     } else {
-      await this.logIn()
+      const storedAuthStatus = sessionStorage.getItem('authStatus');
+
+      if (storedAuthStatus === 'authorized') {
+        // If there is an authorized state in the session storage, login is no longer required.
+        this.authorised = true;
+        this.secret_key = sessionStorage.getItem('secretKey');
+        this.clientID = sessionStorage.getItem('clientID');
+        this.userID = sessionStorage.getItem('userId');
+      } else {
+        await this.logIn()
+      }
     }
 
-    // TODO uncomment question fetching when backend communication is re-established
     if (this.authorised) {
       await this.getQuestions();
+
       if (!this.questions !== null) {
-        this.selectedQuestion = this.questions[0]
-        await this.getExnet(this.selectedQuestion, true)
+
+        this.selectedQuestion = urlParams.exnetName ? urlParams.exnetName : this.questions[0];
+        await this.getExnet(this.selectedQuestion, true);
+        await this.getLastWorkingAnswer();
+
       }
     }
   },

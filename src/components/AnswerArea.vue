@@ -2,10 +2,7 @@
   <div id="submitBtn">
     <button @click="convertToJson">Submit</button>
   </div>
-  <div id="submitBtn">
-    <button @click="feedback_re">Feedback</button>
-  </div>
-  <div id="showDataStructuresButton">
+  <div id="showDataStructuresButton" v-if="$route.query.isDev">
     <button @click="toggleShowDataStructures">show data structures</button>
   </div>
   <div v-if="showDataStructures" class="statement-dump"> <pre>
@@ -157,9 +154,6 @@ export default {
   methods: {
     updateSharedData(newValue) {
       this.$emit("update-shared-data",newValue);
-    },
-    feedback_re(){
-      this.$emit("String_feedback");
     },
     toggleShowDataStructures(){
       this.showDataStructures = !this.showDataStructures;
