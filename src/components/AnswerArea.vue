@@ -2,7 +2,7 @@
   <div id="submitBtn">
     <button @click="convertToJson">Submit</button>
   </div>
-  <div id="showDataStructuresButton" v-if="$route.query.isDev">
+  <div id="showDataStructuresButton" v-if="isDev">
     <button @click="toggleShowDataStructures">show data structures</button>
   </div>
   <div v-if="showDataStructures" class="statement-dump"> <pre>
@@ -148,6 +148,9 @@ export default {
     },
     prettifiedRootStatementIDs_Dump(){
       return "-----------this.rootStatementID_set--------------\n"+JSON.stringify(Array.from(this.rootStatementID_set),null,4);
+    },
+    isDev() {
+      return this.$route.query.isDev;
     }
   },
 

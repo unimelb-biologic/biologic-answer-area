@@ -38,6 +38,10 @@ export default {
     }, 
     exnetID: {
       type: Number
+    },
+    isConnector: {
+      type: Boolean,
+      default: false
     }
   },
   inject: ['feedbackRubricMap'],
