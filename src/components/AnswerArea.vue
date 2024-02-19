@@ -197,6 +197,7 @@ export default {
       const connectorID = info[0];  // this is the connectorID of the connector that was dropped on.
       const statementID = info[1];
       const statementContent = info[2];
+      const statementIdentifier = this.allStatements[statementID]?.statementIdentifier;
 
       const statementDropped = this.allStatements[statementID];
       const statementOldParent = statementDropped["parent"];
@@ -220,10 +221,14 @@ export default {
           this.allConnectors[statementOldParent]["leftID"] = undefined;
           this.allConnectors[statementOldParent]["leftType"] = undefined;
           this.allConnectors[statementOldParent]["leftContent"] = undefined;
+          this.allConnectors[statementOldParent]["leftStatementIdentifier"] = undefined;
+
         } else if (statementOldSide === "right") {
           this.allConnectors[statementOldParent]["rightID"] = undefined;
           this.allConnectors[statementOldParent]["rightType"] = undefined;
           this.allConnectors[statementOldParent]["rightContent"] = undefined;
+          this.allConnectors[statementOldParent]["rightStatementIdentifier"] = undefined;
+
         } else {
           console.error();
         }
@@ -232,6 +237,7 @@ export default {
       this.allConnectors[connectorID]["leftID"] = statementID;
       this.allConnectors[connectorID]["leftType"] = "statement";
       this.allConnectors[connectorID]["leftContent"] = statementContent;
+      this.allConnectors[connectorID]["leftStatementIdentifier"] = statementIdentifier;
     },
 
     // If a statement is dropped on the right side of a
@@ -240,6 +246,7 @@ export default {
       const connectorID = info[0];  // this is the connectorID of the connector that was dropped on.
       const statementID = info[1];
       const statementContent = info[2];
+      const statementIdentifier = this.allStatements[statementID]?.statementIdentifier;
 
       const statementDropped = this.allStatements[statementID];
       const statementOldParent = statementDropped["parent"];
@@ -263,10 +270,15 @@ export default {
           this.allConnectors[statementOldParent]["leftID"] = undefined;
           this.allConnectors[statementOldParent]["leftType"] = undefined;
           this.allConnectors[statementOldParent]["leftContent"] = undefined;
+          this.allConnectors[statementOldParent]["leftStatementIdentifier"] = undefined;
+
+
         } else if (statementOldSide === "right") {
           this.allConnectors[statementOldParent]["rightID"] = undefined;
           this.allConnectors[statementOldParent]["rightType"] = undefined;
           this.allConnectors[statementOldParent]["rightContent"] = undefined;
+          this.allConnectors[statementOldParent]["rightStatementIdentifier"] = undefined;
+
         } else {
           console.error();
         }
@@ -275,6 +287,8 @@ export default {
       this.allConnectors[connectorID]["rightID"] = statementID;
       this.allConnectors[connectorID]["rightType"] = "statement";
       this.allConnectors[connectorID]["rightContent"] = statementContent;
+      this.allConnectors[connectorID]["rightSatementIdentifier"] = statementIdentifier;
+
     },
 
     setDraggedItem(value) {
@@ -350,9 +364,11 @@ export default {
         this.allConnectors[droppedConnectorID]["leftID"] = undefined;
         this.allConnectors[droppedConnectorID]["leftType"] = undefined;
         this.allConnectors[droppedConnectorID]["leftContent"] = undefined;
+        this.allConnectors[droppedConnectorID]["leftStatementIdentifier"] = undefined;
         this.allConnectors[droppedConnectorID]["rightID"] = undefined;
         this.allConnectors[droppedConnectorID]["rightType"] = undefined;
         this.allConnectors[droppedConnectorID]["rightContent"] = undefined;
+        this.allConnectors[droppedConnectorID]["rightStatementIdentifier"] = undefined;
         this.allConnectors[droppedConnectorID]["clickCount"] = 0;
         this.allConnectors[droppedConnectorID]["orientation"] = 'row';
       } else if (data.parentID === -1) {
@@ -372,12 +388,14 @@ export default {
           this.allConnectors[data.parentID]["leftID"] = undefined;
           this.allConnectors[data.parentID]["leftType"] = undefined;
           this.allConnectors[data.parentID]["leftContent"] = undefined;
+          this.allConnectors[data.parentID]["leftStatementIdentifier"] = undefined;
         } else if (
           this.allConnectors[data.parentID]["rightID"] === droppedConnectorID
         ) {
           this.allConnectors[data.parentID]["rightID"] = undefined;
           this.allConnectors[data.parentID]["rightType"] = undefined;
           this.allConnectors[data.parentID]["rightContent"] = undefined;
+          this.allConnectors[data.parentID]["rightStatementIdentifier"] = undefined;
         } else {
           console.error(
             "Something went wrong! The logic of connector to connector is wrong!!"
@@ -423,9 +441,11 @@ export default {
         this.allConnectors[droppedConnectorID]["leftID"] = undefined;
         this.allConnectors[droppedConnectorID]["leftType"] = undefined;
         this.allConnectors[droppedConnectorID]["leftContent"] = undefined;
+        this.allConnectors[droppedConnectorID]["leftStatementIdentifier"] = undefined;
         this.allConnectors[droppedConnectorID]["rightID"] = undefined;
         this.allConnectors[droppedConnectorID]["rightType"] = undefined;
         this.allConnectors[droppedConnectorID]["rightContent"] = undefined;
+        this.allConnectors[droppedConnectorID]["rightStatementIdentifier"] = undefined;
         this.allConnectors[droppedConnectorID]["clickCount"] = 0;
         this.allConnectors[droppedConnectorID]["orientation"] = 'row';
       } else if (data.parentID === -1) {
@@ -443,12 +463,14 @@ export default {
           this.allConnectors[data.parentID]["leftID"] = undefined;
           this.allConnectors[data.parentID]["leftType"] = undefined;
           this.allConnectors[data.parentID]["leftContent"] = undefined;
+          this.allConnectors[data.parentID]["leftStatementIdentifier"] = undefined;
         } else if (
           this.allConnectors[data.parentID]["rightID"] === droppedConnectorID
         ) {
           this.allConnectors[data.parentID]["rightID"] = undefined;
           this.allConnectors[data.parentID]["rightType"] = undefined;
           this.allConnectors[data.parentID]["rightContent"] = undefined;
+          this.allConnectors[data.parentID]["rightStatementIdentifier"] = undefined;
         } else {
           console.error(
             "Something went wrong! The logic of connector to connector is wrong!!"
@@ -622,9 +644,11 @@ export default {
         this.allConnectors[droppedConnectorID]["leftID"] = wasStatement?droppedOnStatementID:droppedOnConnectorID;
         this.allConnectors[droppedConnectorID]["leftType"] = wasStatement?"statement":"connector";
         this.allConnectors[droppedConnectorID]["leftContent"] = undefined;
+        this.allConnectors[droppedConnectorID]["leftStatementIdentifier"] = undefined;
         this.allConnectors[droppedConnectorID]["rightID"] = undefined;
         this.allConnectors[droppedConnectorID]["rightType"] = undefined;
         this.allConnectors[droppedConnectorID]["rightContent"] = undefined;
+        this.allConnectors[droppedConnectorID]["rightStatementIdentifier"] = undefined;
         this.allConnectors[droppedConnectorID]["clickCount"] = 0;
         this.allConnectors[droppedConnectorID]["orientation"] = 'row';
 
@@ -749,9 +773,11 @@ export default {
           this.allConnectors[this.connectorCount]["leftID"] = undefined;
           this.allConnectors[this.connectorCount]["leftType"] = undefined;
           this.allConnectors[this.connectorCount]["leftContent"] = undefined;
+          this.allConnectors[this.connectorCount]["leftStatementIdentifier"] = undefined;
           this.allConnectors[this.connectorCount]["rightID"] = undefined;
           this.allConnectors[this.connectorCount]["rightType"] = undefined;
           this.allConnectors[this.connectorCount]["rightContent"] = undefined;
+          this.allConnectors[this.connectorCount]["rightStatementIdentifier"] = undefined;
           this.allConnectors[this.connectorCount]["clickCount"] = 0;
           this.allConnectors[this.connectorCount]["orientation"] = 'row';
 
@@ -797,10 +823,12 @@ export default {
               this.allConnectors[oldParentID]["leftID"] = undefined;
               this.allConnectors[oldParentID]["leftType"] = undefined;
               this.allConnectors[oldParentID]["leftContent"] = undefined;
+              this.allConnectors[oldParentID]["leftStatementIdentifier"] = undefined;
             } else {
               this.allConnectors[oldParentID]["rightID"] = undefined;
               this.allConnectors[oldParentID]["rightType"] = undefined;
               this.allConnectors[oldParentID]["rightContent"] = undefined;
+              this.allConnectors[oldParentID]["rightStatementIdentifier"] = undefined;
             }
           }
         }
@@ -844,12 +872,16 @@ export default {
             this.allConnectors[statementOldParent]["leftID"] = undefined;
             this.allConnectors[statementOldParent]["leftType"] = undefined;
             this.allConnectors[statementOldParent]["leftContent"] = undefined;
+            this.allConnectors[statementOldParent]["leftStatementIdentifier"] = undefined;
+
           } else if (
             this.allConnectors[statementOldParent]["rightID"] === statementID
           ) {
             this.allConnectors[statementOldParent]["rightID"] = undefined;
             this.allConnectors[statementOldParent]["rightType"] = undefined;
             this.allConnectors[statementOldParent]["rightContent"] = undefined;
+            this.allConnectors[statementOldParent]["rightStatementIdentifier"] = undefined;
+
           } else {
             console.error("The dropped statement has a wrong parent ID.");
           }
@@ -872,9 +904,11 @@ export default {
         this.allConnectors[this.connectorCount]["leftID"] = undefined;
         this.allConnectors[this.connectorCount]["leftType"] = undefined;
         this.allConnectors[this.connectorCount]["leftContent"] = undefined;
+        this.allConnectors[this.connectorCount]["leftStatementIdentifier"] = undefined;
         this.allConnectors[this.connectorCount]["rightID"] = undefined;
         this.allConnectors[this.connectorCount]["rightType"] = undefined;
         this.allConnectors[this.connectorCount]["rightContent"] = undefined;
+        this.allConnectors[this.connectorCount]["rightStatementIdentifier"] = undefined;
         this.allConnectors[this.connectorCount]["clickCount"] = 0;
         this.allConnectors[this.connectorCount]["orientation"] = 'row';
         this.allConnectors[this.connectorCount]["top"] = this.allStatements[statementID]["top"]
