@@ -287,7 +287,7 @@ export default {
       this.allConnectors[connectorID]["rightID"] = statementID;
       this.allConnectors[connectorID]["rightType"] = "statement";
       this.allConnectors[connectorID]["rightContent"] = statementContent;
-      this.allConnectors[connectorID]["rightSatementIdentifier"] = statementIdentifier;
+      this.allConnectors[connectorID]["rightStatementIdentifier"] = statementIdentifier;
 
     },
 
