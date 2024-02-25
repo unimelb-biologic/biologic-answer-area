@@ -131,7 +131,7 @@ export default {
       default: true
     }
   },
-  inject: ['isFeedbackAvailable'],
+  inject: ['isFeedbackAvailable', 'showAllFeedback'],
   data() {
     return {
       statementType: this.statementData.statementType,
@@ -241,6 +241,9 @@ export default {
     data() {
       this.initContent();
     },
+    showAllFeedback() {
+      this.showFeedback = this.showAllFeedback
+    }
   },
   created() {
     this.initContent();

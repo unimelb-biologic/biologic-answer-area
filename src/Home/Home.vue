@@ -162,7 +162,6 @@ export default {
       offsetX: 0,
       offsetY: 0,
       answerAreaEnabled: true,
-
       clientID: null,
       authorised: true, // TODO: automatically bypass login - for prototyping purpose
       secret_key: null,
@@ -171,8 +170,9 @@ export default {
       jsonOutput: {},
       jsonData: [],
       dataObject: {},
+      isFeedbackAllowed: true,  // flag used to restrict from backend, link to this flag from api response
+      isFeedbackAvailable: false, // flag used to check whether client_feedback is there
       feedback: null,
-      isFeedbackAvailable: false,
       feedbackRubricMap: ref({}),
       sharedData: "" // awful solution to passing information during drag!
     };
@@ -183,7 +183,7 @@ export default {
       feedbackRubricMap: computed(() => {
        return this.feedbackRubricMap.value;
       }),
-      isFeedbackAvailable: computed(() => this.isFeedbackAvailable),
+      isFeedbackAvailable: computed(() => this.isFeedbackAvailable && this.isFeedbackAllowed),
     }
   },
 

@@ -2,6 +2,9 @@
   <div id="submitBtn">
     <button @click="convertToJson">Submit</button>
   </div>
+  <div v-if="isFeedbackAvailable">
+    <button @click="toggleAllFeedback"> {{ showAllFeedback ? "Close Feedback" : "Show Feedback" }} </button>
+  </div>
   <div id="showDataStructuresButton" v-if="isDev">
     <button @click="toggleShowDataStructures">show data structures</button>
   </div>
@@ -85,6 +88,8 @@
 import Connector from "@/components/Connector.vue";
 import RenderStatement from "../components/RenderStatement.vue";
 import uniqueId from "lodash.uniqueid";
+import { computed } from 'vue';
+
 
 export default {
   name: "AnswerArea",
@@ -128,8 +133,15 @@ export default {
       data_Object: {},
       answerContent: {}, // {ID: Content} record the element ID and its content
       showDataStructures: false,
+      showAllFeedback: false // flag used to toggle all the feedback elements at once
     };
   },
+  provide() {
+    return {
+      showAllFeedback: computed(() => this.showAllFeedback),
+    }
+  },
+  inject: ['isFeedbackAvailable'],
   computed: {
     prettifiedAnswerContentDump(){
       return "-----------this.answerContent--------------\n"+JSON.stringify(this.answerContent,null,4);
@@ -1107,6 +1119,10 @@ export default {
         delete this.allConnectors[parentId][`${position}Type`];
       }
     },
+
+    toggleAllFeedback() {
+      this.showAllFeedback = !this.showAllFeedback
+    }
   },
 
   mounted() {

@@ -315,7 +315,7 @@ import FeedbackRubric from "@/components/FeedbackRubric.vue";
 export default {
   name: "Connector",
   components: { ConnectorContextMenu, RenderStatement, FeedbackRubric },
-  inject : ['isFeedbackAvailable'],
+  inject : ['isFeedbackAvailable', 'showAllFeedback'],
   emits: [
     "droppedAstat",
     "droppedBstat",
@@ -1047,6 +1047,9 @@ export default {
           ? ""
           : this.currConnectorContent[2]);
     },
+    showAllFeedback() {
+      this.showFeedback = this.showAllFeedback
+    }
   },
   created() {
     // this.currConnectorContent = JSON.parse(JSON.stringify(this.connectorContent[this.selectedPhrase]));
