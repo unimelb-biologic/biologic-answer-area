@@ -93,7 +93,7 @@ export default {
       default: true
     }
   },
-  inject: ['isFeedbackAvailable'],
+  inject: ['isFeedbackAvailable', 'showAllFeedback'],
   data() {
     return {
       //TODO: confirm that the first entry is text, 2nd entry is image.
@@ -112,6 +112,13 @@ export default {
       return this.collapsed ? "src/assets/expand_icon.png" : "src/assets/collapse_icon.png";
     }
   },
+
+  watch: {
+    showAllFeedback() {
+      this.showFeedback = this.showAllFeedback
+    }
+  },
+
   methods: {
     // Verify the image format to display
     isImage(fact) {
