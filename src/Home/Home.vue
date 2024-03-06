@@ -52,7 +52,7 @@
                     Question:
                     <!-- {{ this.exNetName }} -->
                     <select
-                      @change="getLastWorkingAnswer"
+                      @change="getLastWorkingAnswer(true)"
                       v-model="selectedQuestion"
                     >
                       <option
@@ -111,6 +111,8 @@
                     @setDraggedItem="onDragStart"
                     @addDroppedItems="addDroppedItems"
                     @delDroppedItem="delDroppedItem"
+                    @update-show-my-answer="updateShowMyAnswer"
+                    @update-show-correct-answer="updateShowCorrectAnswer"
                     @update-answer-area-content="handleUpdateAnswerContent"
                     @statement-used="handleStatementUsed"
                     @enable-area="(n) => toggleAnswerArea(n)"
@@ -197,6 +199,8 @@ export default {
       isFeedbackAvailable: false, // flag used to check whether client_feedback is there
       isCorrectAnswerAllowed: false, // flag used to check whether student can see the correct answer
       feedback: null,
+      showMyAnswer: false,
+      showCorrectAnswer: false,
       feedbackRubricMap: ref({}),
       sharedData: "", // awful solution to passing information during drag!
     };
@@ -210,6 +214,8 @@ export default {
       isFeedbackAvailable: computed(
         () => this.isFeedbackAvailable && this.isFeedbackAllowed
       ),
+      showMyAnswer: computed(() => this.showMyAnswer),
+      showCorrectAnswer: computed(() => this.showCorrectAnswer),
       isCorrectAnswerAllowed: computed(() => this.isCorrectAnswerAllowed),
     };
   },
@@ -266,6 +272,14 @@ export default {
           return;
         }
       }
+    },
+
+    updateShowCorrectAnswer(value) {
+      this.showCorrectAnswer = value;
+    },
+
+    updateShowMyAnswer(value) {
+      this.showMyAnswer = value;
     },
 
     // add the statement to the droppedItem array
@@ -689,7 +703,7 @@ export default {
       }
     },
 
-    async getLastWorkingAnswer() {
+    async getLastWorkingAnswer(isNewExnet) {
       this.updateFeedback(null);
 
       // TODO: check if this call is required, as we all already getting exnet on changing question
@@ -709,6 +723,14 @@ export default {
         // 5. Check promptText is a LIST and not just a string. If it is a string - there is no information
         // that has been stored. Display the question similar to the getExnet above.
         await this.getExnet(this.selectedQuestion, true);
+
+        // disabling the show correct answer and show my answer buttons
+        // whenever there is a change in the exnet question from dropdown
+        if (isNewExnet) {
+          this.showMyAnswer = false;
+          this.showCorrectAnswer = false;
+        }
+
         if (typeof promptText === "string") {
           //console.log(promptText);
         }
@@ -765,7 +787,7 @@ export default {
           ? urlParams.exnetName
           : this.questions[0];
         await this.getExnet(this.selectedQuestion, true);
-        await this.getLastWorkingAnswer();
+        await this.getLastWorkingAnswer(true);
       }
     }
   },

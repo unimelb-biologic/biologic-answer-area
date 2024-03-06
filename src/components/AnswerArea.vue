@@ -1,6 +1,8 @@
 <template>
   <div>
-    <button id="submitBtn" @click="convertToJson">Submit</button>
+    <button id="submitBtn" @click="convertToJson" :disabled="showMyAnswer">
+      Submit
+    </button>
   </div>
   <div v-if="isFeedbackAvailable">
     <button @click="toggleAllFeedback">
@@ -145,8 +147,6 @@ export default {
       data_Object: {},
       answerContent: {}, // {ID: Content} record the element ID and its content
       showDataStructures: false,
-      showCorrectAnswer: false,
-      showMyAnswer: false,
       showAllFeedback: false, // flag used to toggle all the feedback elements at once
     };
   },
@@ -155,7 +155,12 @@ export default {
       showAllFeedback: computed(() => this.showAllFeedback),
     };
   },
-  inject: ["isFeedbackAvailable", "isCorrectAnswerAllowed"],
+  inject: [
+    "isFeedbackAvailable",
+    "isCorrectAnswerAllowed",
+    "showCorrectAnswer",
+    "showMyAnswer",
+  ],
   computed: {
     prettifiedAnswerContentDump() {
       return (
@@ -207,27 +212,16 @@ export default {
     },
 
     getCorrectAnswer() {
-      this.showCorrectAnswer = false;
-      this.showMyAnswer = true;
+      this.$emit("update-show-correct-answer", false);
+      this.$emit("update-show-my-answer", true);
 
       this.$emit("get-correct-answer");
-
-      // Disable the submit button when showing the correct answer
-      this.$nextTick(() => {
-        document.getElementById("submitBtn").disabled = true;
-      });
     },
     showUserAnswer() {
-      // Toggle the visibility of buttons
-      this.showCorrectAnswer = true;
-      this.showMyAnswer = false;
+      this.$emit("update-show-correct-answer", true);
+      this.$emit("update-show-my-answer", false);
 
-      this.$emit("get-last-working-answer");
-
-      // Enable the submit button
-      this.$nextTick(() => {
-        document.getElementById("submitBtn").disabled = false;
-      });
+      this.$emit("get-last-working-answer", false);
     },
 
     convertToJson() {
@@ -253,8 +247,8 @@ export default {
       };
 
       // enables the correct answer option
-      this.showCorrectAnswer = true;
-      this.showMyAnswer = false;
+      this.$emit("update-show-correct-answer", true);
+      this.$emit("update-show-my-answer", false);
 
       // Emit the dataObject and saveJson() result
       this.$emit("answer-data", this.data_Object);
