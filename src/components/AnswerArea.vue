@@ -5,6 +5,10 @@
   <div v-if="isFeedbackAvailable">
     <button @click="toggleAllFeedback"> {{ showAllFeedback ? "Close Feedback" : "Show Feedback" }} </button>
   </div>
+  <div v-if="isCorrectAnswerAllowed">
+    <button>Show Correct Answer</button>
+    <button>Show My Answer</button>
+  </div>
   <div id="showDataStructuresButton" v-if="isDev">
     <button @click="toggleShowDataStructures">show data structures</button>
   </div>
@@ -141,7 +145,7 @@ export default {
       showAllFeedback: computed(() => this.showAllFeedback),
     }
   },
-  inject: ['isFeedbackAvailable'],
+  inject: ['isFeedbackAvailable', 'isCorrectAnswerAllowed'],
   computed: {
     prettifiedAnswerContentDump(){
       return "-----------this.answerContent--------------\n"+JSON.stringify(this.answerContent,null,4);

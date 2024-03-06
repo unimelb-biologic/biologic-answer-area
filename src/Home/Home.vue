@@ -170,8 +170,9 @@ export default {
       jsonOutput: {},
       jsonData: [],
       dataObject: {},
-      isFeedbackAllowed: true,  // flag used to restrict from backend, link to this flag from api response
+      isFeedbackAllowed: false,  // flag used to restrict from backend, link to this flag from api response
       isFeedbackAvailable: false, // flag used to check whether client_feedback is there
+      isCorrectAnswerAllowed: false, // flag used to check whether student can see the correct answer
       feedback: null,
       feedbackRubricMap: ref({}),
       sharedData: "" // awful solution to passing information during drag!
@@ -184,6 +185,7 @@ export default {
        return this.feedbackRubricMap.value;
       }),
       isFeedbackAvailable: computed(() => this.isFeedbackAvailable && this.isFeedbackAllowed),
+      isCorrectAnswerAllowed: computed(() => this.isCorrectAnswerAllowed)
     }
   },
 
@@ -476,6 +478,7 @@ export default {
     },
 
     async getExnet(exnetName, clear = false) {
+
       // TODO: reenable this
       let response = await this.sendGetExnetRequest(exnetName);
       console.log(response);
@@ -488,6 +491,9 @@ export default {
           const exnetWorkingAnswerJson = JSON.parse(
             response.exnet_working_answer_json
           );
+
+          this.isFeedbackAllowed = response.is_feedback_allowed;
+          this.isCorrectAnswerAllowed = response.is_correct_answer_allowed;
           // Successful response code here.
           this.setCurrentExNet(exnetWorkingAnswerJson, clear)
         }
