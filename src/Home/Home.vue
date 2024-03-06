@@ -6,22 +6,26 @@
       </button>
       <br />
       <!-- TODO: Remove this! Development purposes only! -->
-      <button @click="authorised = true" v-if="!authorised" style="font-size: 30px">
+      <button
+        @click="authorised = true"
+        v-if="!authorised"
+        style="font-size: 30px"
+      >
         Bypass login
       </button>
     </div>
 
     <splitpanes v-if="authorised" class="mainContainer" horizontal>
-      <pane max-size="10" style="height: 50px;" min-size="5">
-        <MenuBar 
-          :userID = "userID"
-          @onDownloadExNet = "onDownloadExNet"
-          @setCurrentExNet = "setCurrentExNet"
+      <pane max-size="10" style="height: 50px" min-size="5">
+        <MenuBar
+          :userID="userID"
+          @onDownloadExNet="onDownloadExNet"
+          @setCurrentExNet="setCurrentExNet"
         />
       </pane>
       <pane min-size="5">
         <Splitpanes>
-          <pane max-size="14" class="statementContainer" min-size="5" >
+          <pane max-size="14" class="statementContainer" min-size="5">
             <!-- Displays Statements -->
             <h2 class="areaHeading">Statement Area</h2>
             <div class="tooltips">
@@ -32,12 +36,12 @@
               </span>
             </div>
 
-            <StatementArea 
-              :statements="this.statementElements" 
+            <StatementArea
+              :statements="this.statementElements"
               :sharedData="this.sharedData"
               @onDragStart="onDragStart"
               @update-shared-data="updateSharedData"
-              />
+            />
           </pane>
           <pane min-size="5">
             <splitpanes horizontal>
@@ -47,8 +51,15 @@
                   <h2 class="areaHeading">
                     Question:
                     <!-- {{ this.exNetName }} -->
-                    <select @change="getLastWorkingAnswer" v-model="selectedQuestion">
-                      <option v-for="item in questions" :value="item" :key="item">
+                    <select
+                      @change="getLastWorkingAnswer"
+                      v-model="selectedQuestion"
+                    >
+                      <option
+                        v-for="item in questions"
+                        :value="item"
+                        :key="item"
+                      >
                         {{ item.slice(0, -".data".length) }}
                       </option>
                     </select>
@@ -69,7 +80,12 @@
               </pane>
               <pane min-size="5">
                 <!-- Displays workspace -->
-                <div class="displayWorkspace" @drop="onDropWorkspace($event)" @dragover.prevent @dragenter.prevent>
+                <div
+                  class="displayWorkspace"
+                  @drop="onDropWorkspace($event)"
+                  @dragover.prevent
+                  @dragenter.prevent
+                >
                   <div id="answerArea" class="sectionTitle">
                     <h2 class="areaHeading">Answer</h2>
                     <div class="tooltips">
@@ -81,21 +97,21 @@
                     </div>
                   </div>
 
-                  <AnswerArea ref="workspace" 
-                    :droppedItems="droppedItems" 
-                    :draggedItem="draggedItem" 
+                  <AnswerArea
+                    ref="workspace"
+                    :droppedItems="droppedItems"
+                    :draggedItem="draggedItem"
                     :offsetX="offsetX"
-                    :offsetY="offsetY" 
-                    :statements="statementElements" 
+                    :offsetY="offsetY"
+                    :statements="statementElements"
                     :sharedData="this.sharedData"
-                    
                     @answer-data="updateJsonOutput"
-                    @setDraggedItem="onDragStart" 
-                    @addDroppedItems="addDroppedItems" 
+                    @setDraggedItem="onDragStart"
+                    @addDroppedItems="addDroppedItems"
                     @delDroppedItem="delDroppedItem"
-                    @update-answer-area-content="handleUpdateAnswerContent" 
+                    @update-answer-area-content="handleUpdateAnswerContent"
                     @statement-used="handleStatementUsed"
-                    @enable-area="(n) => toggleAnswerArea(n)" 
+                    @enable-area="(n) => toggleAnswerArea(n)"
                     @update-shared-data="updateSharedData"
                   />
                 </div>
@@ -114,7 +130,7 @@
             <!-- Displays the connectors -->
             <div class="displayConnectors">
               <h2 class="areaHeading">Connector Area</h2>
-              <ConnectorArea 
+              <ConnectorArea
                 :sharedData="this.sharedData"
                 @update-shared-data="updateSharedData"
               />
@@ -125,7 +141,7 @@
     </splitpanes>
   </div>
 </template>
-  
+
 <script>
 import QuestionArea from "@/components/QuestionArea.vue";
 import StatementArea from "@/components/StatementArea.vue";
@@ -136,10 +152,15 @@ import FileReader from "@/components/FileReader.vue";
 import MenuBar from "@/components/MenuBar.vue";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
-import download from 'downloadjs';
-import {BASE_URL, API_ENDPOINTS, API_BODY_PARAMS, DEFAULT_USER_ID} from '../config/constants';
+import download from "downloadjs";
+import {
+  BASE_URL,
+  API_ENDPOINTS,
+  API_BODY_PARAMS,
+  DEFAULT_USER_ID,
+} from "../config/constants";
 import { buildFeedbackRubricMap } from "@/utils/common";
-import { computed, ref } from 'vue';
+import { computed, ref } from "vue";
 
 export default {
   name: "App",
@@ -170,23 +191,25 @@ export default {
       jsonOutput: {},
       jsonData: [],
       dataObject: {},
-      isFeedbackAllowed: false,  // flag used to restrict from backend, link to this flag from api response
+      isFeedbackAllowed: false, // flag used to restrict from backend, link to this flag from api response
       isFeedbackAvailable: false, // flag used to check whether client_feedback is there
       isCorrectAnswerAllowed: false, // flag used to check whether student can see the correct answer
       feedback: null,
       feedbackRubricMap: ref({}),
-      sharedData: "" // awful solution to passing information during drag!
+      sharedData: "", // awful solution to passing information during drag!
     };
   },
-  
+
   provide() {
     return {
       feedbackRubricMap: computed(() => {
-       return this.feedbackRubricMap.value;
+        return this.feedbackRubricMap.value;
       }),
-      isFeedbackAvailable: computed(() => this.isFeedbackAvailable && this.isFeedbackAllowed),
-      isCorrectAnswerAllowed: computed(() => this.isCorrectAnswerAllowed)
-    }
+      isFeedbackAvailable: computed(
+        () => this.isFeedbackAvailable && this.isFeedbackAllowed
+      ),
+      isCorrectAnswerAllowed: computed(() => this.isCorrectAnswerAllowed),
+    };
   },
 
   components: {
@@ -223,7 +246,6 @@ export default {
       if (response["success"] === true) {
         await this.sendGetFeedback(this.selectedQuestion);
         window.alert("Submission successful!");
-
       }
     },
 
@@ -261,8 +283,7 @@ export default {
       this.draggedItem = item;
     },
 
-
-    updateSharedData(newValue){
+    updateSharedData(newValue) {
       // newValue is a JSON.stringified version of
       // {
       //    "draggedWidth" : value;
@@ -301,8 +322,7 @@ export default {
       }
     },
     // Handle ExNetJson from FileREader
-    onExNetReadFile(exNetRawData) 
-    {
+    onExNetReadFile(exNetRawData) {
       console.log(exNetRawData);
       const exnetWorkingAnswerJson = JSON.parse(exNetRawData);
       this.setCurrentExNet(exnetWorkingAnswerJson, true);
@@ -310,31 +330,32 @@ export default {
 
     // Download ExNetJson
     onDownloadExNet() {
-      console.log(this.dataObject)
+      console.log(this.dataObject);
 
       const exNetTemplate = {
         activeExNetQuestionPack: {
           promptText: this.promptText,
           exNetRelativePath: "Explanation Networks/" + this.exNetName,
           exNetName: this.exNetName,
-          statementElements: this.statementElements
+          statementElements: this.statementElements,
         },
         statementElements: [],
-        connectorElements: []
-      }
-      console.log(exNetTemplate)
-      download(JSON.stringify(exNetTemplate), this.exNetName + "_exnet_question.json", "application/json");
-
+        connectorElements: [],
+      };
+      console.log(exNetTemplate);
+      download(
+        JSON.stringify(exNetTemplate),
+        this.exNetName + "_exnet_question.json",
+        "application/json"
+      );
     },
 
     setCurrentExNet(exNetData, clear = false) {
-      this.promptText =
-        exNetData.activeExNetQuestionPack.promptText;
+      this.promptText = exNetData.activeExNetQuestionPack.promptText;
       console.log("FIXED PROMPT TEXT", this.promptText);
       this.exNetRelativePath =
         exNetData.activeExNetQuestionPack.exNetRelativePath;
-      this.exNetName =
-        exNetData.activeExNetQuestionPack.exNetName;
+      this.exNetName = exNetData.activeExNetQuestionPack.exNetName;
       this.statementElements =
         exNetData.activeExNetQuestionPack.statementElements;
       for (let statement of this.statementElements) {
@@ -346,10 +367,12 @@ export default {
         // if the userInput object is empty we need to initialise it with the first option of each popup
         //console.log("statement original=",statement)
         for (let i = 0; i < statement.content.originalFacts.length; i++) {
-          if (typeof(statement.content.originalFacts[i]) !== 'string') {
+          if (typeof statement.content.originalFacts[i] !== "string") {
             // if not a string then it is an array of popup options
             // we assume it has at least one element and take the first as default.
-            statement.content.userInput.push(statement.content.originalFacts[i][0]);
+            statement.content.userInput.push(
+              statement.content.originalFacts[i][0]
+            );
           }
         }
         //console.log("statement after initialising userInput=",statement)
@@ -400,20 +423,20 @@ export default {
 
     // Sends login request and processes returned promise.
     async logIn(userId) {
-      let response = await this.sendLoginRequest(userId)
+      let response = await this.sendLoginRequest(userId);
       if (response && response["success"] === true) {
-        this.secret_key = response["persistent_secret_key"]
-        this.authorised = true
+        this.secret_key = response["persistent_secret_key"];
+        this.authorised = true;
 
         // Store authorization status to session storage
-        sessionStorage.setItem('authStatus', 'authorized');
-        sessionStorage.setItem('secretKey', this.secret_key);
-        sessionStorage.setItem('clientID', this.clientID);
-        sessionStorage.setItem('userID', this.userID);
+        sessionStorage.setItem("authStatus", "authorized");
+        sessionStorage.setItem("secretKey", this.secret_key);
+        sessionStorage.setItem("clientID", this.clientID);
+        sessionStorage.setItem("userID", this.userID);
 
-        window.alert("Successfully authorised!")
+        window.alert("Successfully authorised!");
       } else {
-        window.alert("Login failed!")
+        window.alert("Login failed!");
       }
     },
 
@@ -422,20 +445,17 @@ export default {
         // FIXME: HTTP request here.
         let questionsListUrl = BASE_URL + API_ENDPOINTS.GET_QUESTIONS_LIST;
         let body = {
-            [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
-            [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
-        }
+          [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
+          [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
+        };
 
-        let response = await fetch(
-          questionsListUrl,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(body)
-          }
-        );
+        let response = await fetch(questionsListUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
 
         return await response.json();
       } catch (error) {
@@ -459,17 +479,17 @@ export default {
         // Is this GET or POST?
         let getQuestionsUrl = BASE_URL + API_ENDPOINTS.GET_EXNET;
         let body = {
-            [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
-            [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
-            [API_BODY_PARAMS.EXNET_NAME]: exnetName
-        }
+          [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
+          [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
+          [API_BODY_PARAMS.EXNET_NAME]: exnetName,
+        };
 
         let response = await fetch(getQuestionsUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(body)
+          body: JSON.stringify(body),
         });
         return await response.json();
       } catch (error) {
@@ -478,7 +498,6 @@ export default {
     },
 
     async getExnet(exnetName, clear = false) {
-
       // TODO: reenable this
       let response = await this.sendGetExnetRequest(exnetName);
       console.log(response);
@@ -495,7 +514,7 @@ export default {
           this.isFeedbackAllowed = response.is_feedback_allowed;
           this.isCorrectAnswerAllowed = response.is_correct_answer_allowed;
           // Successful response code here.
-          this.setCurrentExNet(exnetWorkingAnswerJson, clear)
+          this.setCurrentExNet(exnetWorkingAnswerJson, clear);
         }
       } else {
         // What to do if failed?
@@ -512,7 +531,8 @@ export default {
         // console.log(JSON.parse(exnetQuestionPack))
         exnetQuestionPack = JSON.parse(exnetQuestionPack);
 
-        let activeExNetQuestionPack = exnetQuestionPack["activeExNetQuestionPack"];
+        let activeExNetQuestionPack =
+          exnetQuestionPack["activeExNetQuestionPack"];
         let promptText = activeExNetQuestionPack["promptText"];
         promptText = [promptText, this.dataObject];
 
@@ -532,17 +552,15 @@ export default {
         // console.log("msgBody", msgBody);
         msgBody = JSON.stringify(msgBody);
 
-        let storeWorkingAnswerUrl = BASE_URL + API_ENDPOINTS.STORE_WORKING_ANSWER;
-        let postResponse = await fetch(
-          storeWorkingAnswerUrl,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: msgBody,
-          }
-        );
+        let storeWorkingAnswerUrl =
+          BASE_URL + API_ENDPOINTS.STORE_WORKING_ANSWER;
+        let postResponse = await fetch(storeWorkingAnswerUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: msgBody,
+        });
 
         if (!postResponse.ok) {
           throw new Error(`HTTP error! status: ${postResponse.status}`);
@@ -555,32 +573,29 @@ export default {
     },
 
     async sendGetExnetAnswer(exnetName) {
-
       try {
         // FIXME: HTTP request here.
         // Is this GET or POST?
 
-      let getLastWorkingAnswerUrl = BASE_URL + API_ENDPOINTS.GET_LAST_WORKING_ANSWER;
-      let bodyParams = {
-      [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
-      [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
-      [API_BODY_PARAMS.EXNET_NAME]: exnetName,
-      }
+        let getLastWorkingAnswerUrl =
+          BASE_URL + API_ENDPOINTS.GET_LAST_WORKING_ANSWER;
+        let bodyParams = {
+          [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
+          [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
+          [API_BODY_PARAMS.EXNET_NAME]: exnetName,
+        };
 
-      let response = await fetch(getLastWorkingAnswerUrl,
-      {
-            method: "POST",
-      headers: {
-      "Content-Type": "application/json",
-      },
-      body: JSON.stringify(bodyParams)
-      }
-        );
-      return await response.json();
+        let response = await fetch(getLastWorkingAnswerUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bodyParams),
+        });
+        return await response.json();
       } catch (error) {
         console.log(error);
       }
-
     },
 
     async sendGetFeedback(exnetName) {
@@ -589,37 +604,36 @@ export default {
         activeExNetQuestionPack: {
           promptText: [this.promptText, this.dataObject],
           //...this.dataObject,
-          "exNetRelativePath": this.exNetRelativePath,
-          "exNetName": exnetName,
-          statementElements: this.dataObject.statementElements
+          exNetRelativePath: this.exNetRelativePath,
+          exNetName: exnetName,
+          statementElements: this.dataObject.statementElements,
         },
-        statementElements: this.dataObject.statementElements
+        statementElements: this.dataObject.statementElements,
       };
 
       try {
         // FIXME: Endpoint URL here
         let getFeedbackUrl = BASE_URL + API_ENDPOINTS.GET_FEEDBACK;
         let body = {
-              [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
-              [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
-              [API_BODY_PARAMS.EXNET_NAME]: exnetName,
-              // "ex_net": JSON.stringify({activeExNetQuestionPack: this.promptText, ...this.dataObject}) }
-              "working_answer_data": params,
-              // "ex_flow":JSON.stringify(params)
-            };
-    
+          [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
+          [API_BODY_PARAMS.SECRET_KEY_BODY_PARAM]: this.secret_key,
+          [API_BODY_PARAMS.EXNET_NAME]: exnetName,
+          // "ex_net": JSON.stringify({activeExNetQuestionPack: this.promptText, ...this.dataObject}) }
+          working_answer_data: params,
+          // "ex_flow":JSON.stringify(params)
+        };
+
         let response = await fetch(getFeedbackUrl, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(body)
-        })
+          body: JSON.stringify(body),
+        });
         const data = await response.json();
         this.updateFeedback(data.client_feedback);
-
       } catch (error) {
-        console.log(`Failed to fetch ${exnetName}!`)
+        console.log(`Failed to fetch ${exnetName}!`);
       }
 
       //console.log(JSON.stringify(params))
@@ -633,34 +647,36 @@ export default {
 
       // FIX ME: Success spell is wrong!
       if (response["success"]) {
-      let lastWorkingAnswerData = await JSON.parse(response["last_working_answer_data"]);
-      let activeExNetQuestionPack = lastWorkingAnswerData["activeExNetQuestionPack"];
+        let lastWorkingAnswerData = await JSON.parse(
+          response["last_working_answer_data"]
+        );
+        let activeExNetQuestionPack =
+          lastWorkingAnswerData["activeExNetQuestionPack"];
 
-      // 4. get the query entry via activeExNetQuestionPack > promptText
-      let promptText = activeExNetQuestionPack["promptText"];
- 
-      // 5. Check promptText is a LIST and not just a string. If it is a string - there is no information
-      // that has been stored. Display the question similar to the getExnet above.
-      await this.getExnet(this.selectedQuestion, true);
-      if (typeof promptText === "string") {
-      //console.log(promptText);
-      }
+        // 4. get the query entry via activeExNetQuestionPack > promptText
+        let promptText = activeExNetQuestionPack["promptText"];
 
-      // 6. If promptText is a LIST, LIST[0] is the query itself - display directly.
-      // 7. LIST[1] contains all the parameters passed when saving. Extract entries and replace those in App.vue.
-      // let data = LIST[1];
-      // this.offSetX = data["offSetX"]
-      else if (typeof promptText === "object") {
-      let data = promptText[1];
-      this.offsetX = parseInt(data["offsetX"]);
-      this.offsetY = parseInt(data["offsetY"]);
-      this.statementElements = data["statementElements"];
+        // 5. Check promptText is a LIST and not just a string. If it is a string - there is no information
+        // that has been stored. Display the question similar to the getExnet above.
+        await this.getExnet(this.selectedQuestion, true);
+        if (typeof promptText === "string") {
+          //console.log(promptText);
+        }
 
-      // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
+        // 6. If promptText is a LIST, LIST[0] is the query itself - display directly.
+        // 7. LIST[1] contains all the parameters passed when saving. Extract entries and replace those in App.vue.
+        // let data = LIST[1];
+        // this.offSetX = data["offSetX"]
+        else if (typeof promptText === "object") {
+          let data = promptText[1];
+          this.offsetX = parseInt(data["offsetX"]);
+          this.offsetY = parseInt(data["offsetY"]);
+          this.statementElements = data["statementElements"];
 
-      this.$refs.workspace.loadPreviousAnswer(data);
-      }
+          // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
 
+          this.$refs.workspace.loadPreviousAnswer(data);
+        }
       } else {
         await this.getExnet(this.selectedQuestion, true);
       }
@@ -670,25 +686,24 @@ export default {
       this.feedbackRubricMap.value = buildFeedbackRubricMap(feedback);
       this.feedback = feedback;
       this.isFeedbackAvailable = feedback ? true : false;
-    }
+    },
   },
 
   async mounted() {
-
     const urlParams = this.$route.query;
     if (urlParams.userId) {
       await this.logIn(urlParams.userId);
     } else {
-      const storedAuthStatus = sessionStorage.getItem('authStatus');
+      const storedAuthStatus = sessionStorage.getItem("authStatus");
 
-      if (storedAuthStatus === 'authorized') {
+      if (storedAuthStatus === "authorized") {
         // If there is an authorized state in the session storage, login is no longer required.
         this.authorised = true;
-        this.secret_key = sessionStorage.getItem('secretKey');
-        this.clientID = sessionStorage.getItem('clientID');
-        this.userID = sessionStorage.getItem('userID');
+        this.secret_key = sessionStorage.getItem("secretKey");
+        this.clientID = sessionStorage.getItem("clientID");
+        this.userID = sessionStorage.getItem("userID");
       } else {
-        await this.logIn()
+        await this.logIn();
       }
     }
 
@@ -696,18 +711,17 @@ export default {
       await this.getQuestions();
 
       if (!this.questions !== null) {
-
-        this.selectedQuestion = urlParams.exnetName ? urlParams.exnetName : this.questions[0];
+        this.selectedQuestion = urlParams.exnetName
+          ? urlParams.exnetName
+          : this.questions[0];
         await this.getExnet(this.selectedQuestion, true);
         await this.getLastWorkingAnswer();
-
       }
     }
   },
-
 };
 </script>
-  
+
 <style>
 body {
   margin: 0px;
@@ -730,12 +744,12 @@ body {
   margin: 0px 0px 0px 10px;
 }
 
-.splitpanes--vertical>.splitpanes__splitter {
+.splitpanes--vertical > .splitpanes__splitter {
   min-width: 8px;
   background: rgb(198, 155, 155);
 }
 
-.splitpanes--horizontal>.splitpanes__splitter {
+.splitpanes--horizontal > .splitpanes__splitter {
   min-height: 8px;
   background: rgb(198, 155, 155);
 }
@@ -773,4 +787,3 @@ body {
   color: #9f0000;
 }
 </style>
-  
