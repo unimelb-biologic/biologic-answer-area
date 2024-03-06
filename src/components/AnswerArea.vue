@@ -1,6 +1,6 @@
 <template>
-  <div id="submitBtn">
-    <button @click="convertToJson">Submit</button>
+  <div>
+    <button id="submitBtn" @click="convertToJson">Submit</button>
   </div>
   <div v-if="isFeedbackAvailable">
     <button @click="toggleAllFeedback">
@@ -8,8 +8,10 @@
     </button>
   </div>
   <div v-if="isCorrectAnswerAllowed">
-    <button>Show Correct Answer</button>
-    <button>Show My Answer</button>
+    <button v-if="showCorrectAnswer" @click="getCorrectAnswer">
+      Show Correct Answer
+    </button>
+    <button v-if="showMyAnswer" @click="showUserAnswer">Show My Answer</button>
   </div>
   <div id="showDataStructuresButton" v-if="isDev">
     <button @click="toggleShowDataStructures">show data structures</button>
@@ -111,6 +113,7 @@ export default {
     "setDroppedItems",
     "connector-deleted",
     "answer-data",
+    "get-correct-answer",
     "get-last-working-answer",
     "update-shared-data",
   ],
@@ -142,6 +145,8 @@ export default {
       data_Object: {},
       answerContent: {}, // {ID: Content} record the element ID and its content
       showDataStructures: false,
+      showCorrectAnswer: false,
+      showMyAnswer: false,
       showAllFeedback: false, // flag used to toggle all the feedback elements at once
     };
   },
@@ -200,6 +205,31 @@ export default {
     toggleShowDataStructures() {
       this.showDataStructures = !this.showDataStructures;
     },
+
+    getCorrectAnswer() {
+      this.showCorrectAnswer = false;
+      this.showMyAnswer = true;
+
+      this.$emit("get-correct-answer");
+
+      // Disable the submit button when showing the correct answer
+      this.$nextTick(() => {
+        document.getElementById("submitBtn").disabled = true;
+      });
+    },
+    showUserAnswer() {
+      // Toggle the visibility of buttons
+      this.showCorrectAnswer = true;
+      this.showMyAnswer = false;
+
+      this.$emit("get-last-working-answer");
+
+      // Enable the submit button
+      this.$nextTick(() => {
+        document.getElementById("submitBtn").disabled = false;
+      });
+    },
+
     convertToJson() {
       //console.log("button pressed");
       this.data_Object = {
@@ -221,6 +251,11 @@ export default {
         offsetX: undefined,
         offsetY: undefined,
       };
+
+      // enables the correct answer option
+      this.showCorrectAnswer = true;
+      this.showMyAnswer = false;
+
       // Emit the dataObject and saveJson() result
       this.$emit("answer-data", this.data_Object);
       //console.log(this.data_Object);

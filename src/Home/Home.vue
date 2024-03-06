@@ -105,6 +105,8 @@
                     :offsetY="offsetY"
                     :statements="statementElements"
                     :sharedData="this.sharedData"
+                    @get-correct-answer="getCorrectWorkingAnswer"
+                    @get-last-working-answer="getLastWorkingAnswer"
                     @answer-data="updateJsonOutput"
                     @setDraggedItem="onDragStart"
                     @addDroppedItems="addDroppedItems"
@@ -352,7 +354,7 @@ export default {
 
     setCurrentExNet(exNetData, clear = false) {
       this.promptText = exNetData.activeExNetQuestionPack.promptText;
-      console.log("FIXED PROMPT TEXT", this.promptText);
+
       this.exNetRelativePath =
         exNetData.activeExNetQuestionPack.exNetRelativePath;
       this.exNetName = exNetData.activeExNetQuestionPack.exNetName;
@@ -500,7 +502,6 @@ export default {
     async getExnet(exnetName, clear = false) {
       // TODO: reenable this
       let response = await this.sendGetExnetRequest(exnetName);
-      console.log(response);
 
       // TODO: Remove sample server response.
       // let response = {"success": true, "exnet_name": "sky_question.data", "exnet_working_answer_json": "{\"activeExNetQuestionPack\": {\"promptText\": \"<table style=\\\"border-collapse: collapse; width: 50.0213%; margin:10px;\\\" border=\\\"1\\\"> <tbody> <tr> <td style=\\\"width: 49.949%;\\\"> <h4><span style=\\\"color: #ba372a;\\\"><em><strong>When you look up at the sky,</strong></em></span></h4> <p>the sun is yellow, while the sky is blue.</p> <h4><span style=\\\"text-decoration: underline;\\\"><span style=\\\"color: #169179; text-decoration: underline;\\\"><strong>Explain why the sky is blue.</strong>.</span></span></h4> </td> <td><img src=\\\"blue_sky.jpg\\\" alt=\\\"blue_sky.jpg\\\" width=\\\"100\\\" height=\\\"158\\\" data-api-endpoint=\\\"https://canvas.lms.unimelb.edu.au/api/v1/courses/63494/files/13454251\\\" data-api-returntype=\\\"File\\\" /></td> </tr> </tbody> </table>\", \"exNetRelativePath\": \"Explanation Networks/sky\", \"exNetName\": \"sky\", \"statementElements\": [{\"statementType\": 0, \"id\": 140255704346928, \"content\": {\"originalFacts\": [\"The sky is blue\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 20, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348560, \"content\": {\"originalFacts\": [\"light is comprised of multiple wavelengths\", \"light_has_multiple_wavelengths.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 59, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348608, \"content\": {\"originalFacts\": [\"blue light has a short wavelength\", \"blue_light.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 221, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348704, \"content\": {\"originalFacts\": [\"yellow light has a long wavelength\", \"yellow_light.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 338, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 2, \"id\": 140255704348800, \"content\": {\"originalFacts\": [\"the\", [\"--choose--\", \"smaller\", \"longer\"], \"the wavelength the more it is scattered\"], \"userInput\": [\"--choose--\"]}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 455, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 2, \"id\": 140255704348896, \"content\": {\"originalFacts\": [[\"blue light\", \"yellow light\"], \"is scattered more than\", [\"yellow light\", \"blue light\"]], \"userInput\": [\"blue light\", \"yellow light\"]}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 568, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348992, \"content\": {\"originalFacts\": [\"the light we see when we arent looking at the sun\", \"direct_indirect_light.jpg\", \"is scattered light\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 683, \"fontSizeStr\": \"12px\"}}]}, \"statementElements\": [{\"statementType\": 0, \"id\": 140255704346928, \"content\": {\"originalFacts\": [\"The sky is blue\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 20, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348560, \"content\": {\"originalFacts\": [\"light is comprised of multiple wavelengths\", \"light_has_multiple_wavelengths.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 59, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348608, \"content\": {\"originalFacts\": [\"blue light has a short wavelength\", \"blue_light.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 221, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348704, \"content\": {\"originalFacts\": [\"yellow light has a long wavelength\", \"yellow_light.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 338, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 2, \"id\": 140255704348800, \"content\": {\"originalFacts\": [\"the\", [\"--choose--\", \"smaller\", \"longer\"], \"the wavelength the more it is scattered\"], \"userInput\": [\"--choose--\"]}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 455, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 2, \"id\": 140255704348896, \"content\": {\"originalFacts\": [[\"blue light\", \"yellow light\"], \"is scattered more than\", [\"yellow light\", \"blue light\"]], \"userInput\": [\"blue light\", \"yellow light\"]}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 568, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348992, \"content\": {\"originalFacts\": [\"the light we see when we arent looking at the sun\", \"direct_indirect_light.jpg\", \"is scattered light\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 683, \"fontSizeStr\": \"12px\"}}], \"connectorElements\": []}"}
@@ -513,6 +514,7 @@ export default {
 
           this.isFeedbackAllowed = response.is_feedback_allowed;
           this.isCorrectAnswerAllowed = response.is_correct_answer_allowed;
+
           // Successful response code here.
           this.setCurrentExNet(exnetWorkingAnswerJson, clear);
         }
@@ -526,6 +528,7 @@ export default {
     async StoreLastWorkingAnswer(exnetName) {
       try {
         let response = await this.getExnet(exnetName, false);
+
         // console.log("Get exnet response\n", response);
         let exnetQuestionPack = response["exnet_working_answer_json"];
         // console.log(JSON.parse(exnetQuestionPack))
@@ -637,6 +640,53 @@ export default {
       }
 
       //console.log(JSON.stringify(params))
+    },
+
+    async getCorrectWorkingAnswer() {
+      this.updateFeedback(null);
+
+      // TODO: check if this call is required, as we all already getting exnet on changing question
+      let response = await this.sendGetExnetRequest(this.selectedQuestion);
+
+      if (
+        response["success"] &&
+        response["exnet_correct_answer_json"] != null &&
+        response["exnet_correct_answer_json"] != ""
+      ) {
+        let lastWorkingAnswerData = await JSON.parse(
+          response["exnet_correct_answer_json"]
+        );
+        let activeExNetQuestionPack =
+          lastWorkingAnswerData["activeExNetQuestionPack"];
+
+        // 4. get the query entry via activeExNetQuestionPack > promptText
+        let promptText = activeExNetQuestionPack["promptText"];
+
+        // 5. Check promptText is a LIST and not just a string. If it is a string - there is no information
+        // that has been stored. Display the question similar to the getExnet above.
+        await this.getExnet(this.selectedQuestion, true);
+        if (typeof promptText === "string") {
+          //console.log(promptText);
+        }
+
+        // 6. If promptText is a LIST, LIST[0] is the query itself - display directly.
+        // 7. LIST[1] contains all the parameters passed when saving. Extract entries and replace those in App.vue.
+        // let data = LIST[1];
+        // this.offSetX = data["offSetX"]
+        else if (typeof promptText === "object") {
+          let data = promptText[1];
+          this.offsetX = parseInt(data["offsetX"]);
+          this.offsetY = parseInt(data["offsetY"]);
+          this.statementElements = data["statementElements"];
+
+          // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
+
+          this.$refs.workspace.loadPreviousAnswer(data);
+        }
+      } else {
+        // If fetching the correct working answer fails, log an error
+        console.error("Failed to fetch correct working answer.");
+      }
     },
 
     async getLastWorkingAnswer() {
