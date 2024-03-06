@@ -1,6 +1,7 @@
 
 // Backend URL
-export const BASE_URL = 'http://localhost:5000/'
+export const BASE_LOCAL_URL = 'http://localhost:5000/'
+export const BASE_URL = 'https://biologic-dev.unimelb.edu.au/'
 
 // Default user id
 export const DEFAULT_USER_ID = "9999999"
