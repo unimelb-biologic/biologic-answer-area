@@ -626,7 +626,7 @@ export default {
       let response = await this.sendGetExnetAnswer(this.selectedQuestion);
 
       // FIX ME: Success spell is wrong!
-      if (response["succcess"]) {
+      if (response["success"]) {
       let lastWorkingAnswerData = await JSON.parse(response["last_working_answer_data"]);
       let activeExNetQuestionPack = lastWorkingAnswerData["activeExNetQuestionPack"];
 
