@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button id="submitBtn" @click="convertToJson" :disabled="showMyAnswer">
+    <button id="submitBtn" @click="convertToJson" :disabled="showMyAnswer && !showCorrectAnswer">
       Submit
     </button>
   </div>
