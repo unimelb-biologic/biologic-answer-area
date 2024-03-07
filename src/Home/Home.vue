@@ -704,8 +704,6 @@ export default {
     },
 
     async getLastWorkingAnswer(isNewExnet) {
-      console.log("testing the getLastWorkingAnswer");
-      console.log(isNewExnet);
       this.updateFeedback(null);
 
       // TODO: check if this call is required, as we all already getting exnet on changing question
