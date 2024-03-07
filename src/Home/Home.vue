@@ -32,7 +32,7 @@
               Please see the instruction here.
               <span class="tooltip_info">
                 This is statement section, you can drag any statement to the
-                answerarea.
+                answer area.
               </span>
             </div>
 
@@ -709,6 +709,13 @@ export default {
       // TODO: check if this call is required, as we all already getting exnet on changing question
       let response = await this.sendGetExnetAnswer(this.selectedQuestion);
 
+      // disabling the show correct answer and show my answer buttons
+      // whenever there is a change in the exnet question from dropdown
+      if (isNewExnet) {
+        this.showMyAnswer = false;
+        this.showCorrectAnswer = false;
+      }
+
       // FIX ME: Success spell is wrong!
       if (response["success"]) {
         let lastWorkingAnswerData = await JSON.parse(
@@ -723,13 +730,6 @@ export default {
         // 5. Check promptText is a LIST and not just a string. If it is a string - there is no information
         // that has been stored. Display the question similar to the getExnet above.
         await this.getExnet(this.selectedQuestion, true);
-
-        // disabling the show correct answer and show my answer buttons
-        // whenever there is a change in the exnet question from dropdown
-        if (isNewExnet) {
-          this.showMyAnswer = false;
-          this.showCorrectAnswer = false;
-        }
 
         if (typeof promptText === "string") {
           //console.log(promptText);
