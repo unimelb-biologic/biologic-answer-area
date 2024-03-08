@@ -1,6 +1,8 @@
 <template>
   <!-- record the statement position-->
   <div class="StatementTruth">
+
+    <FeedbackRubric :isVisible=showFeedback :exnetID=id />
     <div class = "content-wrapper">
     <div class="iconContainer">
       <button v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement" class="statementButton">
@@ -28,6 +30,15 @@
         width="20"
         />
       </button>
+
+      <button v-if="showToggle && isFeedbackAvailable" @click="showFeedback = !showFeedback" class="statementButton">
+          <img
+            src="../../assets/feedback-rubric.png"
+            alt="FeedbackStatement"
+            width="20"
+          />
+      </button>
+
     </div>
     <div class="main-content">
       <div v-if="this.statementData.collapsed" class="concatenated-statement">
@@ -66,8 +77,13 @@
 </template>
 
 <script>
+import FeedbackRubric from '../FeedbackRubric.vue';
+
 export default {
   name: "StatementTruth",
+  components: {
+    FeedbackRubric
+  },
   emits: ["duplicate-statement","toggle-collapsed-statement-truth"],
   props: {
     statementData: Object,
@@ -77,11 +93,13 @@ export default {
       default: true
     }
   },
+  inject: ['isFeedbackAvailable', 'showAllFeedback'],
   data() {
     return {
       //TODO: confirm that the first entry is text, 2nd entry is image.
       userInput: this.statementData.content.userInput,
       id: this.statementData.id,
+      showFeedback: false
     };
   },
   computed: {
@@ -94,6 +112,13 @@ export default {
       return this.collapsed ? "src/assets/expand_icon.png" : "src/assets/collapse_icon.png";
     }
   },
+
+  watch: {
+    showAllFeedback() {
+      this.showFeedback = this.showAllFeedback
+    }
+  },
+
   methods: {
     // Verify the image format to display
     isImage(fact) {

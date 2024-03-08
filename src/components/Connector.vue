@@ -8,6 +8,7 @@
     @drop="onDrop($event, 'x')"
 
     >
+    <FeedbackRubric :isVisible=showFeedback :exnetID=connectorID :isConnector=true />
     <div v-if="this.parent !== undefined" class="buttons-container">
       <!--button @click="call_connectorString">call connector String</button-->
       <button v-if="this.clickCount % 2 === 0" @click="displayFormChanged" class="connectorButton">
@@ -37,6 +38,16 @@
         
       />
     </button>
+
+    <button v-if="isFeedbackAvailable" @click="showFeedback = !showFeedback" class="connectorButton">
+      <img 
+        src="../assets/feedback-rubric.png"
+        alt="Feedback"
+        width="20"
+        
+      />
+    </button>
+
     <button @click="deleteConnector({ id: connectorID })" class="connectorButton">
       <img
         class="delete-button"
@@ -299,10 +310,12 @@
 <script>
 import RenderStatement from "@/components/RenderStatement.vue";
 import ConnectorContextMenu from "@/components/ConnectorContextMenu.vue";
+import FeedbackRubric from "@/components/FeedbackRubric.vue";
 
 export default {
   name: "Connector",
-  components: { ConnectorContextMenu, RenderStatement },
+  components: { ConnectorContextMenu, RenderStatement, FeedbackRubric },
+  inject : ['isFeedbackAvailable', 'showAllFeedback'],
   emits: [
     "droppedAstat",
     "droppedBstat",
@@ -360,6 +373,7 @@ export default {
       word: null,
       contentTextAll: null, // Record the contents in children and in itself
       // clickCountInConn: 0,
+      showFeedback: false
     };
   },
   computed: {
@@ -1033,6 +1047,9 @@ export default {
           ? ""
           : this.currConnectorContent[2]);
     },
+    showAllFeedback() {
+      this.showFeedback = this.showAllFeedback
+    }
   },
   created() {
     // this.currConnectorContent = JSON.parse(JSON.stringify(this.connectorContent[this.selectedPhrase]));

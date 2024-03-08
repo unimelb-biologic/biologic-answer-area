@@ -26,6 +26,12 @@
   /* change visible to hidden for opposite effect */
 }
 
+.tooltips.active .tooltip_info {
+  visibility: visible;
+  /* change visible to hidden for opposite effect */
+}
+
+
 /* statementFreeText tooltips css style */
 .StatementFreeText .StatementFreeText_tooltip {
 visibility: hidden;
