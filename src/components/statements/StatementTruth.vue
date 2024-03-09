@@ -99,6 +99,7 @@ export default {
       //TODO: confirm that the first entry is text, 2nd entry is image.
       userInput: this.statementData.content.userInput,
       id: this.statementData.id,
+      userSelected: [],
       showFeedback: false
     };
   },
