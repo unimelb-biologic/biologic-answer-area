@@ -60,7 +60,7 @@
                         :value="item"
                         :key="item"
                       >
-                        {{ item.slice(0, -".data".length) }}
+                        {{ item.endsWith(".data") ? item.slice(0, -5) : item }}
                       </option>
                     </select>
 
