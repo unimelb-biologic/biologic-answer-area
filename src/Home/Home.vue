@@ -13,6 +13,7 @@
           :userID="userID"
           @onDownloadExNet="onDownloadExNet"
           @setCurrentExNet="setCurrentExNet"
+          @logout="handleLogout"
         />
       </pane>
       <pane min-size="5">
@@ -247,6 +248,11 @@ export default {
         await this.sendGetFeedback(this.selectedQuestion);
         window.alert("Submission successful!");
       }
+    },
+
+    // handling log out functionality
+    handleLogout() {
+      this.authorised = false;
     },
 
     // // Selects a specific question from the list.
