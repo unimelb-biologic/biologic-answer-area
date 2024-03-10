@@ -5,14 +5,6 @@
         Log in
       </button>
       <br />
-      <!-- TODO: Remove this! Development purposes only! -->
-      <button
-        @click="authorised = true"
-        v-if="!authorised"
-        style="font-size: 30px"
-      >
-        Bypass login
-      </button>
     </div>
 
     <splitpanes v-if="authorised" class="mainContainer" horizontal>
@@ -188,7 +180,7 @@ export default {
       offsetY: 0,
       answerAreaEnabled: true,
       clientID: null,
-      authorised: true, // TODO: automatically bypass login - for prototyping purpose
+      authorised: false, // TODO: automatically bypass login - for prototyping purpose
       secret_key: null,
       userID: null,
       answerText: [], // Receive all content texts from AnswerArea
