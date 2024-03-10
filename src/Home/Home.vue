@@ -1,7 +1,11 @@
 <template>
   <div>
     <div v-if="!authorised">
-      <button @click="logIn" v-if="!authorised" style="font-size: 30px">
+      <button
+        @click="logIn('Enter your Student ID')"
+        v-if="!authorised"
+        style="font-size: 30px"
+      >
         Log in
       </button>
       <br />
@@ -235,6 +239,57 @@ export default {
   },
 
   methods: {
+    // Sends login request and processes returned promise.
+    async logIn(userId) {
+      let response = await this.sendLoginRequest(userId);
+
+      if (response && response["success"] === true) {
+        this.secret_key = response["persistent_secret_key"];
+        this.authorised = true;
+
+        // Store authorization status to session storage
+        sessionStorage.setItem("authStatus", "authorized");
+        sessionStorage.setItem("secretKey", this.secret_key);
+        sessionStorage.setItem("clientID", this.clientID);
+        sessionStorage.setItem("userID", this.userID);
+
+        window.alert("Successfully authorised!");
+      } else {
+        window.alert("Login failed!");
+      }
+    },
+
+    // Sends the login HTTP request to the server.
+    async sendLoginRequest(user_name = DEFAULT_USER_ID) {
+      let userID = window.prompt("Enter your user ID.", user_name);
+      this.userID = userID;
+      await this.digestMessage(userID).then((digestHex) => {
+        userID = digestHex;
+        // this.userID = userID//save userID
+      });
+
+      this.clientID = userID;
+      try {
+        let login_url = BASE_URL + API_ENDPOINTS.LOGIN_ENDPOINT;
+        let response = await fetch(login_url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: `{"client_id":"${userID}"}`,
+        });
+        return await response.json();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    // handling log out functionality
+    handleLogout() {
+      sessionStorage.clear();
+      this.authorised = false;
+    },
+
     async updateJsonOutput(dataObject) {
       this.dataObject = dataObject;
       this.dataObject["offsetX"] = String(this.offsetX);
@@ -248,11 +303,6 @@ export default {
         await this.sendGetFeedback(this.selectedQuestion);
         window.alert("Submission successful!");
       }
-    },
-
-    // handling log out functionality
-    handleLogout() {
-      this.authorised = false;
     },
 
     // // Selects a specific question from the list.
@@ -408,50 +458,6 @@ export default {
       const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
       // convert bytes to hex string
       return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-    },
-
-    // Sends the login HTTP request to the server.
-    async sendLoginRequest(user_name = DEFAULT_USER_ID) {
-      let userID = window.prompt("Enter your user ID.", user_name);
-      this.userID = userID;
-      await this.digestMessage(userID).then((digestHex) => {
-        userID = digestHex;
-        // this.userID = userID//save userID
-      });
-
-      this.clientID = userID;
-      try {
-        let login_url = BASE_URL + API_ENDPOINTS.LOGIN_ENDPOINT;
-        let response = await fetch(login_url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: `{"client_id":"${userID}"}`,
-        });
-        return await response.json();
-      } catch (error) {
-        console.log(error);
-      }
-    },
-
-    // Sends login request and processes returned promise.
-    async logIn(userId) {
-      let response = await this.sendLoginRequest(userId);
-      if (response && response["success"] === true) {
-        this.secret_key = response["persistent_secret_key"];
-        this.authorised = true;
-
-        // Store authorization status to session storage
-        sessionStorage.setItem("authStatus", "authorized");
-        sessionStorage.setItem("secretKey", this.secret_key);
-        sessionStorage.setItem("clientID", this.clientID);
-        sessionStorage.setItem("userID", this.userID);
-
-        window.alert("Successfully authorised!");
-      } else {
-        window.alert("Login failed!");
-      }
     },
 
     async sendGetQuestionsListRequest() {
