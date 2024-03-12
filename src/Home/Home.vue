@@ -253,6 +253,17 @@ export default {
         sessionStorage.setItem("clientID", this.clientID);
         sessionStorage.setItem("userID", this.userID);
 
+        const urlParams = this.$route.query;
+
+        await this.getQuestions();
+
+        if (!this.questions !== null) {
+          this.selectedQuestion = urlParams.exnetName
+            ? urlParams.exnetName
+            : this.questions[0];
+          await this.getExnet(this.selectedQuestion, true);
+          await this.getLastWorkingAnswer(true);
+        }
         window.alert("Successfully authorised!");
       } else {
         window.alert("Login failed!");
@@ -719,7 +730,6 @@ export default {
         this.showMyAnswer = false;
         this.showCorrectAnswer = false;
       }
-
       // FIX ME: Success spell is wrong!
       if (response["success"]) {
         let lastWorkingAnswerData = await JSON.parse(
