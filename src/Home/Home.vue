@@ -96,12 +96,14 @@
 
                   <AnswerArea
                     ref="workspace"
+                    :selectedExnet="selectedQuestion"
                     :droppedItems="droppedItems"
                     :draggedItem="draggedItem"
                     :offsetX="offsetX"
                     :offsetY="offsetY"
                     :statements="statementElements"
                     :sharedData="this.sharedData"
+                    @get-reset-answer-area="getResetAnswerArea"
                     @get-correct-answer="getCorrectWorkingAnswer"
                     @get-last-working-answer="getLastWorkingAnswer"
                     @answer-data="updateJsonOutput"
@@ -302,6 +304,7 @@ export default {
     },
 
     async updateJsonOutput(dataObject) {
+
       this.dataObject = dataObject;
       this.dataObject["offsetX"] = String(this.offsetX);
       this.dataObject["offsetY"] = String(this.offsetY);
@@ -401,6 +404,11 @@ export default {
       console.log(exNetRawData);
       const exnetWorkingAnswerJson = JSON.parse(exNetRawData);
       this.setCurrentExNet(exnetWorkingAnswerJson, true);
+    },
+
+    getResetAnswerArea(exnetName) {
+      console.log(exnetName);
+      this.getExnet(exnetName, true);
     },
 
     // Download ExNetJson
@@ -706,6 +714,7 @@ export default {
           let data = promptText[1];
           this.offsetX = parseInt(data["offsetX"]);
           this.offsetY = parseInt(data["offsetY"]);
+
           this.statementElements = data["statementElements"];
 
           // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
@@ -757,6 +766,7 @@ export default {
           let data = promptText[1];
           this.offsetX = parseInt(data["offsetX"]);
           this.offsetY = parseInt(data["offsetY"]);
+
           this.statementElements = data["statementElements"];
 
           // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
