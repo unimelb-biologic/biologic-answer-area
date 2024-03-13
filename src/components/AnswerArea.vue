@@ -1,7 +1,18 @@
 <template>
   <div>
-    <button id="submitBtn" @click="convertToJson" :disabled="showMyAnswer && !showCorrectAnswer">
+    <button
+      id="submitBtn"
+      @click="convertToJson"
+      :disabled="showMyAnswer && !showCorrectAnswer"
+    >
       Submit
+    </button>
+    <button
+      id="resetBtn"
+      @click="resetAnswerArea(selectedExnet)"
+      :disabled="showMyAnswer && !showCorrectAnswer"
+    >
+      Reset
     </button>
   </div>
   <div v-if="isFeedbackAvailable">
@@ -116,10 +127,12 @@ export default {
     "connector-deleted",
     "answer-data",
     "get-correct-answer",
+    "reset-answer-area",
     "get-last-working-answer",
     "update-shared-data",
   ],
   props: {
+    selectedExnet: String,
     statements: Object, // this is a reference to the statementElements in Home.vue MM
     data: Object, // I don't think this is used MM
     droppedItems: Array, // record the dropped statements
@@ -217,11 +230,16 @@ export default {
 
       this.$emit("get-correct-answer");
     },
+
     showUserAnswer() {
       this.$emit("update-show-correct-answer", true);
       this.$emit("update-show-my-answer", false);
 
       this.$emit("get-last-working-answer", false);
+    },
+
+    resetAnswerArea(selectedExnet) {
+      this.$emit("get-reset-answer-area", selectedExnet);
     },
 
     convertToJson() {
@@ -254,6 +272,7 @@ export default {
       this.$emit("answer-data", this.data_Object);
       //console.log(this.data_Object);
     },
+
     handleLinkWordChange(info) {
       const connectorID = info[0];
       this.allConnectors[connectorID]["selectedPhrase"] = info[1];
@@ -1284,6 +1303,7 @@ export default {
       this.allStatements[id]["collapsed"] =
         !this.allStatements[id]["collapsed"];
     },
+
     toggleShowPopupFromRenderStatement(id) {
       console.log("AnswerArea:toggleShowPopupFromRenderStatement");
       this.allStatements[id]["showPopup"] =
