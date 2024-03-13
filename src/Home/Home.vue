@@ -406,9 +406,8 @@ export default {
       this.setCurrentExNet(exnetWorkingAnswerJson, true);
     },
 
-    getResetAnswerArea(exnetName) {
-      console.log(exnetName);
-      this.getExnet(exnetName, true);
+    getResetAnswerArea(selectedExnet) {
+      this.getExnet(selectedExnet, true);
     },
 
     // Download ExNetJson

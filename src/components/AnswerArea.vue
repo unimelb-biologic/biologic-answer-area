@@ -7,8 +7,6 @@
     >
       Submit
     </button>
-  </div>
-  <div>
     <button
       id="resetBtn"
       @click="resetAnswerArea(selectedExnet)"
