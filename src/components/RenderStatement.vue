@@ -87,6 +87,7 @@ export default {
       answeredStat: null,
       hide_renderCollapsed: false,
       hide_renderShowPopups: true,
+      remove_formats: [".png", ".jpg", ".jpeg"],  // array of formats to exclude from the answer string
     };
   },
   methods: {
@@ -202,11 +203,16 @@ export default {
     },
 
     initContent() {
-      if (this.statementData.statementType === 0 || this.statementData.statementType === 1) {
+      if (
+        this.statementData.statementType === 0 ||
+        this.statementData.statementType === 1
+      ) {
         // TODO: process the "xxx.jpg" in TRUTH statement
         this.contentText = this.statementData.content.originalFacts
-            .filter((fact) => !fact.includes(".jpg"))
-            .join(" ");
+          .filter(
+            (fact) => !this.remove_formats.some((format) => fact.includes(format))
+          )
+          .join(" ");
       }
       this.answeredStat = this.statementData;
     },

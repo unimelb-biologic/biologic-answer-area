@@ -773,6 +773,7 @@ export default {
           this.$refs.workspace.loadPreviousAnswer(data);
         }
       } else {
+        this.statementElements = []
         await this.getExnet(this.selectedQuestion, true);
       }
     },
