@@ -127,7 +127,7 @@ export default {
     "connector-deleted",
     "answer-data",
     "get-correct-answer",
-    "reset-answer-area",
+    "get-reset-answer-area",
     "get-last-working-answer",
     "update-shared-data",
   ],
