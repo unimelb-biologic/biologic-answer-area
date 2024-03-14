@@ -114,6 +114,7 @@
                     @update-show-correct-answer="updateShowCorrectAnswer"
                     @update-answer-area-content="handleUpdateAnswerContent"
                     @statement-used="handleStatementUsed"
+                    @statement-removed="handleStatementRemoval"
                     @enable-area="(n) => toggleAnswerArea(n)"
                     @update-shared-data="updateSharedData"
                   />
@@ -331,6 +332,19 @@ export default {
       for (let statement of this.statementElements) {
         if (statement["id"] === statementID) {
           statement["visible"] = state;
+          return;
+        }
+      }
+    },
+
+    // invoked when a connector with statements is deleted.
+    // Set the corresponding statement to be visible in Statement Area
+    // and removes references to the deleted connector. 
+    handleStatementRemoval(statementID, state = false) {
+      for (let statement of this.statementElements) {
+        if (statement["id"] === statementID) {
+          statement["visible"] = state;
+          statement["parent"] = undefined
           return;
         }
       }

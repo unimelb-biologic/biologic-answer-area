@@ -120,7 +120,8 @@ export default {
   components: { Connector, RenderStatement },
   emits: [
     "update-answer-area-content",
-    "statementUsed",
+    "statement-used",
+    "statement-removed",
     "setStatementElements",
     "setDraggedItem",
     "setDroppedItems",
@@ -301,7 +302,7 @@ export default {
         console.log(
           "AnswerArea:handAStatementDrop: A statement was dragged directly onto connector left side."
         );
-        this.$emit("statementUsed", statementID);
+        this.$emit("statement-used", statementID);
       } else if (statementOldParent === -1) {
         console.log(
           "AnswerArea:handAStatementDrop: A statement was dragged from ans area onto connector left side."
@@ -358,7 +359,7 @@ export default {
         console.log(
           "A statement was dragged directly onto connector right side."
         );
-        this.$emit("statementUsed", statementID);
+        this.$emit("statement-used", statementID);
       } else if (statementOldParent === -1) {
         console.log(
           "A statement was dragged from ans area onto connector right side."
@@ -916,6 +917,7 @@ export default {
     },
 
     onDrop(e) {
+
       e.preventDefault();
 
       //retrieve the internal grab offsets that were recorded at the start of the drag
@@ -1053,7 +1055,6 @@ export default {
         if (getStatement) {
           statementOldParent = this.allStatements[statementID]["parent"];
         }
-
         //console.log(          "FINAL POSITION =========>",  leftWithinAnswerArea,  topWithinAnswerArea,  "<================");
         if (statementOldParent === undefined) {
           this.allStatements[statementID]["parent"] = -1;
@@ -1063,7 +1064,7 @@ export default {
           this.rootStatementID_set.add(statementID);
 
           // TODO: emit statement used.
-          this.$emit("statementUsed", statementID);
+          this.$emit("statement-used", statementID);
 
           // TODO: Render text???
         } else if (statementOldParent === -1) {
@@ -1071,7 +1072,8 @@ export default {
           this.allStatements[statementID]["top"] = topWithinAnswerArea;
           this.allStatements[statementID]["left"] = leftWithinAnswerArea;
           //console.log(this);
-        } else {
+        } 
+        else {
           // must have a parent, which means it's part of a connector tree
           this.allStatements[statementID]["parent"] = -1;
           this.allStatements[statementID]["position"] = "absolute";
@@ -1255,10 +1257,10 @@ export default {
         this.deleteConnector({ id: rightID });
       }
       if (leftType === "statement") {
-        this.$emit("statementUsed", leftID, true);
+        this.$emit("statement-removed", leftID, true);
       }
       if (rightType === "statement") {
-        this.$emit("statementUsed", rightID, true);
+        this.$emit("statement-removed", rightID, true);
       }
       delete this.allConnectors[id];
       this.rootConnectorID_set.delete(id);
@@ -1286,7 +1288,7 @@ export default {
       this.allStatements[duplicatedStatement.id]["top"] = baseTop + 25;
       this.allStatements[duplicatedStatement.id]["left"] = baseLeft + 25;
       this.rootStatementID_set.add(duplicatedStatement.id);
-      this.$emit("statementUsed", duplicatedStatement.id);
+      this.$emit("statement-used", duplicatedStatement.id);
     },
 
     toggleCollapsedRenderStatement(id) {
@@ -1342,7 +1344,7 @@ export default {
       // Remove the connector from allConnectors object
       const { id, parentId, position } = params;
       if (position) {
-        this.$emit("statementUsed", id, true);
+        this.$emit("statement-used", id, true);
         delete this.allConnectors[parentId][`${position}ID`];
         delete this.allConnectors[parentId][`${position}Type`];
       }
