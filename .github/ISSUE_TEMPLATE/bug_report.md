@@ -7,20 +7,27 @@ assignees: ''
 
 ---
 
-**Describe the bug**
+**Describe the bug:**
 A clear and concise description of what the bug is.
 
-**To Reproduce**
+**User Type**
+- [ ] Student 
+- [ ] Academic 
+- [ ] Admin 
+
+Give ID if appropriate or if the issue happens specifically for the user.
+
+**To Reproduce:**
 Steps to reproduce the behavior:
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
 4. See error
 
-**Expected behavior**
+**Expected behavior:**
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
+**Screenshots:**
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
@@ -28,11 +35,13 @@ If applicable, add screenshots to help explain your problem.
  - Browser [e.g. chrome, safari]
  - Version [e.g. 22]
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
-
 **Additional context**
 Add any other context about the problem here.
+
+**Priority**
+On a scale of 1 to 5:
+- [ ] 5: Critical issue requiring immediate attention
+- [ ] 4: Major issue affecting core functionality
+- [ ] 3: Significant issue impacting usability or performance
+- [ ] 2: Minor issue with limited impact
+- [ ] 1: Cosmetic issue or enhancement request
