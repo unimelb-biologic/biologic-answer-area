@@ -1,13 +1,17 @@
 <template>
   <div>
     <div v-if="!authorised">
+      <div style="display: flex; flex-direction: row; align-items: center">
+      <img src="https://murraym678.github.io/images/biologic/BiologicEditor_Icon_for_poster.png" width="50">
+
       <button
         @click="logIn('Enter your Student ID')"
         v-if="!authorised"
-        style="font-size: 30px"
+        class = "biologic_login_button"
       >
-        Log in
+      Biologic Log in
       </button>
+      </div>
       <br />
     </div>
 
@@ -24,7 +28,7 @@
         <Splitpanes>
           <pane max-size="14" class="statementContainer" min-size="5">
             <!-- Displays Statements -->
-            <h2 class="areaHeading">Statement Area</h2>
+            <h2 class="areaHeading">Statements</h2>
             <div class="tooltips">
               Please see the instruction here.
               <span class="tooltip_info">
@@ -132,7 +136,7 @@
           <pane max-size="14" class="connectorContainer" min-size="5">
             <!-- Displays the connectors -->
             <div class="displayConnectors">
-              <h2 class="areaHeading">Connector Area</h2>
+              <h2 class="areaHeading">Connectors</h2>
               <ConnectorArea
                 :sharedData="this.sharedData"
                 @update-shared-data="updateSharedData"
@@ -301,6 +305,7 @@ export default {
     handleLogout() {
       sessionStorage.clear();
       this.authorised = false;
+      this.showSurveyPrompt();
     },
 
     async updateJsonOutput(dataObject) {
@@ -782,6 +787,20 @@ export default {
       this.feedback = feedback;
       this.isFeedbackAvailable = feedback ? true : false;
     },
+    
+    showSurveyPrompt() {
+      // Show confirmation dialog
+      var response = confirm(`Hi students, We would love to use your answers for our BioLogic research project. All responses will be DE-IDENTIFIED so nobody teaching in BIOM20001 will know which answers were yours.
+      Clicking OK will take you to a site where you can find out more, BEFORE giving your consent. We'd also love any feedback you might have so there is a survey you can do. If you'd like to do this later use the link in Lisa's email. And if you don't want to participate, no worries. Just click Cancel.`);
+      
+      // Check user response
+      if (response == true) {
+        // If user clicks OK, redirect to the survey URL in a new window
+        window.open("https://melbourneuni.au1.qualtrics.com/jfe/form/SV_71BkxLoxFCgD9SC", "_blank");
+      } else {
+        // If user clicks No thanks or cancels the dialog, do nothing
+      }
+    }
   },
 
   async mounted() {
@@ -813,7 +832,7 @@ export default {
         await this.getLastWorkingAnswer(true);
       }
     }
-  },
+  }
 };
 </script>
 
@@ -822,6 +841,36 @@ body {
   margin: 0px;
   padding: 0px;
 }
+
+.biologic_login_button {
+  font-size: 25px;
+  color:rgb(162, 38, 38);
+  background-color: #fff;
+  margin: 2px;
+  padding: 10px;
+  align-items: center;
+  border-top: 1px solid #8b8b8b; /* Darker green for bevel effect */
+  border-left: 1px solid #848484; /* Darker green for bevel effect */
+  border-bottom: 2px solid #4b4b4b; /* Darker green for bevel effect */
+  border-right: 2px solid #444444; /* Darker green for bevel effect */
+}
+.biologic_login_button:hover {
+    background-color: #e1e1e1; /* Change color on hover */
+    border-bottom: 2px solid #2d1010; /* Darker green for bevel effect on hover */
+    border-right: 2px solid #2d1010; /* Darker green for bevel effect on hover */
+  }
+
+.biologic_login_button:active {
+    background-color: #ffffff; /* Darker green when button is pressed */
+    border-top: 3px solid #8b8b8b; /* Darker green for bevel effect */
+    border-left: 3px solid #848484; /* Darker green for bevel effect */
+    border-bottom: 1px solid #2d1010; /* Remove bottom border when button is pressed */
+    border-right: 1px solid #2d1010; /* Remove right border when button is pressed */
+    transform: translate(1px,1px); /* Move button down by 2 pixels when pressed */
+  }
+
+
+
 
 .displayWorkspace {
   position: relative;
@@ -840,13 +889,13 @@ body {
 }
 
 .splitpanes--vertical > .splitpanes__splitter {
-  min-width: 8px;
-  background: rgb(198, 155, 155);
+  min-width: 2px;
+  background: rgb(156, 62, 62);
 }
 
 .splitpanes--horizontal > .splitpanes__splitter {
-  min-height: 8px;
-  background: rgb(198, 155, 155);
+  min-height: 2px;
+  background: rgb(162, 73, 73);
 }
 
 .mainContainer {
