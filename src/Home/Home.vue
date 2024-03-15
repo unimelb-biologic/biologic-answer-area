@@ -810,7 +810,7 @@ export default {
       // Check user response
       if (response == true) {
         // If user clicks OK, redirect to the survey URL in a new window
-        window.open("https://melbourneuni.au1.qualtrics.com/jfe/form/SV_71BkxLoxFCgD9SC", "_blank");
+        window.open("https://melbourneuni.au1.qualtrics.com/jfe/form/SV_4Jig2LkO92qQjt4", "_blank");
       } else {
         // If user clicks No thanks or cancels the dialog, do nothing
       }
