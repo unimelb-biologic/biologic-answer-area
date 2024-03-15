@@ -279,7 +279,7 @@ export default {
 
     // Sends the login HTTP request to the server.
     async sendLoginRequest(user_name = DEFAULT_USER_ID) {
-      let userID = window.prompt("Enter your user ID.", user_name);
+      let userID = window.prompt("Enter your Student ID.");
       this.userID = userID;
       await this.digestMessage(userID).then((digestHex) => {
         userID = digestHex;
