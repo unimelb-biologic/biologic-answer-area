@@ -1382,8 +1382,6 @@ export default {
       for (let item in newStatements) {
         item = newStatements[item];
         this.allStatements[item.id] = item;
-        this.allStatements[item.id]["parent"] = undefined;
-        this.allStatements[item.id]["side"] = undefined;
       }
     },
   },
