@@ -180,7 +180,12 @@ export default {
       // Concat all the texts
       for (let i = 0; i < this.originalFacts.length; i++) {
         if (typeof this.originalFacts[i] === "string") {
-          studentContentText += this.originalFacts[i];
+          // formatting original fact to remove https links and images
+          const formattedFact = this.originalFacts[i].replace(
+            /(https?:\/\/[^\s]+)|(\.png$)|(\.jpg$)|(\.jpeg$)/gi,
+            ""
+          );
+          studentContentText += formattedFact;
           studentContentText += " ";
         } else {
           studentContentText += this.userSelected[i];
