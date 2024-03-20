@@ -75,7 +75,6 @@ export default {
 
 <style scoped>
 .right_menu {
-  position: absolute;
   right: 16px;
   display: flex;
   flex-direction: row;

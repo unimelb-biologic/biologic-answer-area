@@ -250,6 +250,7 @@ export default {
   opacity: 1;
 }
 .statementButton {
+  cursor: pointer;
   width: 24px;
   height: 24px;
   margin: 2px;
