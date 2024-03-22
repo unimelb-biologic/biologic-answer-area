@@ -1262,6 +1262,11 @@ export default {
       }
       delete this.allConnectors[id];
       this.rootConnectorID_set.delete(id);
+
+      // deleting the connector text from string area upon deletion
+      if (this.answerContent.hasOwnProperty(id)) {
+        delete this.answerContent[id];
+      }
       this.$emit("connector-deleted", id);
     },
 
