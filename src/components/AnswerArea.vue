@@ -917,7 +917,6 @@ export default {
     },
 
     onDrop(e) {
-
       e.preventDefault();
 
       //retrieve the internal grab offsets that were recorded at the start of the drag
@@ -1072,8 +1071,7 @@ export default {
           this.allStatements[statementID]["top"] = topWithinAnswerArea;
           this.allStatements[statementID]["left"] = leftWithinAnswerArea;
           //console.log(this);
-        } 
-        else {
+        } else {
           // must have a parent, which means it's part of a connector tree
           this.allStatements[statementID]["parent"] = -1;
           this.allStatements[statementID]["position"] = "absolute";
@@ -1384,11 +1382,6 @@ export default {
       for (let item in newStatements) {
         item = newStatements[item];
         this.allStatements[item.id] = item;
-        this.allStatements[item.id]["parent"] = undefined;
-        this.allStatements[item.id]["top"] = undefined;
-        this.allStatements[item.id]["left"] = undefined;
-        this.allStatements[item.id]["position"] = undefined;
-        this.allStatements[item.id]["side"] = undefined;
       }
     },
   },
