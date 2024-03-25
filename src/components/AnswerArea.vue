@@ -2,7 +2,7 @@
   <div>
     <button
       id="submitBtn"
-      @click="convertToJson"
+      @click="convertToJson(false)"
       :disabled="showMyAnswer && !showCorrectAnswer"
     >
       Submit
@@ -243,8 +243,7 @@ export default {
       this.$emit("get-reset-answer-area", selectedExnet);
     },
 
-    convertToJson() {
-      //console.log("button pressed");
+    convertToJson(isSavingLocally) {
       this.data_Object = {
         connectorCount: String(this.connectorCount),
         rootConnectorID_set: Array.from(this.rootConnectorID_set),
@@ -264,6 +263,11 @@ export default {
         offsetX: undefined,
         offsetY: undefined,
       };
+
+      // return object if data is being downloaded locally
+      if (isSavingLocally) {
+        return this.data_Object;
+      }
 
       // enables the correct answer option
       this.$emit("update-show-correct-answer", true);
