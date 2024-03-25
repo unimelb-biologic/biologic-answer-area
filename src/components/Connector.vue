@@ -1202,6 +1202,7 @@ export default {
   transition: opacity 0.3s ease;
 }
 .connectorButton {
+  cursor: pointer;
   width: 24px;
   height: 24px;
   margin: 2px;

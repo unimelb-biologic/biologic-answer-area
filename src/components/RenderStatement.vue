@@ -28,6 +28,7 @@
         v-bind="$attrs"
         v-if="this.statementData.statementType === 1"
         :statement-data="this.statementData"
+        @user-choice-changed="handleUserChoiceChanged"
         @duplicate-statement="duplicateStatement"
         @toggle-collapsed-statement-truth="toggleCollapsedStatementTruth"
     />
