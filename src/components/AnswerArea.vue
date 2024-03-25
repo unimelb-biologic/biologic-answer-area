@@ -53,6 +53,7 @@
       :showToggle="true"
       :sharedData="sharedData"
       @duplicate-statement="duplicateStatement"
+      @update-statement-content="handleUpdateStatementContent"
       @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething"
       @statement-dropped-on-statement="handleStatementDroppedOnStatement"
       @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
@@ -1100,6 +1101,7 @@ export default {
             console.error("The dropped statement has a wrong parent ID.");
           }
         }
+        this.answerContent[statementID] = transContent;
       }
     },
 
@@ -1179,9 +1181,16 @@ export default {
       }
     },
 
+    // invoked when student statement choice is changed to
+    // update the answer string area
+    handleUpdateStatementContent(contentText, statementID) {
+      this.answerContent[statementID] = contentText[0];
+    },
+
     emitUpdateContent(newAnswerContentObject) {
       this.$emit("update-answer-area-content", [
         this.rootConnectorID_set,
+        this.rootStatementID_set,
         newAnswerContentObject,
       ]);
     },

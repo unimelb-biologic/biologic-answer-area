@@ -2,15 +2,18 @@
   <div>
     <div v-if="!authorised">
       <div style="display: flex; flex-direction: row; align-items: center">
-      <img src="https://murraym678.github.io/images/biologic/BiologicEditor_Icon_for_poster.png" width="50">
+        <img
+          src="https://murraym678.github.io/images/biologic/BiologicEditor_Icon_for_poster.png"
+          width="50"
+        />
 
-      <button
-        @click="logIn('Enter your Student ID')"
-        v-if="!authorised"
-        class = "biologic_login_button"
-      >
-      Biologic Log in
-      </button>
+        <button
+          @click="logIn('Enter your Student ID')"
+          v-if="!authorised"
+          class="biologic_login_button"
+        >
+          Biologic Log in
+        </button>
       </div>
       <br />
     </div>
@@ -310,7 +313,6 @@ export default {
     },
 
     async updateJsonOutput(dataObject) {
-
       this.dataObject = dataObject;
       this.dataObject["offsetX"] = String(this.offsetX);
       this.dataObject["offsetY"] = String(this.offsetY);
@@ -344,12 +346,12 @@ export default {
 
     // invoked when a connector with statements is deleted.
     // Set the corresponding statement to be visible in Statement Area
-    // and removes references to the deleted connector. 
+    // and removes references to the deleted connector.
     handleStatementRemoval(statementID, state = false) {
       for (let statement of this.statementElements) {
         if (statement["id"] === statementID) {
           statement["visible"] = state;
-          statement["parent"] = undefined
+          statement["parent"] = undefined;
           return;
         }
       }
@@ -409,12 +411,19 @@ export default {
 
     // Receive all content texts from AnswerArea
     handleUpdateAnswerContent(info) {
-      const rootID = Array.from(info[0]);
-      const newAnswerContentObject = info[1];
+      const rootIDs = Array.from(info[0]);
+      const statementIDs = Array.from(info[1]);
+      const newAnswerContentObject = info[2];
+
       this.answerText = [];
-      for (let i = 0; i < rootID.length; i++) {
+      for (let i = 0; i < rootIDs.length; i++) {
         this.answerText.push(
-          Object.values(newAnswerContentObject[rootID[i]]).join("")
+          Object.values(newAnswerContentObject[rootIDs[i]]).join("")
+        );
+      }
+      for (let i = 0; i < statementIDs.length; i++) {
+        this.answerText.push(
+          Object.values(newAnswerContentObject[statementIDs[i]]).join("")
         );
       }
     },
@@ -801,20 +810,24 @@ export default {
       this.feedback = feedback;
       this.isFeedbackAvailable = feedback ? true : false;
     },
-    
+
     showSurveyPrompt() {
       // Show confirmation dialog
-      var response = confirm(`Hi students, We would love to use your answers for our BioLogic research project. All responses will be DE-IDENTIFIED so nobody teaching in BIOM20001 will know which answers were yours.
+      var response =
+        confirm(`Hi students, We would love to use your answers for our BioLogic research project. All responses will be DE-IDENTIFIED so nobody teaching in BIOM20001 will know which answers were yours.
       Clicking OK will take you to a site where you can find out more, BEFORE giving your consent. We'd also love any feedback you might have so there is a survey you can do. If you'd like to do this later use the link in Lisa's email. And if you don't want to participate, no worries. Just click Cancel.`);
-      
+
       // Check user response
       if (response == true) {
         // If user clicks OK, redirect to the survey URL in a new window
-        window.open("https://melbourneuni.au1.qualtrics.com/jfe/form/SV_4Jig2LkO92qQjt4", "_blank");
+        window.open(
+          "https://melbourneuni.au1.qualtrics.com/jfe/form/SV_4Jig2LkO92qQjt4",
+          "_blank"
+        );
       } else {
         // If user clicks No thanks or cancels the dialog, do nothing
       }
-    }
+    },
   },
 
   async mounted() {
@@ -846,7 +859,7 @@ export default {
         await this.getLastWorkingAnswer(true);
       }
     }
-  }
+  },
 };
 </script>
 
@@ -858,7 +871,7 @@ body {
 
 .biologic_login_button {
   font-size: 25px;
-  color:rgb(162, 38, 38);
+  color: rgb(162, 38, 38);
   background-color: #fff;
   margin: 2px;
   padding: 10px;
@@ -869,22 +882,22 @@ body {
   border-right: 2px solid #444444; /* Darker green for bevel effect */
 }
 .biologic_login_button:hover {
-    background-color: #e1e1e1; /* Change color on hover */
-    border-bottom: 2px solid #2d1010; /* Darker green for bevel effect on hover */
-    border-right: 2px solid #2d1010; /* Darker green for bevel effect on hover */
-  }
+  background-color: #e1e1e1; /* Change color on hover */
+  border-bottom: 2px solid #2d1010; /* Darker green for bevel effect on hover */
+  border-right: 2px solid #2d1010; /* Darker green for bevel effect on hover */
+}
 
 .biologic_login_button:active {
-    background-color: #ffffff; /* Darker green when button is pressed */
-    border-top: 3px solid #8b8b8b; /* Darker green for bevel effect */
-    border-left: 3px solid #848484; /* Darker green for bevel effect */
-    border-bottom: 1px solid #2d1010; /* Remove bottom border when button is pressed */
-    border-right: 1px solid #2d1010; /* Remove right border when button is pressed */
-    transform: translate(1px,1px); /* Move button down by 2 pixels when pressed */
-  }
-
-
-
+  background-color: #ffffff; /* Darker green when button is pressed */
+  border-top: 3px solid #8b8b8b; /* Darker green for bevel effect */
+  border-left: 3px solid #848484; /* Darker green for bevel effect */
+  border-bottom: 1px solid #2d1010; /* Remove bottom border when button is pressed */
+  border-right: 1px solid #2d1010; /* Remove right border when button is pressed */
+  transform: translate(
+    1px,
+    1px
+  ); /* Move button down by 2 pixels when pressed */
+}
 
 .displayWorkspace {
   position: relative;

@@ -1,52 +1,52 @@
 <template>
   <div
-      class="statement-box"
-      id="renderStatementElement"
-      :draggable="true"
-      @dragstart.stop="startDrag($event, data)"
-      @dragover.prevent
-      @dragenter.prevent="handleDragEnteringRenderStatement"
-      @dragleave.prevent="handleDragLeavingRenderStatement"
-      @drop="onDrop($event)"
-      ref="mmStatementBox"
-      :style="{
+    class="statement-box"
+    id="renderStatementElement"
+    :draggable="true"
+    @dragstart.stop="startDrag($event, data)"
+    @dragover.prevent
+    @dragenter.prevent="handleDragEnteringRenderStatement"
+    @dragleave.prevent="handleDragLeavingRenderStatement"
+    @drop="onDrop($event)"
+    ref="mmStatementBox"
+    :style="{
       position: this.statementData.position,
       left: this.statementData.left + 'px',
       top: this.statementData.top + 'px',
     }"
   >
     <StatementRoot
-        v-bind="$attrs"
-        v-if="this.statementData.statementType === 0"
-        :statement-data="this.statementData"
-        @user-choice-changed="handleUserChoiceChanged"
-        @duplicate-statement="duplicateStatement"
-        @toggle-collapsed-statement-root="toggleCollapsedStatementRoot"
-        @toggle-showPopup-fromstatementroot="toggleShowPopupStatementRoot"
+      v-bind="$attrs"
+      v-if="this.statementData.statementType === 0"
+      :statement-data="this.statementData"
+      @user-choice-changed="handleUserChoiceChanged"
+      @duplicate-statement="duplicateStatement"
+      @toggle-collapsed-statement-root="toggleCollapsedStatementRoot"
+      @toggle-showPopup-fromstatementroot="toggleShowPopupStatementRoot"
     />
     <StatementTruth
-        v-bind="$attrs"
-        v-if="this.statementData.statementType === 1"
-        :statement-data="this.statementData"
-        @user-choice-changed="handleUserChoiceChanged"
-        @duplicate-statement="duplicateStatement"
-        @toggle-collapsed-statement-truth="toggleCollapsedStatementTruth"
+      v-bind="$attrs"
+      v-if="this.statementData.statementType === 1"
+      :statement-data="this.statementData"
+      @user-choice-changed="handleUserChoiceChanged"
+      @duplicate-statement="duplicateStatement"
+      @toggle-collapsed-statement-truth="toggleCollapsedStatementTruth"
     />
     <StatementStudent
-        v-bind="$attrs"
-        v-if="this.statementData.statementType === 2"
-        :statement-data="this.statementData"
-        @user-choice-changed="handleUserChoiceChanged"
-        @duplicate-statement="duplicateStatement"
-        @toggle-collapsed-statement-student="toggleCollapsedStatementStudent"
-        @toggle-showPopup-fromstatementstudent="toggleShowPopupStatementStudent"
+      v-bind="$attrs"
+      v-if="this.statementData.statementType === 2"
+      :statement-data="this.statementData"
+      @user-choice-changed="handleUserChoiceChanged"
+      @duplicate-statement="duplicateStatement"
+      @toggle-collapsed-statement-student="toggleCollapsedStatementStudent"
+      @toggle-showPopup-fromstatementstudent="toggleShowPopupStatementStudent"
     />
     <StatementFreeText
-        v-bind="$attrs"
-        v-if="this.statementData.statementType === 3"
-        :statement-statementData="this.statementData"
-        @user-input-changed="handleUserInputChanged"
-        @duplicate-statement="duplicateStatement"
+      v-bind="$attrs"
+      v-if="this.statementData.statementType === 3"
+      :statement-statementData="this.statementData"
+      @user-input-changed="handleUserInputChanged"
+      @duplicate-statement="duplicateStatement"
     />
     <div v-if="renderedText">{{ renderedText }}</div>
   </div>
@@ -67,15 +67,15 @@ export default {
     StatementRoot,
   },
   emits: [
-    "update-statement-content", 
-    "onDragStart", 
+    "update-statement-content",
+    "onDragStart",
     "delete-statement",
     "connector-dropped-on-statement",
     "statement-dropped-on-statement",
     "duplicate-statement",
     "toggle-collapsed-renderstatement",
     "toggle-showPopup-fromrenderstatement",
-    "update-shared-data"
+    "update-shared-data",
   ],
   inheritAttrs: false,
   props: {
@@ -88,23 +88,23 @@ export default {
       answeredStat: null,
       hide_renderCollapsed: false,
       hide_renderShowPopups: true,
-      remove_formats: [".png", ".jpg", ".jpeg"],  // array of formats to exclude from the answer string
+      remove_formats: [".png", ".jpg", ".jpeg"], // array of formats to exclude from the answer string
     };
   },
   methods: {
     handleDoubleClick(combinedText) {
       this.renderedText = combinedText;
     },
-    handleDragOveringRenderStatement(e){
+    handleDragOveringRenderStatement(e) {
       console.log("render over event");
     },
-    handleDragEnteringRenderStatement(e){
-            console.log("render enter event");
+    handleDragEnteringRenderStatement(e) {
+      console.log("render enter event");
     },
-    handleDragLeavingRenderStatement(e){
+    handleDragLeavingRenderStatement(e) {
       console.log("render leave event");
     },
-    
+
     startDrag(e, data) {
       // e.target.className = 'dragEffect';
       e.dataTransfer.dropEffect = "move";
@@ -120,9 +120,13 @@ export default {
       const grabOffsetLeft = e.clientX - rect.left;
       const grabOffsetTop = e.clientY - rect.top;
 
-      console.log("---START DRAG e.client (X,Y)---", e.clientX, e.clientY );
+      console.log("---START DRAG e.client (X,Y)---", e.clientX, e.clientY);
       console.log("---START DRAG rect position=---", rect.left, rect.top);
-      console.log("---START DRAG grabOffset is diff---", grabOffsetLeft, grabOffsetTop);
+      console.log(
+        "---START DRAG grabOffset is diff---",
+        grabOffsetLeft,
+        grabOffsetTop
+      );
       e.dataTransfer.setData("grabOffsetLeft", grabOffsetLeft.toString());
       e.dataTransfer.setData("grabOffsetTop", grabOffsetTop.toString());
 
@@ -135,72 +139,94 @@ export default {
       const dragInformation = JSON.stringify({
         draggedWidth: draggedWidth,
         draggedHeight: draggedHeight,
-        drageeType : "render_statement",
-        drageeConnectorID : undefined,
-        })
-      console.log("SETTING DRAG INFORMATION = ",dragInformation);
-      this.$emit("update-shared-data",dragInformation);
-
+        drageeType: "render_statement",
+        drageeConnectorID: undefined,
+      });
+      console.log("SETTING DRAG INFORMATION = ", dragInformation);
+      this.$emit("update-shared-data", dragInformation);
     },
 
-    onDrop(e) 
-    {
+    onDrop(e) {
       e.stopImmediatePropagation();
       const type = e.dataTransfer.getData("type");
-      console.log("RenderStatement:onDrop type=",type);
-      if (type=="connector") { // ignore if it was statement droopped on statement
+      console.log("RenderStatement:onDrop type=", type);
+      if (type == "connector") {
+        // ignore if it was statement droopped on statement
         console.log(" emitting connector-dropped-on-statement");
-        this.$emit("connector-dropped-on-statement", [this.statementData.id, undefined, e] ); // let the Parent deal with it
-      } else if (type=="statement"){
+        this.$emit("connector-dropped-on-statement", [
+          this.statementData.id,
+          undefined,
+          e,
+        ]); // let the Parent deal with it
+      } else if (type == "statement") {
         console.log(" emitting statement-dropped-on-statement");
-        this.$emit("statement-dropped-on-statement", [this.statementData.id, e] ); // let the Parent deal with it
+        this.$emit("statement-dropped-on-statement", [
+          this.statementData.id,
+          e,
+        ]); // let the Parent deal with it
       }
     },
 
     handleUserChoiceChanged(info) {
       this.contentText = info[0];
       this.answeredStat = info[1];
-      this.$emit("update-statement-content", [
-        this.contentText,
-        this.answeredStat,
-      ]);
+      const statementID = info[1]["id"];
+      this.$emit(
+        "update-statement-content",
+        [this.contentText, this.answeredStat],
+        statementID
+      );
     },
 
     handleUserInputChanged(info) {
       this.contentText = info[0];
       this.answeredStat = info[1];
-      this.$emit("update-statement-content", [
-        this.contentText,
-        this.answeredStat,
-      ]);
+      const statementID = info[1]["id"];
+      this.$emit(
+        "update-statement-content",
+        [this.contentText, this.answeredStat],
+        statementID
+      );
     },
 
     duplicateStatement(id) {
-      console.log('RenderStatement:duplicateStatement - calling emit duplicate-statement')
-      this.$emit("duplicate-statement",id); // pass it on up the chain
+      console.log(
+        "RenderStatement:duplicateStatement - calling emit duplicate-statement"
+      );
+      this.$emit("duplicate-statement", id); // pass it on up the chain
     },
 
     toggleCollapsedStatementStudent(id) {
-      console.log('RenderStatement:toggleCollapsedStatementStudent - calling emit toggle-collapsed-renderstatement')
-      this.$emit("toggle-collapsed-renderstatement",id); // pass it on up the chain
+      console.log(
+        "RenderStatement:toggleCollapsedStatementStudent - calling emit toggle-collapsed-renderstatement"
+      );
+      this.$emit("toggle-collapsed-renderstatement", id); // pass it on up the chain
     },
     toggleCollapsedStatementTruth(id) {
-      console.log('RenderStatement:toggleCollapsedStatementTruth - calling emit toggle-collapsed-renderstatement')
-      this.$emit("toggle-collapsed-renderstatement",id); // pass it on up the chain
+      console.log(
+        "RenderStatement:toggleCollapsedStatementTruth - calling emit toggle-collapsed-renderstatement"
+      );
+      this.$emit("toggle-collapsed-renderstatement", id); // pass it on up the chain
     },
     toggleCollapsedStatementRoot(id) {
-      console.log('RenderStatement:toggleCollapsedStatementRoot - calling emit toggle-collapsed-renderstatement')
-      this.$emit("toggle-collapsed-renderstatement",id); // pass it on up the chain
+      console.log(
+        "RenderStatement:toggleCollapsedStatementRoot - calling emit toggle-collapsed-renderstatement"
+      );
+      this.$emit("toggle-collapsed-renderstatement", id); // pass it on up the chain
     },
 
     toggleShowPopupStatementStudent(id) {
-      console.log('RenderStatement:toggleShowPopupStatementStudent - calling emit toggle-showPopup-fromrenderstatement')
-      this.$emit("toggle-showPopup-fromrenderstatement",id); // pass it on up the chain
+      console.log(
+        "RenderStatement:toggleShowPopupStatementStudent - calling emit toggle-showPopup-fromrenderstatement"
+      );
+      this.$emit("toggle-showPopup-fromrenderstatement", id); // pass it on up the chain
     },
 
     toggleShowPopupStatementRoot(id) {
-      console.log('RenderStatement:toggleShowPopupStatementRoot - calling emit toggle-showPopup-fromrenderstatement')
-      this.$emit("toggle-showPopup-fromrenderstatement",id); // pass it on up the chain
+      console.log(
+        "RenderStatement:toggleShowPopupStatementRoot - calling emit toggle-showPopup-fromrenderstatement"
+      );
+      this.$emit("toggle-showPopup-fromrenderstatement", id); // pass it on up the chain
     },
 
     initContent() {
@@ -211,7 +237,8 @@ export default {
         // TODO: process the "xxx.jpg" in TRUTH statement
         this.contentText = this.statementData.content.originalFacts
           .filter(
-            (fact) => !this.remove_formats.some((format) => fact.includes(format))
+            (fact) =>
+              !this.remove_formats.some((format) => fact.includes(format))
           )
           .join(" ");
       }
@@ -265,9 +292,7 @@ export default {
   position: relative;
 }
 
-.statement-box:hover  .iconContainer {
+.statement-box:hover .iconContainer {
   border: 5px solid rgb(12, 0, 246);
 }
-
-
 </style>
