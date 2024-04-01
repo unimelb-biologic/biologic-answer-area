@@ -445,6 +445,7 @@ export default {
         activeExNetQuestionPack: {
           promptText: [this.promptText, this.dataObject],
           exNetRelativePath: "Explanation Networks/" + this.exNetName,
+          questionName: this.selectedQuestion,
           exNetName: this.exNetName,
           statementElements: this.statementElements,
         },
@@ -459,38 +460,50 @@ export default {
       );
     },
 
+    /**
+     * Sets the Exnet question and answer area data after opening a offline ExNet File.
+     * @param {object} exNetData - The parsed ExNet data from a json file
+     * @returns {void}
+     */
     setExNetAnswer(exNetData) {
-      this.promptText = exNetData.activeExNetQuestionPack.promptText;
+      const questionName = exNetData.activeExNetQuestionPack.questionName;
 
-      this.exNetRelativePath =
-        exNetData.activeExNetQuestionPack.exNetRelativePath;
-      this.exNetName = exNetData.activeExNetQuestionPack.exNetName;
-      this.statementElements =
-        exNetData.activeExNetQuestionPack.statementElements;
-      for (let statement of this.statementElements) {
-        statement["visible"] = true;
-        statement["collapsed"] = false;
-        statement["showPopup"] = true;
+      if (this.doesQuestionExist(questionName)) {
+        this.promptText = exNetData.activeExNetQuestionPack.promptText;
+        this.exNetRelativePath =
+          exNetData.activeExNetQuestionPack.exNetRelativePath;
+        this.exNetName = exNetData.activeExNetQuestionPack.exNetName;
+        this.statementElements =
+          exNetData.activeExNetQuestionPack.statementElements;
+        this.selectedQuestion = questionName;
+        for (let statement of this.statementElements) {
+          statement["visible"] = true;
+          statement["collapsed"] = false;
+          statement["showPopup"] = true;
 
-        // if the userInput object is empty we need to initialise it with the first option of each popup
-        for (let i = 0; i < statement.content.originalFacts.length; i++) {
-          if (typeof statement.content.originalFacts[i] !== "string") {
-            // if not a string then it is an array of popup options
-            // we assume it has at least one element and take the first as default.
-            statement.content.userInput.push(
-              statement.content.originalFacts[i][0]
-            );
+          // if the userInput object is empty we need to initialise it with the first option of each popup
+          for (let i = 0; i < statement.content.originalFacts.length; i++) {
+            if (typeof statement.content.originalFacts[i] !== "string") {
+              // if not a string then it is an array of popup options
+              // we assume it has at least one element and take the first as default.
+              statement.content.userInput.push(
+                statement.content.originalFacts[i][0]
+              );
+            }
           }
         }
-      }
 
-      if (typeof this.promptText === "object") {
-        let data = this.promptText[1];
-        this.offsetX = parseInt(data["offsetX"]);
-        this.offsetY = parseInt(data["offsetY"]);
+        if (typeof this.promptText === "object") {
+          let data = this.promptText[1];
+          this.offsetX = parseInt(data["offsetX"]);
+          this.offsetY = parseInt(data["offsetY"]);
 
-        this.statementElements = data["statementElements"];
-        this.$refs.workspace.loadPreviousAnswer(data);
+          this.statementElements = data["statementElements"];
+          this.$refs.workspace.loadPreviousAnswer(data);
+        }
+      } else {
+        // TODO: Check with Michael about this
+        window.alert("Sorry that ExNet doesn't exist anymore!");
       }
     },
 
@@ -639,6 +652,7 @@ export default {
 
         activeExNetQuestionPack["promptText"] = promptText;
         exnetQuestionPack["activeExNetQuestionPack"] = activeExNetQuestionPack;
+        exnetQuestionPack["questionName"] = this.selectedQuestion;
         exnetQuestionPack = JSON.stringify(exnetQuestionPack);
         // console.log("working answer data")
         // console.log(exnetQuestionPack)
@@ -837,6 +851,12 @@ export default {
       } else {
         await this.getExnet(this.selectedQuestion, true);
       }
+    },
+
+    // check if student has access to the particular Exnet
+    // currently used for offline features
+    doesQuestionExist(questionName) {
+      return this.questions.includes(questionName);
     },
 
     updateFeedback(feedback) {
