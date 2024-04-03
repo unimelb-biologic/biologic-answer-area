@@ -22,6 +22,7 @@
       <pane max-size="10" style="height: 50px" min-size="5">
         <MenuBar
           :userID="userID"
+          :clientType="clientType"
           @setExNetAnswer="setExNetAnswer"
           @onDownloadExNet="onDownloadExNet"
           @logout="handleLogout"
@@ -169,6 +170,7 @@ import {
   API_ENDPOINTS,
   API_BODY_PARAMS,
   DEFAULT_USER_ID,
+  CLIENT_TYPE,
 } from "../config/constants";
 import { buildFeedbackRubricMap } from "@/utils/common";
 import { computed, ref } from "vue";
@@ -198,6 +200,7 @@ export default {
       authorised: false, // TODO: automatically bypass login - for prototyping purpose
       secret_key: null,
       userID: null,
+      clientType: "Student", // Setting client Type to lowest type as default
       answerText: [], // Receive all content texts from AnswerArea
       jsonOutput: {},
       jsonData: [],
@@ -257,9 +260,14 @@ export default {
         this.secret_key = response["persistent_secret_key"];
         this.authorised = true;
 
+        if (response["client_type"]) {
+          this.clientType = CLIENT_TYPE[response["client_type"]];
+        }
+
         // Store authorization status to session storage
         sessionStorage.setItem("authStatus", "authorized");
         sessionStorage.setItem("secretKey", this.secret_key);
+        sessionStorage.setItem("clientType", this.clientType);
         sessionStorage.setItem("clientID", this.clientID);
         sessionStorage.setItem("userID", this.userID);
 
@@ -411,12 +419,19 @@ export default {
 
     // Receive all content texts from AnswerArea
     handleUpdateAnswerContent(info) {
-      const rootID = Array.from(info[0]);
-      const newAnswerContentObject = info[1];
+      const rootIDs = Array.from(info[0]);
+      const statementIDs = Array.from(info[1]);
+      const newAnswerContentObject = info[2];
+
       this.answerText = [];
-      for (let i = 0; i < rootID.length; i++) {
+      for (let i = 0; i < rootIDs.length; i++) {
         this.answerText.push(
-          Object.values(newAnswerContentObject[rootID[i]]).join("")
+          Object.values(newAnswerContentObject[rootIDs[i]]).join("")
+        );
+      }
+      for (let i = 0; i < statementIDs.length; i++) {
+        this.answerText.push(
+          Object.values(newAnswerContentObject[statementIDs[i]]).join("")
         );
       }
     },
@@ -468,42 +483,37 @@ export default {
     setExNetAnswer(exNetData) {
       const questionName = exNetData.activeExNetQuestionPack.questionName;
 
-      if (this.doesQuestionExist(questionName)) {
-        this.promptText = exNetData.activeExNetQuestionPack.promptText;
-        this.exNetRelativePath =
-          exNetData.activeExNetQuestionPack.exNetRelativePath;
-        this.exNetName = exNetData.activeExNetQuestionPack.exNetName;
-        this.statementElements =
-          exNetData.activeExNetQuestionPack.statementElements;
-        this.selectedQuestion = questionName;
-        for (let statement of this.statementElements) {
-          statement["visible"] = true;
-          statement["collapsed"] = false;
-          statement["showPopup"] = true;
+      this.promptText = exNetData.activeExNetQuestionPack.promptText;
+      this.exNetRelativePath =
+        exNetData.activeExNetQuestionPack.exNetRelativePath;
+      this.exNetName = exNetData.activeExNetQuestionPack.exNetName;
+      this.statementElements =
+        exNetData.activeExNetQuestionPack.statementElements;
+      this.selectedQuestion = questionName;
+      for (let statement of this.statementElements) {
+        statement["visible"] = true;
+        statement["collapsed"] = false;
+        statement["showPopup"] = true;
 
-          // if the userInput object is empty we need to initialise it with the first option of each popup
-          for (let i = 0; i < statement.content.originalFacts.length; i++) {
-            if (typeof statement.content.originalFacts[i] !== "string") {
-              // if not a string then it is an array of popup options
-              // we assume it has at least one element and take the first as default.
-              statement.content.userInput.push(
-                statement.content.originalFacts[i][0]
-              );
-            }
+        // if the userInput object is empty we need to initialise it with the first option of each popup
+        for (let i = 0; i < statement.content.originalFacts.length; i++) {
+          if (typeof statement.content.originalFacts[i] !== "string") {
+            // if not a string then it is an array of popup options
+            // we assume it has at least one element and take the first as default.
+            statement.content.userInput.push(
+              statement.content.originalFacts[i][0]
+            );
           }
         }
+      }
 
-        if (typeof this.promptText === "object") {
-          let data = this.promptText[1];
-          this.offsetX = parseInt(data["offsetX"]);
-          this.offsetY = parseInt(data["offsetY"]);
+      if (typeof this.promptText === "object") {
+        let data = this.promptText[1];
+        this.offsetX = parseInt(data["offsetX"]);
+        this.offsetY = parseInt(data["offsetY"]);
 
-          this.statementElements = data["statementElements"];
-          this.$refs.workspace.loadPreviousAnswer(data);
-        }
-      } else {
-        // TODO: Check with Michael about this
-        window.alert("Sorry that ExNet doesn't exist anymore!");
+        this.statementElements = data["statementElements"];
+        this.$refs.workspace.loadPreviousAnswer(data);
       }
     },
 
@@ -895,6 +905,7 @@ export default {
         // If there is an authorized state in the session storage, login is no longer required.
         this.authorised = true;
         this.secret_key = sessionStorage.getItem("secretKey");
+        this.clientType = sessionStorage.getItem("clientType");
         this.clientID = sessionStorage.getItem("clientID");
         this.userID = sessionStorage.getItem("userID");
       } else {

@@ -34,7 +34,7 @@
     </div>
 
     <div class="right_menu">
-      <h3>Student: {{ userID }}</h3>
+      <h3>{{ clientType }}: {{ userID }}</h3>
 
       <button @click="show = !show">Show offline features</button>
       <button class="biologic_logout_button" @click="handleLogout">
@@ -55,7 +55,7 @@ export default {
     };
   },
 
-  props: ["userID"],
+  props: ["userID", "clientType"],
   emits: ["onDownloadExNet", "setExNetAnswer", "logout"],
   components: {
     FileReader,
@@ -72,13 +72,11 @@ export default {
       this.$emit("logout");
     },
   },
-  inject: ["selectedQuestion"],
 };
 </script>
 
 <style scoped>
 .right_menu {
-  position: absolute;
   right: 16px;
   display: flex;
   flex-direction: row;

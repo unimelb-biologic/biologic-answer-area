@@ -4,10 +4,10 @@
     <div class="iconContainer">
       <button v-if="showToggle" @click="duplicateMe" class="statementButton">
         <img
-        class="duplicate-statement-button"
-        src="../../assets/duplicate_icon.png"
-        alt="DuplicateStatement"
-        width="20"
+          class="duplicate-statement-button"
+          src="../../assets/duplicate_icon.png"
+          alt="DuplicateStatement"
+          width="20"
         />
       </button>
     </div>
@@ -24,14 +24,14 @@
 <script>
 export default {
   name: "StatementFreeText",
-  emits: ["user-input-changed","duplicate-statement"],
+  emits: ["user-input-changed", "duplicate-statement"],
   props: {
     statementData: Object,
     position: String,
     showToggle: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
 
   data() {
@@ -54,10 +54,9 @@ export default {
       this.userInputText = this.previousUserInput;
       this.answeredData = this.statementData;
     },
-    duplicateMe(){
-      this.$emit("duplicate-statement", [ this.id ]);
+    duplicateMe() {
+      this.$emit("duplicate-statement", [this.id]);
     },
-
   },
   watch: {
     // Pass the new input to other component
@@ -91,6 +90,15 @@ export default {
 .text {
   margin-top: 10px;
   margin-bottom: 10px;
+}
+
+.statementButton {
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  margin: 2px;
+  padding: 1px;
+  align-items: center;
 }
 
 .textarea {
