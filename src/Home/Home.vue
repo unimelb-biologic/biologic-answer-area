@@ -22,6 +22,7 @@
       <pane max-size="10" style="height: 50px" min-size="5">
         <MenuBar
           :userID="userID"
+          :clientType="clientType"
           @onDownloadExNet="onDownloadExNet"
           @setCurrentExNet="setCurrentExNet"
           @logout="handleLogout"
@@ -169,6 +170,7 @@ import {
   API_ENDPOINTS,
   API_BODY_PARAMS,
   DEFAULT_USER_ID,
+  CLIENT_TYPE,
 } from "../config/constants";
 import { buildFeedbackRubricMap } from "@/utils/common";
 import { computed, ref } from "vue";
@@ -198,6 +200,7 @@ export default {
       authorised: false, // TODO: automatically bypass login - for prototyping purpose
       secret_key: null,
       userID: null,
+      clientType: "Student", // Setting client Type to lowest type as default
       answerText: [], // Receive all content texts from AnswerArea
       jsonOutput: {},
       jsonData: [],
@@ -257,9 +260,14 @@ export default {
         this.secret_key = response["persistent_secret_key"];
         this.authorised = true;
 
+        if (response["client_type"]) {
+          this.clientType = CLIENT_TYPE[response["client_type"]];
+        }
+
         // Store authorization status to session storage
         sessionStorage.setItem("authStatus", "authorized");
         sessionStorage.setItem("secretKey", this.secret_key);
+        sessionStorage.setItem("clientType", this.clientType);
         sessionStorage.setItem("clientID", this.clientID);
         sessionStorage.setItem("userID", this.userID);
 
@@ -841,6 +849,7 @@ export default {
         // If there is an authorized state in the session storage, login is no longer required.
         this.authorised = true;
         this.secret_key = sessionStorage.getItem("secretKey");
+        this.clientType = sessionStorage.getItem("clientType");
         this.clientID = sessionStorage.getItem("clientID");
         this.userID = sessionStorage.getItem("userID");
       } else {
