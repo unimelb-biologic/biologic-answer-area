@@ -56,15 +56,14 @@ export default {
   },
 
   props: ["userID", "clientType"],
-  emits: ["onDownloadExNet", "setCurrentExNet", "logout"],
+  emits: ["onDownloadExNet", "setExNetAnswer", "logout"],
   components: {
     FileReader,
   },
   methods: {
     onExNetReadFile(exNetRawData) {
       const exnetWorkingAnswerJson = JSON.parse(exNetRawData);
-      // this.setCurrentExNet(exnetWorkingAnswerJson, true);
-      this.$emit("setCurrentExNet", exnetWorkingAnswerJson, true);
+      this.$emit("setExNetAnswer", exnetWorkingAnswerJson);
     },
     onDownloadExNet() {
       this.$emit("onDownloadExNet");
