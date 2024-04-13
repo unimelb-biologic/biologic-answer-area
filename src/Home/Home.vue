@@ -2,15 +2,18 @@
   <div>
     <div v-if="!authorised">
       <div style="display: flex; flex-direction: row; align-items: center">
-      <img src="https://murraym678.github.io/images/biologic/BiologicEditor_Icon_for_poster.png" width="50">
+        <img
+          src="https://murraym678.github.io/images/biologic/BiologicEditor_Icon_for_poster.png"
+          width="50"
+        />
 
-      <button
-        @click="logIn('Enter your Student ID')"
-        v-if="!authorised"
-        class = "biologic_login_button"
-      >
-      Biologic Log in
-      </button>
+        <button
+          @click="logIn('Enter your Student ID')"
+          v-if="!authorised"
+          class="biologic_login_button"
+        >
+          Biologic Log in
+        </button>
       </div>
       <br />
     </div>
@@ -19,8 +22,9 @@
       <pane max-size="10" style="height: 50px" min-size="5">
         <MenuBar
           :userID="userID"
+          :clientType="clientType"
+          @setExNetAnswer="setExNetAnswer"
           @onDownloadExNet="onDownloadExNet"
-          @setCurrentExNet="setCurrentExNet"
           @logout="handleLogout"
         />
       </pane>
@@ -166,6 +170,7 @@ import {
   API_ENDPOINTS,
   API_BODY_PARAMS,
   DEFAULT_USER_ID,
+  CLIENT_TYPE,
 } from "../config/constants";
 import { buildFeedbackRubricMap } from "@/utils/common";
 import { computed, ref } from "vue";
@@ -195,6 +200,7 @@ export default {
       authorised: false, // TODO: automatically bypass login - for prototyping purpose
       secret_key: null,
       userID: null,
+      clientType: "Student", // Setting client Type to lowest type as default
       answerText: [], // Receive all content texts from AnswerArea
       jsonOutput: {},
       jsonData: [],
@@ -254,9 +260,14 @@ export default {
         this.secret_key = response["persistent_secret_key"];
         this.authorised = true;
 
+        if (response["client_type"]) {
+          this.clientType = CLIENT_TYPE[response["client_type"]];
+        }
+
         // Store authorization status to session storage
         sessionStorage.setItem("authStatus", "authorized");
         sessionStorage.setItem("secretKey", this.secret_key);
+        sessionStorage.setItem("clientType", this.clientType);
         sessionStorage.setItem("clientID", this.clientID);
         sessionStorage.setItem("userID", this.userID);
 
@@ -310,7 +321,6 @@ export default {
     },
 
     async updateJsonOutput(dataObject) {
-
       this.dataObject = dataObject;
       this.dataObject["offsetX"] = String(this.offsetX);
       this.dataObject["offsetY"] = String(this.offsetY);
@@ -344,12 +354,12 @@ export default {
 
     // invoked when a connector with statements is deleted.
     // Set the corresponding statement to be visible in Statement Area
-    // and removes references to the deleted connector. 
+    // and removes references to the deleted connector.
     handleStatementRemoval(statementID, state = false) {
       for (let statement of this.statementElements) {
         if (statement["id"] === statementID) {
           statement["visible"] = state;
-          statement["parent"] = undefined
+          statement["parent"] = undefined;
           return;
         }
       }
@@ -409,12 +419,19 @@ export default {
 
     // Receive all content texts from AnswerArea
     handleUpdateAnswerContent(info) {
-      const rootID = Array.from(info[0]);
-      const newAnswerContentObject = info[1];
+      const rootIDs = Array.from(info[0]);
+      const statementIDs = Array.from(info[1]);
+      const newAnswerContentObject = info[2];
+
       this.answerText = [];
-      for (let i = 0; i < rootID.length; i++) {
+      for (let i = 0; i < rootIDs.length; i++) {
         this.answerText.push(
-          Object.values(newAnswerContentObject[rootID[i]]).join("")
+          Object.values(newAnswerContentObject[rootIDs[i]]).join("")
+        );
+      }
+      for (let i = 0; i < statementIDs.length; i++) {
+        this.answerText.push(
+          Object.values(newAnswerContentObject[statementIDs[i]]).join("")
         );
       }
     },
@@ -431,12 +448,19 @@ export default {
 
     // Download ExNetJson
     onDownloadExNet() {
-      console.log(this.dataObject);
+      let processedData = this.$refs.workspace.convertToJson(true);
+
+      this.dataObject = processedData;
+      this.dataObject["offsetX"] = String(this.offsetX);
+      this.dataObject["offsetY"] = String(this.offsetY);
+      this.dataObject["statementElements"] = this.statementElements;
+      this.jsonOutput = this.dataObject;
 
       const exNetTemplate = {
         activeExNetQuestionPack: {
-          promptText: this.promptText,
+          promptText: [this.promptText, this.dataObject],
           exNetRelativePath: "Explanation Networks/" + this.exNetName,
+          questionName: this.selectedQuestion,
           exNetName: this.exNetName,
           statementElements: this.statementElements,
         },
@@ -449,6 +473,48 @@ export default {
         this.exNetName + "_exnet_question.json",
         "application/json"
       );
+    },
+
+    /**
+     * Sets the Exnet question and answer area data after opening a offline ExNet File.
+     * @param {object} exNetData - The parsed ExNet data from a json file
+     * @returns {void}
+     */
+    setExNetAnswer(exNetData) {
+      const questionName = exNetData.activeExNetQuestionPack.questionName;
+
+      this.promptText = exNetData.activeExNetQuestionPack.promptText;
+      this.exNetRelativePath =
+        exNetData.activeExNetQuestionPack.exNetRelativePath;
+      this.exNetName = exNetData.activeExNetQuestionPack.exNetName;
+      this.statementElements =
+        exNetData.activeExNetQuestionPack.statementElements;
+      this.selectedQuestion = questionName;
+      for (let statement of this.statementElements) {
+        statement["visible"] = true;
+        statement["collapsed"] = false;
+        statement["showPopup"] = true;
+
+        // if the userInput object is empty we need to initialise it with the first option of each popup
+        for (let i = 0; i < statement.content.originalFacts.length; i++) {
+          if (typeof statement.content.originalFacts[i] !== "string") {
+            // if not a string then it is an array of popup options
+            // we assume it has at least one element and take the first as default.
+            statement.content.userInput.push(
+              statement.content.originalFacts[i][0]
+            );
+          }
+        }
+      }
+
+      if (typeof this.promptText === "object") {
+        let data = this.promptText[1];
+        this.offsetX = parseInt(data["offsetX"]);
+        this.offsetY = parseInt(data["offsetY"]);
+
+        this.statementElements = data["statementElements"];
+        this.$refs.workspace.loadPreviousAnswer(data);
+      }
     },
 
     setCurrentExNet(exNetData, clear = false) {
@@ -596,6 +662,7 @@ export default {
 
         activeExNetQuestionPack["promptText"] = promptText;
         exnetQuestionPack["activeExNetQuestionPack"] = activeExNetQuestionPack;
+        exnetQuestionPack["questionName"] = this.selectedQuestion;
         exnetQuestionPack = JSON.stringify(exnetQuestionPack);
         // console.log("working answer data")
         // console.log(exnetQuestionPack)
@@ -796,25 +863,35 @@ export default {
       }
     },
 
+    // check if student has access to the particular Exnet
+    // currently used for offline features
+    doesQuestionExist(questionName) {
+      return this.questions.includes(questionName);
+    },
+
     updateFeedback(feedback) {
       this.feedbackRubricMap.value = buildFeedbackRubricMap(feedback);
       this.feedback = feedback;
       this.isFeedbackAvailable = feedback ? true : false;
     },
-    
+
     showSurveyPrompt() {
       // Show confirmation dialog
-      var response = confirm(`Hi students, We would love to use your answers for our BioLogic research project. All responses will be DE-IDENTIFIED so nobody teaching in BIOM20001 will know which answers were yours.
+      var response =
+        confirm(`Hi students, We would love to use your answers for our BioLogic research project. All responses will be DE-IDENTIFIED so nobody teaching in BIOM20001 will know which answers were yours.
       Clicking OK will take you to a site where you can find out more, BEFORE giving your consent. We'd also love any feedback you might have so there is a survey you can do. If you'd like to do this later use the link in Lisa's email. And if you don't want to participate, no worries. Just click Cancel.`);
-      
+
       // Check user response
       if (response == true) {
         // If user clicks OK, redirect to the survey URL in a new window
-        window.open("https://melbourneuni.au1.qualtrics.com/jfe/form/SV_4Jig2LkO92qQjt4", "_blank");
+        window.open(
+          "https://melbourneuni.au1.qualtrics.com/jfe/form/SV_4Jig2LkO92qQjt4",
+          "_blank"
+        );
       } else {
         // If user clicks No thanks or cancels the dialog, do nothing
       }
-    }
+    },
   },
 
   async mounted() {
@@ -828,6 +905,7 @@ export default {
         // If there is an authorized state in the session storage, login is no longer required.
         this.authorised = true;
         this.secret_key = sessionStorage.getItem("secretKey");
+        this.clientType = sessionStorage.getItem("clientType");
         this.clientID = sessionStorage.getItem("clientID");
         this.userID = sessionStorage.getItem("userID");
       } else {
@@ -846,7 +924,7 @@ export default {
         await this.getLastWorkingAnswer(true);
       }
     }
-  }
+  },
 };
 </script>
 
@@ -858,7 +936,7 @@ body {
 
 .biologic_login_button {
   font-size: 25px;
-  color:rgb(162, 38, 38);
+  color: rgb(162, 38, 38);
   background-color: #fff;
   margin: 2px;
   padding: 10px;
@@ -869,22 +947,22 @@ body {
   border-right: 2px solid #444444; /* Darker green for bevel effect */
 }
 .biologic_login_button:hover {
-    background-color: #e1e1e1; /* Change color on hover */
-    border-bottom: 2px solid #2d1010; /* Darker green for bevel effect on hover */
-    border-right: 2px solid #2d1010; /* Darker green for bevel effect on hover */
-  }
+  background-color: #e1e1e1; /* Change color on hover */
+  border-bottom: 2px solid #2d1010; /* Darker green for bevel effect on hover */
+  border-right: 2px solid #2d1010; /* Darker green for bevel effect on hover */
+}
 
 .biologic_login_button:active {
-    background-color: #ffffff; /* Darker green when button is pressed */
-    border-top: 3px solid #8b8b8b; /* Darker green for bevel effect */
-    border-left: 3px solid #848484; /* Darker green for bevel effect */
-    border-bottom: 1px solid #2d1010; /* Remove bottom border when button is pressed */
-    border-right: 1px solid #2d1010; /* Remove right border when button is pressed */
-    transform: translate(1px,1px); /* Move button down by 2 pixels when pressed */
-  }
-
-
-
+  background-color: #ffffff; /* Darker green when button is pressed */
+  border-top: 3px solid #8b8b8b; /* Darker green for bevel effect */
+  border-left: 3px solid #848484; /* Darker green for bevel effect */
+  border-bottom: 1px solid #2d1010; /* Remove bottom border when button is pressed */
+  border-right: 1px solid #2d1010; /* Remove right border when button is pressed */
+  transform: translate(
+    1px,
+    1px
+  ); /* Move button down by 2 pixels when pressed */
+}
 
 .displayWorkspace {
   position: relative;

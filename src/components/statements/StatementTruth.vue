@@ -1,74 +1,84 @@
 <template>
   <!-- record the statement position-->
   <div class="StatementTruth">
-
-    <FeedbackRubric :isVisible=showFeedback :exnetID=id />
-    <div class = "content-wrapper">
-    <div class="iconContainer">
-      <button v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement" class="statementButton">
-          <img 
-          class="toggle-expand-collapse"
-          src="../../assets/expand_icon.png"
-          alt="ToggleExpandCollapse"
-          width="20"
+    <FeedbackRubric :isVisible="showFeedback" :exnetID="id" />
+    <div class="content-wrapper">
+      <div class="iconContainer">
+        <button
+          v-if="showToggle && this.statementData.collapsed"
+          @click="toggleCollapsedStatement"
+          class="statementButton"
+        >
+          <img
+            class="toggle-expand-collapse"
+            src="../../assets/expand_icon.png"
+            alt="ToggleExpandCollapse"
+            width="20"
           />
-      </button>
-      <button v-if="showToggle && !this.statementData.collapsed" @click="toggleCollapsedStatement" class="statementButton">
-          <img 
-          class="toggle-expand-collapse"
-          src="../../assets/collapse_icon.png"
-          alt="ToggleExpandCollapse"
-          width="20"
+        </button>
+        <button
+          v-if="showToggle && !this.statementData.collapsed"
+          @click="toggleCollapsedStatement"
+          class="statementButton"
+        >
+          <img
+            class="toggle-expand-collapse"
+            src="../../assets/collapse_icon.png"
+            alt="ToggleExpandCollapse"
+            width="20"
           />
-      </button>
+        </button>
 
-      <button @click="duplicateMe" class="statementButton">
-        <img
-        class="duplicate-statement-button"
-        src="../../assets/duplicate_icon.png"
-        alt="DuplicateStatement"
-        width="20"
-        />
-      </button>
+        <button @click="duplicateMe" class="statementButton">
+          <img
+            class="duplicate-statement-button"
+            src="../../assets/duplicate_icon.png"
+            alt="DuplicateStatement"
+            width="20"
+          />
+        </button>
 
-      <button v-if="showToggle && isFeedbackAvailable" @click="showFeedback = !showFeedback" class="statementButton">
+        <button
+          v-if="showToggle && isFeedbackAvailable"
+          @click="showFeedback = !showFeedback"
+          class="statementButton"
+        >
           <img
             src="../../assets/feedback-rubric.png"
             alt="FeedbackStatement"
             width="20"
           />
-      </button>
-
-    </div>
-    <div class="main-content">
-      <div v-if="this.statementData.collapsed" class="concatenated-statement">
-          {{ concatenatedStatement }}
+        </button>
       </div>
-      <div v-else>
-        <div
-          v-for="(segment, index) in this.statementData.content.originalFacts"
-          :key="index"
-        >
-          <!-- render the text from selection -->
-          <div v-if="typeof segment === 'string'">
-            <div v-if="isImage(segment)">
-              <img :src="segment" class="biologicImage">
+      <div class="main-content">
+        <div v-if="this.statementData.collapsed" class="concatenated-statement">
+          {{ concatenatedStatement }}
+        </div>
+        <div v-else>
+          <div
+            v-for="(segment, index) in this.statementData.content.originalFacts"
+            :key="index"
+          >
+            <!-- render the text from selection -->
+            <div v-if="typeof segment === 'string'">
+              <div v-if="isImage(segment)">
+                <img :src="segment" class="biologicImage" />
+              </div>
+              <div v-else>
+                {{ segment }}
+              </div>
             </div>
             <div v-else>
-              {{ segment }}
+              <select v-model="userSelected[index]">
+                <option v-for="item in segment" :value="item" :key="item">
+                  {{ item }}
+                </option>
+              </select>
             </div>
-          </div>
-          <div v-else>
-            <select v-model="userSelected[index]">
-              <option v-for="item in segment" :value="item" :key="item">
-                {{ item }}
-              </option>
-            </select>
           </div>
         </div>
       </div>
     </div>
-  </div>
     <!-- Display tooltips for this statement-->
     <span v-if="statementData.visible" class="StatementTruth_tooltip">
       The content in this statement is a fact. It is always correct.
@@ -77,63 +87,124 @@
 </template>
 
 <script>
-import FeedbackRubric from '../FeedbackRubric.vue';
+import FeedbackRubric from "../FeedbackRubric.vue";
 
 export default {
   name: "StatementTruth",
   components: {
-    FeedbackRubric
+    FeedbackRubric,
   },
-  emits: ["duplicate-statement","toggle-collapsed-statement-truth"],
+  emits: [
+    "user-choice-changed",
+    "duplicate-statement",
+    "toggle-collapsed-statement-truth",
+  ],
   props: {
     statementData: Object,
     position: String,
     showToggle: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
-  inject: ['isFeedbackAvailable', 'showAllFeedback'],
+  inject: ["isFeedbackAvailable", "showAllFeedback"],
   data() {
     return {
       //TODO: confirm that the first entry is text, 2nd entry is image.
-      userInput: this.statementData.content.userInput,
       id: this.statementData.id,
+      statementType: this.statementData.statementType,
+      originalFacts: this.statementData.content.originalFacts,
+      previousUserInput: this.statementData.content.userInput,
+
       userSelected: [],
-      showFeedback: false
+      answeredData: null,
+      showFeedback: false,
     };
   },
   computed: {
     concatenatedStatement() {
-      return this.statementData.content.originalFacts.map((segment, index) => 
-        typeof segment === 'string' ? (this.isImage(segment)?"":segment) : this.userSelected[index] || segment[0]
-      ).join(" ");
+      return this.statementData.content.originalFacts
+        .map((segment, index) =>
+          typeof segment === "string"
+            ? this.isImage(segment)
+              ? ""
+              : segment
+            : this.userSelected[index] || segment[0]
+        )
+        .join(" ");
     },
-    getCollapseExpandIcon(){
-      return this.collapsed ? "src/assets/expand_icon.png" : "src/assets/collapse_icon.png";
-    }
+    getCollapseExpandIcon() {
+      return this.collapsed
+        ? "src/assets/expand_icon.png"
+        : "src/assets/collapse_icon.png";
+    },
   },
 
   watch: {
+    userSelected: {
+      handler: "handleSelectChange",
+      deep: true,
+    },
+    data() {
+      this.initContent();
+    },
     showAllFeedback() {
-      this.showFeedback = this.showAllFeedback
-    }
+      this.showFeedback = this.showAllFeedback;
+    },
+  },
+  created() {
+    this.initContent();
   },
 
   methods: {
     // Verify the image format to display
     isImage(fact) {
-      const isImg = fact.endsWith(".jpg") || fact.endsWith(".png") || fact.endsWith(".jpeg");
+      const isImg =
+        fact.endsWith(".jpg") ||
+        fact.endsWith(".png") ||
+        fact.endsWith(".jpeg");
       //console.log("testing if fact<",fact," is an image - result is ",isImg);
-      return ( isImg );
+      return isImg;
     },
-    duplicateMe(){
-      this.$emit("duplicate-statement", [ this.id ]);
+    duplicateMe() {
+      this.$emit("duplicate-statement", [this.id]);
     },
     toggleCollapsedStatement() {
       //this.collapsed = !this.collapsed;
-      console.log("StatementTruth:toggleCollapsedStatement")
-      this.$emit("toggle-collapsed-statement-truth", this.id );
+      console.log("StatementTruth:toggleCollapsedStatement");
+      this.$emit("toggle-collapsed-statement-truth", this.id);
+    },
+
+    handleSelectChange() {
+      let studentContentText = "";
+      // Concat all the texts
+      for (let i = 0; i < this.originalFacts.length; i++) {
+        if (typeof this.originalFacts[i] === "string") {
+          // formatting original fact to remove https links and images
+          const formattedFact = this.originalFacts[i].replace(
+            /(https?:\/\/[^\s]+)|(\.png$)|(\.jpg$)|(\.jpeg$)/gi,
+            ""
+          );
+          studentContentText += formattedFact;
+          studentContentText += " ";
+        } else {
+          studentContentText += this.userSelected[i];
+          studentContentText += " ";
+        }
+      }
+
+      let newUserInput = [];
+      for (let i = 0; i < this.userSelected.length; i++) {
+        if (this.userSelected[i] != "") {
+          newUserInput.push(this.userSelected[i]);
+        }
+      }
+      this.answeredData.content.userInput = newUserInput;
+
+      this.$emit("user-choice-changed", [
+        studentContentText,
+        this.answeredData,
+      ]);
     },
 
     initContent() {
@@ -141,7 +212,18 @@ export default {
       this.id = this.statementData.id;
       this.originalFacts = this.statementData.content.originalFacts;
       this.previousUserInput = this.statementData.content.userInput;
-      this.userInputText = this.previousUserInput;
+
+      let userInputID = 0;
+      this.userSelected = [];
+      for (let i = 0; i < this.originalFacts.length; i++) {
+        if (typeof this.originalFacts[i] === "string") {
+          this.userSelected.push("");
+        } else {
+          this.userSelected.push(this.previousUserInput[userInputID]);
+          userInputID += 1;
+        }
+      }
+
       this.answeredData = this.statementData;
     },
   },
@@ -165,9 +247,10 @@ export default {
 }
 
 .StatementTruth:hover .iconContainer {
-  opacity:1;
+  opacity: 1;
 }
 .statementButton {
+  cursor: pointer;
   width: 24px;
   height: 24px;
   margin: 2px;
@@ -204,10 +287,8 @@ export default {
   align-items: middle;
 }
 
-
 .concatenated-statement {
   white-space: pre-wrap;
   max-width: 100px;
 }
-
 </style>

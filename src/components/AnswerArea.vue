@@ -2,7 +2,7 @@
   <div>
     <button
       id="submitBtn"
-      @click="convertToJson"
+      @click="convertToJson(false)"
       :disabled="showMyAnswer && !showCorrectAnswer"
     >
       Submit
@@ -53,6 +53,7 @@
       :showToggle="true"
       :sharedData="sharedData"
       @duplicate-statement="duplicateStatement"
+      @update-statement-content="handleUpdateStatementContent"
       @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething"
       @statement-dropped-on-statement="handleStatementDroppedOnStatement"
       @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
@@ -243,8 +244,7 @@ export default {
       this.$emit("get-reset-answer-area", selectedExnet);
     },
 
-    convertToJson() {
-      //console.log("button pressed");
+    convertToJson(isSavingLocally) {
       this.data_Object = {
         connectorCount: String(this.connectorCount),
         rootConnectorID_set: Array.from(this.rootConnectorID_set),
@@ -264,6 +264,11 @@ export default {
         offsetX: undefined,
         offsetY: undefined,
       };
+
+      // return object if data is being downloaded locally
+      if (isSavingLocally) {
+        return this.data_Object;
+      }
 
       // enables the correct answer option
       this.$emit("update-show-correct-answer", true);
@@ -1100,6 +1105,7 @@ export default {
             console.error("The dropped statement has a wrong parent ID.");
           }
         }
+        this.answerContent[statementID] = transContent;
       }
     },
 
@@ -1179,9 +1185,16 @@ export default {
       }
     },
 
+    // invoked when student statement choice is changed to
+    // update the answer string area
+    handleUpdateStatementContent(contentText, statementID) {
+      this.answerContent[statementID] = contentText[0];
+    },
+
     emitUpdateContent(newAnswerContentObject) {
       this.$emit("update-answer-area-content", [
         this.rootConnectorID_set,
+        this.rootStatementID_set,
         newAnswerContentObject,
       ]);
     },
@@ -1262,6 +1275,11 @@ export default {
       }
       delete this.allConnectors[id];
       this.rootConnectorID_set.delete(id);
+
+      // deleting the connector text from string area upon deletion
+      if (this.answerContent.hasOwnProperty(id)) {
+        delete this.answerContent[id];
+      }
       this.$emit("connector-deleted", id);
     },
 
