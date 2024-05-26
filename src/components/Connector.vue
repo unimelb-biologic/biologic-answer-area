@@ -29,15 +29,6 @@
         
       />
     </button>
-    <button  v-if="this.clickCount % 2 === 0" @click="handleToggleOrientation({ id: connectorID })" class="connectorButton">
-      <img 
-        class="rotate-button"
-        src="../assets/rotate_icon.png"
-        alt="Rotate"
-        width="20"
-        
-      />
-    </button>
 
     <button v-if="isFeedbackAvailable" @click="showFeedback = !showFeedback" class="connectorButton">
       <img 
@@ -110,6 +101,7 @@
             @dragenter.prevent="handleDragEnterTargetBoxLeft($event)"
           >
              <!-- just to provide the inner box -->
+             
           </div>
         </div>
 
@@ -180,20 +172,34 @@
             @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
             @update-shared-data="updateSharedData"
           />
+          
         </div>
       </div>
 
-      <div class="connectorMenu" v-if="connectorContent[selectedPhrase][1]">
-        <ConnectorContextMenu
-          :choice="selectedPhrase"
-          :options="connectorContent"
-          :connector-i-d="connectorID"
-          :parent-i-d="parent"
-          :index="1"
-          @change-link-word="handleLinkWordChange"
+      <div class="connectorTextContainerNew">
+        <button  v-if="this.clickCount % 2 === 0" @click="handleToggleOrientation({ id: connectorID })" class="connectorButton">
+        <img 
+          class="rotate-button"
+          src="../assets/rotate_icon.png"
+          alt="Rotate"
+          width="20"
+          
         />
-      </div>
+        </button>
 
+        <p class="connectorText">{{ connectorContent[selectedPhrase][1] }}</p>
+
+        <div class="connectorMenu" v-if="connectorContent[selectedPhrase][1]">
+          <ConnectorContextMenu
+            :choice="selectedPhrase"
+            :options="connectorContent"
+            :connector-i-d="connectorID"
+            :parent-i-d="parent"
+            :index="1"
+            @change-link-word="handleLinkWordChange"
+          />
+        </div>
+    </div>
       <!-- the right section -->
       <!-- in the order of empty, statement, connector -->
       <!-- TODO: implement connector -->
@@ -453,7 +459,8 @@ export default {
         return false;
       } else {
         console.log("check inTree");
-        const inTree = this.connector1IsInTreeOfconnector2(connectorBeingDroppedOn,connectorBeingDropped);
+        const inTree = this.connectorBeingDropped !== undefined &&
+                       this.connector1IsInTreeOfconnector2(connectorBeingDroppedOn,connectorBeingDropped);
         console.log("inTree = ",inTree);
         return ! inTree;
       }
@@ -610,8 +617,6 @@ export default {
 
     startDragConnector(e) {
 
-      console.log("START DRAG ",e);
-
       e.stopImmediatePropagation();
       e.dataTransfer.dropEffect = "move";
       e.dataTransfer.effectAllowed = "move";
@@ -626,13 +631,7 @@ export default {
         })
       );
 
-      console.log("Connector started dragging! Data:", {
-        connectorContentID: this.connectorContentID,
-        connectorContent: this.connectorContent,
-        selectedPhrase: this.selectedPhrase,
-        connectorID: this.connectorID,
-      });
-      e.dataTransfer.setData("type", "connector");
+            e.dataTransfer.setData("type", "connector");
       // Pass the contained content texts
       e.dataTransfer.setData("content", this.contentTextAll);
 
@@ -652,6 +651,18 @@ export default {
         drageeType: "connector",
         drageeConnectorID : this.connectorID,
         })
+console.log(
+        "\n\nSTART DRAG CONN evt=", e, 
+        " Data=", {
+                    connectorContentID: this.connectorContentID,
+                    connectorContent: this.connectorContent,
+                    selectedPhrase: this.selectedPhrase,
+                    connectorID: this.connectorID,
+                    parentID: this.parent,
+                  }, 
+      "graboffset=(", grabOffsetLeft, ",", grabOffsetTop, 
+      " draggedSize=(", e.currentTarget.offsetWidth, ",", e.currentTarget.offsetHeight
+      );
       console.log("SETTING Information = ",dragInformation);
       this.$emit("update-shared-data",dragInformation);
 
@@ -727,11 +738,11 @@ export default {
       } else if (side === "a" && type === "connector") {
         this.acontent = transContent;
         this.updateContentTextAll()
-        this.$emit("droppedAconn", [this.connectorID, data, transContent]);
+        this.$emit("droppedAconn", [this.connectorID, data, transContent,e]);
       } else if (side === "b" && type === "connector") {
         this.bcontent = transContent;
         this.updateContentTextAll()
-        this.$emit("droppedBconn", [this.connectorID, data, transContent]);
+        this.$emit("droppedBconn", [this.connectorID, data, transContent,e]);
       } else if (side === "x" && type === "connector") {
         // a connector has been dropped on the body of a connector.
         //
@@ -746,7 +757,7 @@ export default {
         // 2. a top level connector (i.e. one with a parentID of -1, is being moved a bit and
         //    has been dropped within it's own area - i.e. onto itself or one of it's children.
         //    in this instance we just pass a signal up the tree.
-
+        console.log("emit new-connector-dropped-on-connector");
         this.$emit("new-connector-dropped-on-connector", [undefined, this.connectorID, e]);
       }
     },
@@ -1096,8 +1107,8 @@ export default {
   margin-bottom: 10px;
   align-items: center;
   border-radius: 6px;
-  border: 1px solid rgb(171, 173, 144);
-  background-color: #fafaef;
+  border: 1px solid rgb(230, 230, 255);
+  background-color: #ffffff;
   padding: 0px 5px;
   overflow:visible;
 }
@@ -1106,24 +1117,12 @@ export default {
       opacity: 1; /* Show childA when hovering over the parent */
 }
 
-.connectorContainerHide:hover {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  justify-content: space-between;
-  flex-basis: auto;
-  /* TODO: These will need to be modified to have dynamic sizes */
-  width: fit-content;
-  min-width: 160px;
-  min-height: 80px;
-  margin-bottom: 10px;
-  align-items: center;
-  border-radius: 6px;
-  border: 4px solid rgb(255, 0, 0);
-  transform: translate(-3px, -3px);
-  background-color: #fafaef;
-  padding: 0px 5px;
-  overflow:visible;
+.connectorContainer:hover .connectorButton {
+      opacity: 1; /* Show childA when hovering over the parent */
+}
+
+.connectorContainer:hover {
+  border: 2px solid rgb(255, 0, 0);
 }
 
 .connectorBox {
@@ -1132,6 +1131,7 @@ export default {
   flex-wrap: nowrap;
   width: 100%;
   justify-content: space-around;
+  align-items: center;
 }
 .onlyText {
   background-color: rgb(236, 236, 236);
@@ -1142,16 +1142,19 @@ export default {
 .connector-sections {
   display: flex;
   padding: 0px;
-  border: 2px rgb(255, 0, 174);
-  height: 100%;
+  border: 0px solid rgb(5, 77, 1);
   align-items: center;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .connector-target-box {
   display: flex;
   padding: 10px;
-  width:100%;
-  height:100%;
+  flex-grow: 1;
+  box-sizing: border-box;
+  border: 2px solid rgb(255, 0, 170);
 }
 
 .connectorMenu {
@@ -1162,7 +1165,7 @@ export default {
 .tooltip {
   position: relative;
   display: inline-block;
-  border: 1px solid rgb(188, 176, 123);
+  border: 0px solid rgb(188, 176, 123);
 }
 
 /* Tooltip text */
@@ -1198,8 +1201,6 @@ export default {
   flex-direction: column;
   align-items: center;
   padding: 10px;
-  opacity: 0.05;
-  transition: opacity 0.3s ease;
 }
 .connectorButton {
   cursor: pointer;
@@ -1208,6 +1209,8 @@ export default {
   margin: 2px;
   padding: 1px;
   align-items: center;
+  opacity: 0.05;
+  transition: opacity 0.3s ease;
 }
 
 .connector-a-picture-parent {
@@ -1226,6 +1229,15 @@ export default {
 .drag-over-happening {
   border: 2px solid rgb(0, 178, 42);
   transform: translate(-1px, -1px);
+}
+
+.connectorTextContainerNew {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
 }
 
 </style>

@@ -135,7 +135,7 @@
         console.log(this.jsonOutput);
         let response = await this.StoreLastWorkingAnswer(this.selectedQuestion);
         if (response["success"] === true) {
-          window.alert("Submission successful!");
+          //window.alert("Submission successful!");
         }
         console.log("Submission response:", response);
       },

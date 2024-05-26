@@ -30,7 +30,7 @@
       </pane>
       <pane min-size="5">
         <Splitpanes>
-          <pane max-size="14" class="statementContainer" min-size="5">
+          <pane max-size="24" class="statementContainer" min-size="5">
             <!-- Displays Statements -->
             <h2 class="areaHeading">Statements</h2>
             <div class="tooltips">
@@ -331,7 +331,7 @@ export default {
 
       if (response["success"] === true) {
         await this.sendGetFeedback(this.selectedQuestion);
-        window.alert("Submission successful!");
+        //window.alert("Submission successful!");
       }
     },
 
@@ -981,13 +981,13 @@ body {
 }
 
 .splitpanes--vertical > .splitpanes__splitter {
-  min-width: 2px;
-  background: rgb(156, 62, 62);
+  min-width: 20px;
+  background: rgb(224, 224, 224);
 }
 
 .splitpanes--horizontal > .splitpanes__splitter {
-  min-height: 2px;
-  background: rgb(162, 73, 73);
+  min-height: 20px;
+  background: rgb(213, 213, 213);
 }
 
 .mainContainer {
