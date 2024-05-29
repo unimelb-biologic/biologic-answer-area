@@ -254,7 +254,7 @@
                 sessionStorage.setItem('authStatus', 'authorized');
                 sessionStorage.setItem('secretKey', this.secret_key);
 
-                window.alert("Successfully authorised!")
+                //window.alert("Successfully authorised!")
             } else {
                 window.alert("Login failed!")
             }

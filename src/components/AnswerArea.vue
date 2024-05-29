@@ -14,6 +14,18 @@
     >
       Reset
     </button>
+    <button
+      id="fullScreenBtn"
+      @click="goFullScreen()"
+    >
+      FullScreen
+    </button>
+    <button
+      id="exitFullScreenBtn"
+      @click="exitFullScreen()"
+    >
+      Exit FullScreen
+    </button>
   </div>
   <div v-if="isFeedbackAvailable">
     <button @click="toggleAllFeedback">
@@ -242,6 +254,30 @@ export default {
 
     resetAnswerArea(selectedExnet) {
       this.$emit("get-reset-answer-area", selectedExnet);
+    },
+
+   goFullScreen() {
+    var elem = document.getElementById("displayWorkspaceID")
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+    } else if (elem.mozRequestFullScreen) { // Firefox
+        elem.mozRequestFullScreen();
+    } else if (elem.webkitRequestFullscreen) { // Chrome, Safari, and Opera
+        elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { // IE/Edge
+        elem.msRequestFullscreen();
+    }
+  },
+   exitFullScreen() {
+      if (document.exitFullscreen) {
+          document.exitFullscreen();
+      } else if (document.mozCancelFullScreen) { // Firefox
+          document.mozCancelFullScreen();
+      } else if (document.webkitExitFullscreen) { // Chrome, Safari, and Opera
+          document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) { // IE/Edge
+          document.msExitFullscreen();
+      }
     },
 
     convertToJson(isSavingLocally) {
@@ -939,6 +975,11 @@ evt.preventDefault();
             this.allConnectors[oldParentID]["rightContent"] = undefined;
             this.allConnectors[oldParentID]["rightStatementIdentifier"] =  undefined;
           }
+        } else {
+          // it should be in the root connector set so need to remove it.
+          if (this.rootConnectorID_set.has(droppedConnectorID)) {
+            this.rootConnectorID_set.delete(droppedConnectorID);
+          }
         }
       }
       let parentID = undefined;// record the OLD parent of whatever was dropped on
@@ -1012,6 +1053,7 @@ evt.preventDefault();
               this.allConnectors[parentConnID]["rightID"] = droppedConnectorID;
               this.allConnectors[parentConnID]["rightType"] = "connector";
             }
+            this.allConnectors[droppedConnectorID]["parent"] =  parentConnID; // finally the droppedConnector needs to know its new parent.
             console.log("all done");
           }
         } else { // we dropped the connector onto a connector
@@ -1523,7 +1565,8 @@ evt.preventDefault();
         this.allStatements[item.id] = item;
       }
     },
-  },
+  }
+
 };
 </script>
 

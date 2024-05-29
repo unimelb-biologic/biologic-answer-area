@@ -86,6 +86,7 @@
               <pane min-size="5">
                 <!-- Displays workspace -->
                 <div
+                  id = "displayWorkspaceID"
                   class="displayWorkspace"
                   @drop="onDropWorkspace($event)"
                   @dragover.prevent

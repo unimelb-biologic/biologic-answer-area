@@ -58,7 +58,7 @@
       v-if="clickCount % 2 === 0 || clickCount === undefined"
       :style="{ flexDirection: orientation }"
     >
-      <div style="font-weight: bold" v-if="connectorContent[selectedPhrase][0]">
+      <div class="connectorText" v-if="connectorContent[selectedPhrase][0]">
         <ConnectorContextMenu
           :choice="selectedPhrase"
           :options="connectorContent"
@@ -297,7 +297,7 @@
         </div>
       </div>
 
-      <div style="font-weight: bold" v-if="connectorContent[selectedPhrase][2]">
+      <div class="connectorText" v-if="connectorContent[selectedPhrase][2]">
         <ConnectorContextMenu
           :choice="selectedPhrase"
           :options="connectorContent"
@@ -1236,8 +1236,13 @@ console.log(
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  width: 100%;
+}
+
+.connectorText {
+  font-size: 12px;
+  font-weight: bold;
+  max-width: 80px;
+  margin: 0px 5px 0px 5px;
 }
 
 </style>
