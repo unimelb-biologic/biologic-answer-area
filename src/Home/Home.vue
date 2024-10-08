@@ -2,16 +2,9 @@
   <div>
     <div v-if="!authorised">
       <div style="display: flex; flex-direction: row; align-items: center">
-        <img
-          src="https://murraym678.github.io/images/biologic/BiologicEditor_Icon_for_poster.png"
-          width="50"
-        />
+        <img src="https://murraym678.github.io/images/biologic/BiologicEditor_Icon_for_poster.png" width="50" />
 
-        <button
-          @click="logIn('Enter your Student ID')"
-          v-if="!authorised"
-          class="biologic_login_button"
-        >
+        <button @click="logIn('Enter your Student ID')" v-if="!authorised" class="biologic_login_button">
           Biologic Log in
         </button>
       </div>
@@ -20,13 +13,8 @@
 
     <splitpanes v-if="authorised" class="mainContainer" horizontal>
       <pane max-size="10" style="height: 50px" min-size="5">
-        <MenuBar
-          :userID="userID"
-          :clientType="clientType"
-          @setExNetAnswer="setExNetAnswer"
-          @onDownloadExNet="onDownloadExNet"
-          @logout="handleLogout"
-        />
+        <MenuBar :userID="userID" :clientType="clientType" @setExNetAnswer="setExNetAnswer"
+          @onDownloadExNet="onDownloadExNet" @logout="handleLogout" />
       </pane>
       <pane min-size="5">
         <Splitpanes>
@@ -41,12 +29,8 @@
               </span>
             </div>
 
-            <StatementArea
-              :statements="this.statementElements"
-              :sharedData="this.sharedData"
-              @onDragStart="onDragStart"
-              @update-shared-data="updateSharedData"
-            />
+            <StatementArea :statements="this.statementElements" :sharedData="this.sharedData" @onDragStart="onDragStart"
+              @update-shared-data="updateSharedData" />
           </pane>
           <pane min-size="5">
             <splitpanes horizontal>
@@ -56,15 +40,8 @@
                   <h2 class="areaHeading">
                     Question:
                     <!-- {{ this.exNetName }} -->
-                    <select
-                      @change="getLastWorkingAnswer(true)"
-                      v-model="selectedQuestion"
-                    >
-                      <option
-                        v-for="item in questions"
-                        :value="item"
-                        :key="item"
-                      >
+                    <select @change="getLastWorkingAnswer(true)" v-model="selectedQuestion">
+                      <option v-for="item in questions" :value="item" :key="item">
                         {{ item.endsWith(".data") ? item.slice(0, -5) : item }}
                       </option>
                     </select>
@@ -85,13 +62,8 @@
               </pane>
               <pane min-size="5">
                 <!-- Displays workspace -->
-                <div
-                  id = "displayWorkspaceID"
-                  class="displayWorkspace"
-                  @drop="onDropWorkspace($event)"
-                  @dragover.prevent
-                  @dragenter.prevent
-                >
+                <div id="displayWorkspaceID" class="displayWorkspace" @drop="onDropWorkspace($event)" @dragover.prevent
+                  @dragenter.prevent>
                   <div id="answerArea" class="sectionTitle">
                     <h2 class="areaHeading">Answer</h2>
                     <div class="tooltips">
@@ -103,30 +75,16 @@
                     </div>
                   </div>
 
-                  <AnswerArea
-                    ref="workspace"
-                    :selectedExnet="selectedQuestion"
-                    :droppedItems="droppedItems"
-                    :draggedItem="draggedItem"
-                    :offsetX="offsetX"
-                    :offsetY="offsetY"
-                    :statements="statementElements"
-                    :sharedData="this.sharedData"
-                    @get-reset-answer-area="getResetAnswerArea"
-                    @get-correct-answer="getCorrectWorkingAnswer"
-                    @get-last-working-answer="getLastWorkingAnswer"
-                    @answer-data="updateJsonOutput"
-                    @setDraggedItem="onDragStart"
-                    @addDroppedItems="addDroppedItems"
-                    @delDroppedItem="delDroppedItem"
-                    @update-show-my-answer="updateShowMyAnswer"
+                  <AnswerArea ref="workspace" :selectedExnet="selectedQuestion" :droppedItems="droppedItems"
+                    :draggedItem="draggedItem" :offsetX="offsetX" :offsetY="offsetY" :statements="statementElements"
+                    :sharedData="this.sharedData" @get-reset-answer-area="getResetAnswerArea"
+                    @get-correct-answer="getCorrectWorkingAnswer" @get-last-working-answer="getLastWorkingAnswer"
+                    @answer-data="updateJsonOutput" @setDraggedItem="onDragStart" @addDroppedItems="addDroppedItems"
+                    @delDroppedItem="delDroppedItem" @update-show-my-answer="updateShowMyAnswer"
                     @update-show-correct-answer="updateShowCorrectAnswer"
-                    @update-answer-area-content="handleUpdateAnswerContent"
-                    @statement-used="handleStatementUsed"
-                    @statement-removed="handleStatementRemoval"
-                    @enable-area="(n) => toggleAnswerArea(n)"
-                    @update-shared-data="updateSharedData"
-                  />
+                    @update-answer-area-content="handleUpdateAnswerContent" @statement-used="handleStatementUsed"
+                    @statement-removed="handleStatementRemoval" @enable-area="(n) => toggleAnswerArea(n)"
+                    @update-shared-data="updateSharedData" />
                 </div>
               </pane>
               <pane min-size="5">
@@ -143,10 +101,7 @@
             <!-- Displays the connectors -->
             <div class="displayConnectors">
               <h2 class="areaHeading">Connectors</h2>
-              <ConnectorArea
-                :sharedData="this.sharedData"
-                @update-shared-data="updateSharedData"
-              />
+              <ConnectorArea :sharedData="this.sharedData" @update-shared-data="updateSharedData" />
             </div>
           </pane>
         </Splitpanes>
@@ -879,7 +834,7 @@ export default {
     showSurveyPrompt() {
       // Show confirmation dialog
       var response =
-        confirm(`Hi students, We would love to use your answers for our BioLogic research project. All responses will be DE-IDENTIFIED so nobody teaching in BIOM20001 will know which answers were yours.
+        confirm(`Hi students, We would love to use your answers for our BioLogic research project. All responses will be DE-IDENTIFIED so nobody teaching in this subject will know which answers were yours.
       Clicking OK will take you to a site where you can find out more, BEFORE giving your consent. We'd also love any feedback you might have so there is a survey you can do. If you'd like to do this later use the link in Lisa's email. And if you don't want to participate, no worries. Just click Cancel.`);
 
       // Check user response
@@ -942,27 +897,39 @@ body {
   margin: 2px;
   padding: 10px;
   align-items: center;
-  border-top: 1px solid #8b8b8b; /* Darker green for bevel effect */
-  border-left: 1px solid #848484; /* Darker green for bevel effect */
-  border-bottom: 2px solid #4b4b4b; /* Darker green for bevel effect */
-  border-right: 2px solid #444444; /* Darker green for bevel effect */
+  border-top: 1px solid #8b8b8b;
+  /* Darker green for bevel effect */
+  border-left: 1px solid #848484;
+  /* Darker green for bevel effect */
+  border-bottom: 2px solid #4b4b4b;
+  /* Darker green for bevel effect */
+  border-right: 2px solid #444444;
+  /* Darker green for bevel effect */
 }
+
 .biologic_login_button:hover {
-  background-color: #e1e1e1; /* Change color on hover */
-  border-bottom: 2px solid #2d1010; /* Darker green for bevel effect on hover */
-  border-right: 2px solid #2d1010; /* Darker green for bevel effect on hover */
+  background-color: #e1e1e1;
+  /* Change color on hover */
+  border-bottom: 2px solid #2d1010;
+  /* Darker green for bevel effect on hover */
+  border-right: 2px solid #2d1010;
+  /* Darker green for bevel effect on hover */
 }
 
 .biologic_login_button:active {
-  background-color: #ffffff; /* Darker green when button is pressed */
-  border-top: 3px solid #8b8b8b; /* Darker green for bevel effect */
-  border-left: 3px solid #848484; /* Darker green for bevel effect */
-  border-bottom: 1px solid #2d1010; /* Remove bottom border when button is pressed */
-  border-right: 1px solid #2d1010; /* Remove right border when button is pressed */
-  transform: translate(
-    1px,
-    1px
-  ); /* Move button down by 2 pixels when pressed */
+  background-color: #ffffff;
+  /* Darker green when button is pressed */
+  border-top: 3px solid #8b8b8b;
+  /* Darker green for bevel effect */
+  border-left: 3px solid #848484;
+  /* Darker green for bevel effect */
+  border-bottom: 1px solid #2d1010;
+  /* Remove bottom border when button is pressed */
+  border-right: 1px solid #2d1010;
+  /* Remove right border when button is pressed */
+  transform: translate(1px,
+      1px);
+  /* Move button down by 2 pixels when pressed */
 }
 
 .displayWorkspace {
@@ -981,12 +948,12 @@ body {
   margin: 0px 0px 0px 10px;
 }
 
-.splitpanes--vertical > .splitpanes__splitter {
+.splitpanes--vertical>.splitpanes__splitter {
   min-width: 20px;
   background: rgb(224, 224, 224);
 }
 
-.splitpanes--horizontal > .splitpanes__splitter {
+.splitpanes--horizontal>.splitpanes__splitter {
   min-height: 20px;
   background: rgb(213, 213, 213);
 }
