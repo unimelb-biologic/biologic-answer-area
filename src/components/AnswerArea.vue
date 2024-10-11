@@ -78,6 +78,8 @@ import RenderStatement from "../components/RenderStatement.vue";
 import uniqueId from "lodash.uniqueid";
 import { computed } from "vue";
 
+import { STATEMENT_PROPORTION_REQUIRED } from '../config/constants';
+
 export default {
   name: "AnswerArea",
   components: { Connector, RenderStatement },
@@ -189,6 +191,12 @@ export default {
     },
 
     getCorrectAnswer() {
+
+      if (this.checkSufficientAnswerSize()) {
+        alert(STATEMENT_PROPORTION_REQUIRED + "% of statements must be used in the answer in order to show the correct answer");
+        return false;
+      }
+
       this.$emit("update-show-correct-answer", false);
       this.$emit("update-show-my-answer", true);
 
@@ -228,6 +236,17 @@ export default {
       } else if (document.msExitFullscreen) { // IE/Edge
         document.msExitFullscreen();
       }
+    },
+    checkSufficientAnswerSize() {
+      // check if more than N% of statements are used before showing feedback
+      // N% defined in constants.js
+
+      let currentAllStatements = Object.values(this.allStatements);
+      let mimimumStatementsRequired = Math.floor(currentAllStatements.length * parseFloat(STATEMENT_PROPORTION_REQUIRED / 100));
+      let usedStatements = currentAllStatements.filter((statement) => statement.visible === false)
+
+      return (usedStatements.length < mimimumStatementsRequired);
+
     },
 
     convertToJson(isSavingLocally) {
@@ -1486,15 +1505,10 @@ export default {
     },
 
     toggleAllFeedback() {
-      // check if more than 50% of statements are used before showing feedback
-      const proportionRequired = 50;
 
-      let currentAllStatements = Object.values(this.allStatements);
-      let mimimumStatementsRequired = Math.floor(currentAllStatements.length * 0.5);
-      let usedStatements = currentAllStatements.filter((statement) => statement.visible === false)
 
-      if (usedStatements.length < mimimumStatementsRequired) {
-        alert(proportionRequired + "% of statements must be used in the answer in order to show the feedback");
+      if (this.checkSufficientAnswerSize()) {
+        alert(STATEMENT_PROPORTION_REQUIRED + "% of statements must be used in the answer in order to show the feedback");
         return false;
       }
 
