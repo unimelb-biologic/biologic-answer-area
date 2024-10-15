@@ -238,7 +238,7 @@ export default {
           await this.getExnet(this.selectedQuestion, true);
           await this.getLastWorkingAnswer(true);
         }
-        window.alert("Successfully authorised!");
+        //window.alert("Successfully authorised!");
       } else {
         window.alert("Login failed!");
       }
@@ -835,13 +835,13 @@ export default {
       // Show confirmation dialog
       var response =
         confirm(`Hi students, We would love to use your answers for our BioLogic research project. All responses will be DE-IDENTIFIED so nobody teaching in this subject will know which answers were yours.
-      Clicking OK will take you to a site where you can find out more, BEFORE giving your consent. We'd also love any feedback you might have so there is a survey you can do. If you'd like to do this later use the link in Lisa's email. And if you don't want to participate, no worries. Just click Cancel.`);
+      Clicking OK will take you to a site where you can find out more, BEFORE giving your consent. We'd also love any feedback you might have so there is a survey you can do. And if you don't want to participate, no worries. Just click Cancel.`);
 
       // Check user response
       if (response == true) {
         // If user clicks OK, redirect to the survey URL in a new window
         window.open(
-          "https://melbourneuni.au1.qualtrics.com/jfe/form/SV_4Jig2LkO92qQjt4",
+          "https://q.surveys.unimelb.edu.au/jfe/form/SV_bBNUxtcRL0dSh3o",
           "_blank"
         );
       } else {
