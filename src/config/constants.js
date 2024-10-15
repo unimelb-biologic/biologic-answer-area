@@ -37,3 +37,5 @@ export const CLIENT_TYPE = {
   2: "Academic",
   3: "Student",
 };
+
+export const STATEMENT_PROPORTION_REQUIRED = 50;

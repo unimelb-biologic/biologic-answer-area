@@ -36,7 +36,7 @@
     <div class="right_menu">
       <h3>{{ clientType }}: {{ userID }}</h3>
 
-      <button @click="show = !show">Show offline features</button>
+      <!--button @click="show = !show">Show offline features</button-->
       <button class="biologic_logout_button" @click="handleLogout">
         Logout
       </button>
