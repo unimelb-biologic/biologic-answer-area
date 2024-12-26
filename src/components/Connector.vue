@@ -113,14 +113,13 @@
             "
             :statement-data="this.allStatements[this.leftID]"
             :showToggle="true"
-            :sharedData="sharedData"
             @update-statement-content="handleUpdateStatContentA"
             @mousedown="onMousedown('leftType')"
             @duplicate-statement="duplicateStatement"
             @connector-dropped-on-statement="connectorDroppedOnStatement"
             @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
             @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement"
-            @update-shared-data="updateSharedData"
+            
           />
         </div>
         <!--                    <span class="tooltiptext" v-if="this.leftID !== undefined">Drag to recycle bin to remove</span>-->
@@ -145,7 +144,7 @@
             :click-count="allConnectors[this.leftID].clickCount"
             :orientation="allConnectors[this.leftID].orientation"
             :selected-phrase="allConnectors[this.leftID].selectedPhrase"
-            :sharedData="sharedData"
+            
             @delete-connector="
               deleteChildConnector({
                 id: this.leftID,
@@ -170,7 +169,7 @@
             @duplicate-statement="duplicateStatement"
             @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
             @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
-            @update-shared-data="updateSharedData"
+            
           />
           
         </div>
@@ -234,14 +233,14 @@
             "
             :statement-data="this.allStatements[this.rightID]"
             :showToggle="true"
-            :sharedData="sharedData"
+            
             @update-statement-content="handleUpdateStatContentB"
             @mousedown="onMousedown('rightType')"
             @connector-dropped-on-statement="connectorDroppedOnStatement"
             @duplicate-statement="duplicateStatement"
             @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
             @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement"
-            @update-shared-data="updateSharedData"
+            
           />
         </div>
 
@@ -266,7 +265,7 @@
             :orientation="allConnectors[this.rightID].orientation"
             :selected-phrase="allConnectors[this.rightID].selectedPhrase"
             :rootConnectorID="rootConnectorID"
-            :sharedData="sharedData"
+            
 
             @delete-connector="
               deleteChildConnector({
@@ -292,7 +291,7 @@
             @duplicate-statement="duplicateStatement"
             @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
             @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
-            @update-shared-data="updateSharedData"
+            
           />
         </div>
       </div>
@@ -343,7 +342,6 @@ export default {
     "toggle-collapsed-renderstatement-from-connector",
     "toggle-showPopup-fromconnector",
     "connector-dropped-on-statement",
-    "update-shared-data"
   ],
   props: {
     connectorContentID: Number,
@@ -366,7 +364,6 @@ export default {
     allStatements: Object,
     clickCount: Number,
     orientation: String,
-    sharedData: Object,
   },
   data() {
     return {
@@ -388,9 +385,6 @@ export default {
     }
   },
   methods: {
-    updateSharedData(newValue) {
-      this.$emit("update-shared-data",newValue);
-    },
 
     duplicateStatement(id)
     {
@@ -399,7 +393,6 @@ export default {
         console.log("Connector:duplicateStatement")
         this.$emit("duplicate-statement", id);
     },
-  
     toggleCollapsedRenderStatement(id){
         // emission from  a child RenderStatement.
         // just pass this on up the tree for the AnswerArea to deal with
@@ -424,8 +417,6 @@ export default {
         console.log("Connector:toggleShowPopupFromConnector emitting toggle-showPopup-fromconnector")
         this.$emit("toggle-showPopup-fromconnector", id);
     },
-
-
     connector1IsInTreeOfconnector2( conn1, conn2 ){
       // if left OR right side is a connector call recursively
       let inLeftTree = false;
@@ -451,7 +442,6 @@ export default {
       console.log(" FINAL result = inLeftTree=",inLeftTree," || inRightTree=",inRightTree," =>",finalResult);
       return finalResult;
     },
-
     dropIsPermissible(connectorBeingDroppedOn,connectorBeingDropped) {
       console.log("checking if ",connectorBeingDropped," can be dropped on ",connectorBeingDroppedOn);
       if (connectorBeingDroppedOn === connectorBeingDropped) {
@@ -465,23 +455,39 @@ export default {
         return ! inTree;
       }
     },
-
-
     connectorDroppedOnStatement( info )
     {
       console.log("Connector:connectorDroppedOnStatement");
       // pass it up the chain and let the AnswerArea deal with it
       this.$emit("connector-dropped-on-statement", info ); 
     },
+    decodeDragInformation(event)
+    { 
+      //  the DnD spec says that during a drag, the drag data store mode is protected mode.
+      // this means you can see the types but not the values. So the workaround is to encode the values into the type names.
+      const types = Array.from(event.dataTransfer.types);
+      console.log("TYPES = ",types);
+      const widthType = types.find((type) => type.startsWith("draggedwidth"));
+      const heightType = types.find((type) => type.startsWith("draggedheight"));
+      const typeType = types.find((type) => type.startsWith("draggedtype"));
+      const connectorIDType = types.find((type) => type.startsWith("draggedconnectorid"));
+      const dragWidthStr = widthType ? widthType.split("/")[1] : null;
+      const dragHeightStr = heightType ? heightType.split("/")[1] : null;
+      const dragTypeStr = typeType ? typeType.split("/")[1] : null;
+      const dragConnectorIDStr = connectorIDType ? connectorIDType.split("/")[1] : null;
 
-    // Get the statement property inside the connector
+      console.log("DRAG DATA = ",dragWidthStr,dragHeightStr,dragTypeStr,dragConnectorIDStr);
+
+      const dragInformation = {draggedWidth:dragWidthStr,
+        draggedHeight:dragHeightStr,
+        drageeType:dragTypeStr,
+        drageeConnectorID:dragConnectorIDStr};
+
+      return dragInformation;
+    },
     handleDragEnterTargetBoxLeft(event){
-
       console.log("Connector:handleDragEnterTargetBoxLeft----------event=",event);
-      console.log("this.sharedData=",this.sharedData);
-      const dragInformation = JSON.parse(this.sharedData);
-      console.log('Draginformation:', dragInformation);
-
+      const dragInformation = this.decodeDragInformation(event);
       if (dragInformation.drageeType==="connector") 
       {
         if (this.dropIsPermissible(this.connectorID,dragInformation.drageeConnectorID)) {
@@ -491,12 +497,9 @@ export default {
           return;
         }
       }
-
 //      console.log("EVENT=",event);
       event.preventDefault();
       var draggedElement = event.currentTarget;
-
-  
       const targetRef = this.$refs.targetBoxRefLeft;
       // Set the size of the dragged element
       const widthStr = dragInformation.draggedWidth + 'px';
@@ -516,12 +519,12 @@ export default {
       targetRef.style.height = 20 + 'px';
       targetRef.style.border = '';
     }, 
-    // Get the statement property inside the connector
-    handleDragEnterTargetBoxRight(event){
-
+    handleDragEnterTargetBoxRight(event)
+    {
       console.log("Connector:handleDragEnterTargetBoxRight----------event=",event);
-      console.log("this.sharedData=",this.sharedData);
-      const dragInformation = JSON.parse(this.sharedData);
+      
+      const dragInformation = this.decodeDragInformation(event);
+
       console.log('Draginformation:', dragInformation);
 
       if (dragInformation.drageeType==="connector") {
@@ -554,7 +557,7 @@ export default {
       targetRef.style.width = 20 + 'px';
       targetRef.style.height = 20 + 'px';
       targetRef.style.border = '';
-    }, 
+    },
     onMousedown(type) {
       let item = null;
       if (type === "rightType") {
@@ -572,20 +575,16 @@ export default {
     call_connectorString(){
       alert(this.connectorString())
     },
-      connectorString() {
-        let resultString = "connectorString";
-        if (this.leftType === 'connector') {
-          resultString = this.$refs.leftChildConnector.connectorString()+resultString;
-        }
-        if (this.rightType === 'connector') {
-          resultString = resultString + this.$refs.rightChildConnector.connectorString();
-        }
-        return resultString;
-      },
-    // delDroppedItem() {
-    //     this.$emit('delDroppedItem', this.moveItem)
-    // },
-
+    connectorString() {
+      let resultString = "connectorString";
+      if (this.leftType === 'connector') {
+        resultString = this.$refs.leftChildConnector.connectorString()+resultString;
+      }
+      if (this.rightType === 'connector') {
+        resultString = resultString + this.$refs.rightChildConnector.connectorString();
+      }
+      return resultString;
+    },
     handleLinkWordChange(info) {
       const newChoice = info[1];
       this.currConnectorContent = JSON.parse(
@@ -610,11 +609,9 @@ export default {
 
       this.$emit("linkWordChanged", info);
     },
-
     handleChildLinkWordChange(info) {
       this.$emit("linkWordChanged", info);
     },
-
     startDragConnector(e) {
 
       e.stopImmediatePropagation();
@@ -631,7 +628,7 @@ export default {
         })
       );
 
-            e.dataTransfer.setData("type", "connector");
+      e.dataTransfer.setData("type", "connector");
       // Pass the contained content texts
       e.dataTransfer.setData("content", this.contentTextAll);
 
@@ -643,50 +640,20 @@ export default {
       e.dataTransfer.setData("grabOffsetLeft", grabOffsetLeft.toString());
       e.dataTransfer.setData("grabOffsetTop", grabOffsetTop.toString());
 
-      // set the global sharedData (YUK!) to hold the size
-      // only because dragEnter can't see insides of the dataTransfer object
-      const dragInformation = JSON.stringify({
-        draggedWidth: e.currentTarget.offsetWidth,
-        draggedHeight: e.currentTarget.offsetHeight,
-        drageeType: "connector",
-        drageeConnectorID : this.connectorID,
-        })
-console.log(
-        "\n\nSTART DRAG CONN evt=", e, 
-        " Data=", {
-                    connectorContentID: this.connectorContentID,
-                    connectorContent: this.connectorContent,
-                    selectedPhrase: this.selectedPhrase,
-                    connectorID: this.connectorID,
-                    parentID: this.parent,
-                  }, 
-      "graboffset=(", grabOffsetLeft, ",", grabOffsetTop, 
-      " draggedSize=(", e.currentTarget.offsetWidth, ",", e.currentTarget.offsetHeight
-      );
-      console.log("SETTING Information = ",dragInformation);
-      this.$emit("update-shared-data",dragInformation);
+      // the following geometry information is used by the Target boxes in the connectors to change size dynamically.
+      // However the DnD spec says that during the drag, the drag data store mode is protected mode.
+      // this means you can see the types but not the values. So the workaround is to encode the values into the type names.
+      const widthTypeStr = "draggedWidth/"+e.currentTarget.offsetWidth;
+      e.dataTransfer.setData(widthTypeStr,0 /* i.e. the zero is a dummy value*/ );
+      const heightTypeStr = "draggedHeight/"+e.currentTarget.offsetHeight;
+      e.dataTransfer.setData(heightTypeStr,0 /* i.e. the zero is a dummy value*/ );
+      const typeTypeStr = "draggedType/"+"connector";
+      e.dataTransfer.setData(typeTypeStr,0 /* i.e. the zero is a dummy value*/ );
+      const connectorIDTypeStr = "draggedConnectorID/"+this.connectorID;
+      e.dataTransfer.setData(connectorIDTypeStr,0 /* i.e. the zero is a dummy value*/ );
 
-      const currentX = e.clientX;
-      const currentY = e.clientY;
-      const currentConnectorX = e.target.offsetLeft;
-      const currentConnectorY = e.target.offsetTop;
-      const myRef = this.$refs.connectorContainerRef;
-/*
-      const dragListener = (e) => {
-        const newConnectorX = currentConnectorX + e.clientX - currentX;
-        const newConnectorY = currentConnectorY + e.clientY - currentY;
-        e.target.style.left = newConnectorX + "px";
-        e.target.style.top = newConnectorY + "px";
-      };
-      document.addEventListener("drag", dragListener);
-      const dragEndListener = () => {
-        document.removeEventListener("drag", dragListener);
-      };
-      e.target.addEventListener("dragend", dragEndListener);
-      */
-
+        console.log(" SET UP DATA TRANSFER:",widthTypeStr,heightTypeStr,typeTypeStr,connectorIDTypeStr);
     },
-
     updateContentTextAll(){
       this.contentTextAll =
           (this.currConnectorContent[0] === null ? "" : this.currConnectorContent[0]) +
@@ -695,7 +662,6 @@ console.log(
           (this.bcontent === null ? "" : this.bcontent) +
           (this.currConnectorContent[2] === null ? "" : this.currConnectorContent[2]);
     },
-
     onDrop(e, side) {
       e.stopImmediatePropagation();
 
@@ -761,32 +727,26 @@ console.log(
         this.$emit("new-connector-dropped-on-connector", [undefined, this.connectorID, e]);
       }
     },
-
     handleAStatementDrop(info) {
       console.log("Connector:handleAStatementDrop:  emitting signal droppedAstat")
       this.$emit("droppedAstat", info);
     },
-
     handleBStatementDrop(info) {
       console.log("Connector:handleBStatementDrop:  passing data up")
       this.$emit("droppedBstat", info);
     },
-
     handleAConnectorDrop(info) {
       console.log("Connector:handleAConnectorDrop:  passing data up")
       this.$emit("droppedAconn", info);
     },
-
     handleNewConnectorDroppedOnConnector(info) {
       console.log("Connector:handleAConnectorDrop:  passing data up")
       this.$emit("new-connector-dropped-on-connector", info);
     },
-
     handleBConnectorDrop(info) {
       console.log("Connector:handleBConnectorDrop:  passing data up")
       this.$emit("droppedBconn", info);
     },
-
     showInfo() {
       console.log("connectorID", this.connectorID);
       console.log("leftType", this.leftType);
@@ -795,7 +755,6 @@ console.log(
       console.log("rightID", this.rightID);
       this.$forceUpdate();
     },
-
     handleUpdateStatContentA(info) {
       this.acontent = info[0];
       this.contentTextAll =
@@ -819,7 +778,6 @@ console.log(
         "left",
       ]);
     },
-
     handleUpdateStatContentB(info) {
       this.bcontent = info[0];
       this.contentTextAll =
@@ -843,15 +801,12 @@ console.log(
         "right",
       ]);
     },
-
     handleStatDataChange(info) {
       this.$emit("update-stat-data", info);
     },
-
     handleUpdateChildStat(info) {
       this.$emit("update-child-stat", info);
     },
-
     handleUpdateConnectorContentA(info) {
       const currConnectID = info[0];
       this.acontent = info[1];
@@ -876,7 +831,6 @@ console.log(
         "left",
       ]);
     },
-
     handleUpdateConnectorContentB(info) {
       const currConnectID = info[0];
       this.bcontent = info[1];
@@ -900,21 +854,17 @@ console.log(
         "right",
       ]);
     },
-
     handleUpdateChildClickCount(info) {
       this.$emit("update-click-count", info);
     },
-
     handleToggleOrientation( {id} ) {
       // Emit an event to the parent component indicating that this connector should 
       //switch from row to column
       this.$emit("toggle-orientation", {id} );
     },
-
     handleUpdateChildConnector(info) {
       this.$emit("update-child-connector-content", info);
     },
-
     displayFormChanged() {
       // this.clickCountInConn = this.clickCountInConn + 1
       this.$emit("update-click-count", this.connectorID);

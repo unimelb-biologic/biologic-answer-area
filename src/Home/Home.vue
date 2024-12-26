@@ -29,8 +29,7 @@
               </span>
             </div>
 
-            <StatementArea :statements="this.statementElements" :sharedData="this.sharedData" @onDragStart="onDragStart"
-              @update-shared-data="updateSharedData" />
+            <StatementArea :statements="this.statementElements" @onDragStart="onDragStart" />
           </pane>
           <pane min-size="5">
             <splitpanes horizontal>
@@ -75,16 +74,16 @@
                     </div>
                   </div>
 
-                  <AnswerArea ref="workspace" :selectedExnet="selectedQuestion" :droppedItems="droppedItems"
-                    :draggedItem="draggedItem" :offsetX="offsetX" :offsetY="offsetY" :statements="statementElements"
-                    :sharedData="this.sharedData" @get-reset-answer-area="getResetAnswerArea"
+                  <AnswerArea ref="answerAreaRef"  
+                    :parentStatementElements="statementElements"
+                    @get-reset-answer-area="getResetAnswerArea"
                     @get-correct-answer="getCorrectWorkingAnswer" @get-last-working-answer="getLastWorkingAnswer"
                     @answer-data="updateJsonOutput" @setDraggedItem="onDragStart" @addDroppedItems="addDroppedItems"
                     @delDroppedItem="delDroppedItem" @update-show-my-answer="updateShowMyAnswer"
                     @update-show-correct-answer="updateShowCorrectAnswer"
                     @update-answer-area-content="handleUpdateAnswerContent" @statement-used="handleStatementUsed"
                     @statement-removed="handleStatementRemoval" @enable-area="(n) => toggleAnswerArea(n)"
-                    @update-shared-data="updateSharedData" />
+                    />
                 </div>
               </pane>
               <pane min-size="5">
@@ -101,7 +100,7 @@
             <!-- Displays the connectors -->
             <div class="displayConnectors">
               <h2 class="areaHeading">Connectors</h2>
-              <ConnectorArea :sharedData="this.sharedData" @update-shared-data="updateSharedData" />
+              <ConnectorArea/>
             </div>
           </pane>
         </Splitpanes>
@@ -145,12 +144,8 @@ export default {
       exNetName: "",
       statementElements: [],
 
-      statements: [],
-      connectors: [],
-      droppedItems: [],
-      draggedItem: null,
-      offsetX: 0,
-      offsetY: 0,
+      offsetX: 0, // don't think this is used, but is stored in database so keep for now so things don't break
+      offsetY: 0, // don't think this is used, but is stored in database so keep for now so things don't break
       answerAreaEnabled: true,
       clientID: null,
       authorised: false, // TODO: automatically bypass login - for prototyping purpose
@@ -168,7 +163,8 @@ export default {
       showMyAnswer: false,
       showCorrectAnswer: false,
       feedbackRubricMap: ref({}),
-      sharedData: "", // awful solution to passing information during drag!
+
+      answerAreaHistory = ;
     };
   },
 
@@ -329,44 +325,15 @@ export default {
       this.showMyAnswer = value;
     },
 
-    // add the statement to the droppedItem array
-    addDroppedItems(data) {
-      this.droppedItems.push(data);
-    },
-
-    // remove the dropped statement on the answerArea
-    delDroppedItem(data) {
-      this.droppedItems = this.droppedItems.filter(
-        (item) => item.id !== data.id
-      );
-    },
-
     //sets the dragged statement to the item that has started to be dragged
     onDragStart(item) {
-      this.draggedItem = item;
-    },
-
-    updateSharedData(newValue) {
-      // newValue is a JSON.stringified version of
-      // {
-      //    "draggedWidth" : value;
-      //    "draggedHeight" : value;
-      //    "drageeType" : "connector";      (or could be "render_statement")
-      // }
-      this.sharedData = newValue;
-    },
-
-    //Record the coordinate of X,Y when it clicked
-    onMousedown(e) {
-      this.offsetX = e.offsetX;
-      this.offsetY = e.offsetY;
     },
 
     onDropWorkspace(e) {
       if (this.answerAreaEnabled === false) {
         return;
       }
-      this.$refs.workspace.onDrop(e);
+      this.$refs.answerAreaRef.onDrop(e);
     },
 
     toggleAnswerArea(e) {
@@ -393,18 +360,19 @@ export default {
     },
     // Handle ExNetJson from FileREader
     onExNetReadFile(exNetRawData) {
-      console.log(exNetRawData);
+      console.log("onExNetReadFile ",exNetRawData);
       const exnetWorkingAnswerJson = JSON.parse(exNetRawData);
       this.setCurrentExNet(exnetWorkingAnswerJson, true);
     },
 
-    getResetAnswerArea(selectedExnet) {
-      this.getExnet(selectedExnet, true);
+    getResetAnswerArea() {
+      console.log("getResetAnswerArea");
+      this.getExnet(this.selectedQuestion, true);
     },
 
     // Download ExNetJson
     onDownloadExNet() {
-      let processedData = this.$refs.workspace.convertToJson(true);
+      let processedData = this.$refs.answerAreaRef.convertToJson(true);
 
       this.dataObject = processedData;
       this.dataObject["offsetX"] = String(this.offsetX);
@@ -423,7 +391,7 @@ export default {
         statementElements: [],
         connectorElements: [],
       };
-      console.log(exNetTemplate);
+      console.log("onDownloadExNet ",exNetTemplate);
       download(
         JSON.stringify(exNetTemplate),
         this.exNetName + "_exnet_question.json",
@@ -437,6 +405,7 @@ export default {
      * @returns {void}
      */
     setExNetAnswer(exNetData) {
+      console.log("setExNetAnswer exNetData=",exNetData);
       const questionName = exNetData.activeExNetQuestionPack.questionName;
 
       this.promptText = exNetData.activeExNetQuestionPack.promptText;
@@ -469,11 +438,12 @@ export default {
         this.offsetY = parseInt(data["offsetY"]);
 
         this.statementElements = data["statementElements"];
-        this.$refs.workspace.loadPreviousAnswer(data);
+        this.$refs.answerAreaRef.loadPreviousAnswer(data);
       }
     },
 
     setCurrentExNet(exNetData, clear = false) {
+      console.log("setCurrentExNet",exNetData," clear = ",clear);
       this.promptText = exNetData.activeExNetQuestionPack.promptText;
 
       this.exNetRelativePath =
@@ -503,8 +473,7 @@ export default {
 
       this.showQuestionList = false;
       if (clear) {
-        this.$refs.workspace.clearWorkspace();
-        this.droppedItems = [];
+        this.$refs.answerAreaRef.clearWorkspace();
       }
     },
 
@@ -553,6 +522,7 @@ export default {
     },
 
     async sendGetExnetRequest(exnetName) {
+      console.log("     sendGetExnetRequest ",exnetName);
       try {
         // FIXME: HTTP request here.
         // Is this GET or POST?
@@ -577,6 +547,7 @@ export default {
     },
 
     async getExnet(exnetName, clear = false) {
+      console.log("  getExnet",exnetName,"clear=",clear);
       // TODO: reenable this
       let response = await this.sendGetExnetRequest(exnetName);
 
@@ -603,6 +574,7 @@ export default {
     },
 
     async StoreLastWorkingAnswer(exnetName) {
+      console.log("StoreLastWorkingAnswer ",exnetName);
       try {
         let response = await this.getExnet(exnetName, false);
 
@@ -654,6 +626,7 @@ export default {
     },
 
     async sendGetExnetAnswer(exnetName) {
+      console.log("sendGetExnetAnswer ",exnetName);
       try {
         // FIXME: HTTP request here.
         // Is this GET or POST?
@@ -721,6 +694,7 @@ export default {
     },
 
     async getCorrectWorkingAnswer() {
+      console.log("getCorrectWorkingAnswer");
       this.updateFeedback(null);
 
       // TODO: check if this call is required, as we all already getting exnet on changing question
@@ -760,7 +734,7 @@ export default {
 
           // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
 
-          this.$refs.workspace.loadPreviousAnswer(data);
+          this.$refs.answerAreaRef.loadPreviousAnswer(data);
         }
       } else {
         // If fetching the correct working answer fails, log an error
@@ -769,6 +743,7 @@ export default {
     },
 
     async getLastWorkingAnswer(isNewExnet) {
+      console.log("getLastWorkingAnswer isNewExnet=",isNewExnet)
       this.updateFeedback(null);
 
       // TODO: check if this call is required, as we all already getting exnet on changing question
@@ -812,7 +787,7 @@ export default {
 
           // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
 
-          this.$refs.workspace.loadPreviousAnswer(data);
+          this.$refs.answerAreaRef.loadPreviousAnswer(data);
         }
       } else {
         await this.getExnet(this.selectedQuestion, true);

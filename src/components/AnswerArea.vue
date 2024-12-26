@@ -3,7 +3,7 @@
     <button id="submitBtn" @click="convertToJson(false)" :disabled="showMyAnswer && !showCorrectAnswer">
       Submit
     </button>
-    <button id="resetBtn" @click="resetAnswerArea(selectedExnet)" :disabled="showMyAnswer && !showCorrectAnswer">
+    <button id="resetBtn" @click="resetAnswerArea" :disabled="showMyAnswer && !showCorrectAnswer">
       Reset
     </button>
     <button id="fullScreenBtn" @click="goFullScreen()">
@@ -39,13 +39,13 @@
   </div>
   <div class="answer_area" @dragover.prevent @dragenter.prevent ref="answer_area">
     <RenderStatement v-for="item in rootStatementID_set" :key="item" :statement-data="allStatements[item]"
-      :showToggle="true" :sharedData="sharedData" @duplicate-statement="duplicateStatement"
+      :showToggle="true" @duplicate-statement="duplicateStatement"
       @update-statement-content="handleUpdateStatementContent"
       @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething"
       @statement-dropped-on-statement="handleStatementDroppedOnStatement"
       @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
       @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement"
-      @update-shared-data="updateSharedData" />
+       />
 
     <Connector v-for="rootConnectorID in rootConnectorID_set" :key="rootConnectorID"
       :connector-i-d="allConnectors[rootConnectorID].connectorID"
@@ -59,7 +59,7 @@
       :click-count="allConnectors[rootConnectorID].clickCount" :orientation="allConnectors[rootConnectorID].orientation"
       :selected-phrase="allConnectors[rootConnectorID].selectedPhrase" :conntop="allConnectors[rootConnectorID].top"
       :connleft="allConnectors[rootConnectorID].left" :moveItem="moveItem" :rootConnectorID="rootConnectorID"
-      :sharedData="sharedData" @delete-child-connector="deleteChildConnector" @delete-connector="deleteConnector"
+      @delete-child-connector="deleteChildConnector" @delete-connector="deleteConnector"
       @delete-statement="deleteStatement" @setDraggedItem="setDraggedItem" @dropped-astat="handleAStatementDrop"
       @dropped-bstat="handleBStatementDrop" @dropped-aconn="handleAConnectorDrop" @dropped-bconn="handleBConnectorDrop"
       @link-word-changed="handleLinkWordChange" @update-connector-content="handleConnectContentChange"
@@ -67,8 +67,9 @@
       @update-child-connector-content="handleUpdateChildConnector" @update-child-stat="handleUpdateChildStat"
       @new-connector-dropped-on-connector="handleNewConnectorDroppedOnSomething"
       @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething" @duplicate-statement="duplicateStatement"
-      @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector
-        " @toggle-showPopup-fromconnector="toggleShowPopupFromConnector" @update-shared-data="updateSharedData" />
+      @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector" 
+      @toggle-showPopup-fromconnector="toggleShowPopupFromConnector" 
+       />
   </div>
 </template>
 
@@ -77,6 +78,7 @@ import Connector from "@/components/Connector.vue";
 import RenderStatement from "../components/RenderStatement.vue";
 import uniqueId from "lodash.uniqueid";
 import { computed } from "vue";
+import stringify from "json-stringify-pretty-compact";
 
 export default {
   name: "AnswerArea",
@@ -93,18 +95,9 @@ export default {
     "get-correct-answer",
     "get-reset-answer-area",
     "get-last-working-answer",
-    "update-shared-data",
   ],
   props: {
-    selectedExnet: String,
-    statements: Object, // this is a reference to the statementElements in Home.vue MM
-    data: Object, // I don't think this is used MM
-    droppedItems: Array, // record the dropped statements
-    draggedItem: Object, // record the dragged statements
-    offsetX: Number, // record the coordinate of x
-    offsetY: Number, // record the coordinate of y
-    dataObject: Object, // I don't think this is used MM
-    sharedData: Object,
+    parentStatementElements: Object, // this is a reference to the statementElements in Home.vue MM
   },
   data() {
     return {
@@ -114,7 +107,7 @@ export default {
       rootConnectorID: null, //not sure if these are used MM
 
       allConnectors: {},
-      allStatements: {}, // this mirrors the statements, but is keyed on the ID
+      allStatements: {}, // this mirrors the parentStatementElements, but is keyed on the ID
       left: 0,
       top: 0,
       // record move item
@@ -142,37 +135,37 @@ export default {
     prettifiedAnswerContentDump() {
       return (
         "-----------this.answerContent--------------\n" +
-        JSON.stringify(this.answerContent, null, 4)
+        stringify(this.answerContent)
       );
     },
     prettifiedStatementsDump() {
       return (
-        "-----------this.statements--------------\n" +
-        JSON.stringify(this.statements, null, 4)
+        "-----------this.parentStatementElements--------------\n" +
+        stringify(this.parentStatementElements)
       );
     },
     prettifiedAllStatementsDump() {
       return (
         "-----------this.allstatements--------------\n" +
-        JSON.stringify(this.allStatements, null, 4)
+        stringify(this.allStatements)
       );
     },
     prettifiedAllConnectorsDump() {
       return (
         "-----------this.allConnectors--------------\n" +
-        JSON.stringify(this.allConnectors, null, 4)
+        stringify(this.allConnectors)
       );
     },
     prettifiedRootConnectorID_List_Dump() {
       return (
         "-----------this.rootConnectorID_set--------------\n" +
-        JSON.stringify(Array.from(this.rootConnectorID_set), null, 4)
+        stringify(Array.from(this.rootConnectorID_set))
       );
     },
     prettifiedRootStatementIDs_Dump() {
       return (
         "-----------this.rootStatementID_set--------------\n" +
-        JSON.stringify(Array.from(this.rootStatementID_set), null, 4)
+        stringify(Array.from(this.rootStatementID_set))
       );
     },
     isDev() {
@@ -181,9 +174,7 @@ export default {
   },
 
   methods: {
-    updateSharedData(newValue) {
-      this.$emit("update-shared-data", newValue);
-    },
+
     toggleShowDataStructures() {
       this.showDataStructures = !this.showDataStructures;
     },
@@ -202,8 +193,8 @@ export default {
       this.$emit("get-last-working-answer", false);
     },
 
-    resetAnswerArea(selectedExnet) {
-      this.$emit("get-reset-answer-area", selectedExnet);
+    resetAnswerArea() {
+      this.$emit("get-reset-answer-area");
     },
 
     goFullScreen() {
@@ -231,6 +222,7 @@ export default {
     },
 
     convertToJson(isSavingLocally) {
+      console.log("convertToJson isSavingLocally=",isSavingLocally);
       this.data_Object = {
         connectorCount: String(this.connectorCount),
         rootConnectorID_set: Array.from(this.rootConnectorID_set),
@@ -277,7 +269,7 @@ export default {
     },
 
     handleAStatementDrop(info) {
-      console.log("AnswerArea:handleAStatementDrop");
+      //console.log("AnswerArea:handleAStatementDrop");
 
       const connectorID = info[0]; // this is the connectorID of the connector that was dropped on.
       const statementID = info[1];
@@ -296,19 +288,19 @@ export default {
       this.allStatements[statementID]["side"] = "left";
 
       if (statementOldParent === undefined) {
-        console.log(
+        /*console.log(
           "AnswerArea:handAStatementDrop: A statement was dragged directly onto connector left side."
-        );
+        );*/
         this.$emit("statement-used", statementID);
       } else if (statementOldParent === -1) {
-        console.log(
+        /*console.log(
           "AnswerArea:handAStatementDrop: A statement was dragged from ans area onto connector left side."
-        );
+        );*/
         this.rootStatementID_set.delete(statementID);
       } else {
-        console.log(
+        /*console.log(
           "AnswerArea:handAStatementDrop: A statement was dragged from a connector to a connector left side."
-        );
+        );*/
         if (statementOldSide === "left") {
           this.allConnectors[statementOldParent]["leftID"] = undefined;
           this.allConnectors[statementOldParent]["leftType"] = undefined;
@@ -469,6 +461,7 @@ export default {
       //retrieve the internal grab offsets that were recorded at the start of the drag
       const grabOffsetLeft = parseInt(e.dataTransfer.getData("grabOffsetLeft"));
       const grabOffsetTop = parseInt(e.dataTransfer.getData("grabOffsetTop"));
+      /*
       console.log(
         " grabOffset: ",
         grabOffsetLeft.toFixed(2),
@@ -483,7 +476,7 @@ export default {
         e.currentTarget.offsetLeft,
         e.currentTarget.offsetTop
       );
-
+      */
       let leftWithinAnswerArea = 0;
       let topWithinAnswerArea = 0;
 
@@ -493,18 +486,20 @@ export default {
         e.currentTarget.closest(".displayWorkspace");
       const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
       const scrollTop = scrollableDisplayWorkspace.scrollTop;
-      console.log("parent scroll=", scrollLeft, ",", scrollTop, ")");
-      console.log("parent position=", scrollableDisplayWorkspace.offsetLeft, ",", scrollableDisplayWorkspace.offsetTop, ")");
+      //console.log("parent scroll=", scrollLeft, ",", scrollTop, ")");
+      //console.log("parent position=", scrollableDisplayWorkspace.offsetLeft, ",", scrollableDisplayWorkspace.offsetTop, ")");
 
       leftWithinAnswerArea =
         e.clientX - scrollableDisplayWorkspace.offsetLeft - grabOffsetLeft + scrollLeft;
       topWithinAnswerArea =
         e.clientY - scrollableDisplayWorkspace.offsetTop - grabOffsetTop + scrollTop;
+        /*
       console.log(
         "SOOOO (left,top) Within AnswerArea = ",
         leftWithinAnswerArea,
         topWithinAnswerArea
       );
+      */
       return [leftWithinAnswerArea, topWithinAnswerArea];
     },
 
@@ -712,12 +707,14 @@ export default {
       const statementData = JSON.parse(e.dataTransfer.getData("data"));
 
       let droppedStatementID = statementData.id;
+      /*
       console.log(
         "AnswerArea::handleStatementDroppedOnStatement  statement",
         droppedStatementID,
         " dropped on ",
         droppedOnStatementID
       );
+      */
 
       // this method is to deal with a topLevel statement being moved.
       // so it's parent would be -1 (i.e. the AnswerArea)
@@ -728,6 +725,7 @@ export default {
       //retrieve the internal grab offsets that were recorded at the start of the drag
       const grabOffsetLeft = parseInt(e.dataTransfer.getData("grabOffsetLeft"));
       const grabOffsetTop = parseInt(e.dataTransfer.getData("grabOffsetTop"));
+      /*
       console.log("\n--------------ANSWER AREA onDrop-------------------");
       console.log(
         " grabOffset: ",
@@ -743,6 +741,7 @@ export default {
         e.currentTarget.offsetLeft,
         e.currentTarget.offsetTop
       );
+      */
       let leftWithinAnswerArea = 0;
       let topWithinAnswerArea = 0;
 
@@ -752,23 +751,23 @@ export default {
         e.currentTarget.closest(".displayWorkspace");
       const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
       const scrollTop = scrollableDisplayWorkspace.scrollTop;
-      console.log("parent scroll=", scrollLeft, ",", scrollTop, ")");
+      //console.log("parent scroll=", scrollLeft, ",", scrollTop, ")");
 
       const sRect = scrollableDisplayWorkspace.getBoundingClientRect();
-      console.log("parent pos=", sRect.left, ",", sRect.top, ")");
+      //console.log("parent pos=", sRect.left, ",", sRect.top, ")");
       const posWithinWorkspaceLeft = e.clientX - sRect.left;
       const posWithinWorkspaceTop = e.clientY - sRect.top;
 
       leftWithinAnswerArea =
         posWithinWorkspaceLeft - grabOffsetLeft + scrollLeft;
       topWithinAnswerArea = posWithinWorkspaceTop - grabOffsetTop + scrollTop;
-
+      /*
       console.log(
         "SOOOO (left,top) Within AnswerArea = ",
         leftWithinAnswerArea,
         topWithinAnswerArea
       );
-
+      */
       this.allStatements[droppedStatementID]["position"] = "absolute";
       this.allStatements[droppedStatementID]["top"] = topWithinAnswerArea;
       this.allStatements[droppedStatementID]["left"] = leftWithinAnswerArea;
@@ -1044,6 +1043,7 @@ export default {
       //retrieve the internal grab offsets that were recorded at the start of the drag
       const grabOffsetLeft = parseInt(e.dataTransfer.getData("grabOffsetLeft"));
       const grabOffsetTop = parseInt(e.dataTransfer.getData("grabOffsetTop"));
+      /*
       console.log("\n--------------ANSWER AREA onDrop-------------------");
       console.log(
         " grabOffset: ",
@@ -1059,7 +1059,7 @@ export default {
         e.currentTarget.offsetLeft,
         e.currentTarget.offsetTop
       );
-
+      */
       let leftWithinAnswerArea = 0;
       let topWithinAnswerArea = 0;
 
@@ -1069,18 +1069,19 @@ export default {
         e.currentTarget.closest(".displayWorkspace");
       const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
       const scrollTop = scrollableDisplayWorkspace.scrollTop;
-      console.log("parent scroll=", scrollLeft, ",", scrollTop, ")");
+      //console.log("parent scroll=", scrollLeft, ",", scrollTop, ")");
 
       leftWithinAnswerArea =
         e.clientX - e.currentTarget.offsetLeft - grabOffsetLeft + scrollLeft;
       topWithinAnswerArea =
         e.clientY - e.currentTarget.offsetTop - grabOffsetTop + scrollTop;
+        /*
       console.log(
         "SOOOO (left,top) Within AnswerArea = ",
         leftWithinAnswerArea,
         topWithinAnswerArea
       );
-
+      */
       e.stopImmediatePropagation();
 
       const type = e.dataTransfer.getData("type");
@@ -1091,9 +1092,11 @@ export default {
 
       // Deal with the dropped type is 'Connector' and with no child
       if (type === "connector") {
+        /*
         console.log(
           " Connector Dropped   ID=", data.connectorID, ""
         );
+        */
         if (data.connectorID === undefined) {
           this.allConnectors[this.connectorCount] = data;
 
@@ -1133,7 +1136,7 @@ export default {
 
           this.connectorCount++;
         } else {
-          console.log(" connector is already in answer area and has ID ", data.connectorID, " and parent ", this.allConnectors[data.connectorID]["parent"]);
+          //console.log(" connector is already in answer area and has ID ", data.connectorID, " and parent ", this.allConnectors[data.connectorID]["parent"]);
           // A connector is already in answerArea.
           this.allConnectors[data.connectorID]["parent"] = -1; // parent = -1 indicates it is not part of a tree, but is a direct child of the answer area
 
@@ -1170,9 +1173,11 @@ export default {
         }
       } else if (type === "statement") {
         const statementID = data.id;
+        /*
         console.log(
           " Statement Dropped   ID=", statementID
         );
+        */
         const getStatement = this.allStatements[statementID];
         let statementOldParent = undefined;
         if (getStatement) {
@@ -1352,6 +1357,7 @@ export default {
     },
 
     loadPreviousAnswer(parameter) {
+      console.log("AnswerArea:loadPreviousAnswer ", parameter);
       this.connectorCount = parseInt(parameter["connectorCount"]);
       this.rootConnectorID_set = new Set(parameter.rootConnectorID_set);
       this.rootStatementID_set = new Set(parameter.rootStatementID_set);
@@ -1362,7 +1368,7 @@ export default {
       this.top = parseInt(parameter["top"]);
 
       this.answerContent = parameter["answerContent"];
-      //console.log(parameter);
+     
     },
 
     deleteChildConnector(params) {
@@ -1412,7 +1418,7 @@ export default {
       duplicatedStatement["position"] = "absolute";
       duplicatedStatement["showPopup"] = theStatement["showPopup"];
       duplicatedStatement["collapsed"] = theStatement["collapsed"];
-      this.statements.push(duplicatedStatement); // Push the duplicated element to the parent array
+      this.parentStatementElements.push(duplicatedStatement); // Push the duplicated element to the parent array
       this.allStatements[duplicatedStatement.id] = duplicatedStatement; // now add to the keyed list
       let baseTop = 100;
       let baseLeft = 100;
@@ -1462,15 +1468,15 @@ export default {
     },
 
     duplicateLastStatement() {
-      if (this.statements.length > 0) {
-        const lastStatement = this.statements[this.statements.length - 1];
+      if (this.parentStatementElements.length > 0) {
+        const lastStatement = this.parentStatementElements[this.parentStatementElements.length - 1];
         const duplicatedStatement = JSON.parse(JSON.stringify(lastStatement)); // Create a copy of the last element
         duplicatedStatement.id = duplicatedStatement.id + 1; //just need a new unique number
         duplicatedStatement.statementIdentifier =
           duplicatedStatement.statementIdentifier;
         duplicatedStatement["parent"] = undefined;
         duplicatedStatement["visible"] = true;
-        this.statements.push(duplicatedStatement); // Push the duplicated element to the parent array
+        this.parentStatementElements.push(duplicatedStatement); // Push the duplicated element to the parent array
         this.allStatements[duplicatedStatement.id] = duplicatedStatement; // now add to the keyed list
       }
     },
@@ -1503,7 +1509,7 @@ export default {
   },
 
   mounted() {
-    const statementCount = this.statements.length;
+    const statementCount = this.parentStatementElements.length;
     if (statementCount > 50) {
       console.log("statementCount error!");
       return;
@@ -1511,7 +1517,7 @@ export default {
     let i = 0;
 
     while (i < statementCount) {
-      const item = this.statements[i];
+      const item = this.parentStatementElements[i];
 
       this.allStatements[item.id] = item;
       i++;
@@ -1526,7 +1532,7 @@ export default {
       deep: true,
     },
 
-    statements(newStatements) {
+    parentStatementElements(newStatements) {
       this.allStatements = {};
       for (let item in newStatements) {
         item = newStatements[item];

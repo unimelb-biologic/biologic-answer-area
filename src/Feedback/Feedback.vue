@@ -91,8 +91,6 @@
   
         statements: [],
         connectors: [],
-        droppedItems: [],
-        draggedItem: null,
         offsetX: 0,
         offsetY: 0,
         answerAreaEnabled: true,
@@ -157,21 +155,11 @@
         }
       },
   
-      // add the statement to the droppedItem array
-      addDroppedItems(data) {
-        this.droppedItems.push(data);
-      },
-  
-      // remove the dropped statement on the answerArea
-      delDroppedItem(data) {
-        this.droppedItems = this.droppedItems.filter(
-          (item) => item.id !== data.id
-        );
-      },
+
   
       //sets the dragged statement to the item that has started to be dragged
       onDragStart(item) {
-        this.draggedItem = item;
+       
       },
   
       //Record the coordinate of X,Y when it clicked
@@ -366,7 +354,7 @@
             this.showQuestionList = false;
   
             this.$refs.workspace.clearWorkspace();
-            this.droppedItems = [];
+            
           }
         } else {
           // What to do if failed?

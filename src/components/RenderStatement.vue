@@ -75,12 +75,10 @@ export default {
     "duplicate-statement",
     "toggle-collapsed-renderstatement",
     "toggle-showPopup-fromrenderstatement",
-    "update-shared-data",
   ],
   inheritAttrs: false,
   props: {
     statementData: Object,
-    sharedData: Object,
   },
   data() {
     return {
@@ -96,13 +94,13 @@ export default {
       this.renderedText = combinedText;
     },
     handleDragOveringRenderStatement(e) {
-      console.log("render over event");
+      //console.log("render over event");
     },
     handleDragEnteringRenderStatement(e) {
-      console.log("render enter event");
+      //console.log("render enter event");
     },
     handleDragLeavingRenderStatement(e) {
-      console.log("render leave event");
+      //console.log("render leave event");
     },
 
     startDrag(e, data) {
@@ -119,7 +117,7 @@ export default {
       var rect = mmBox.getBoundingClientRect();
       const grabOffsetLeft = e.clientX - rect.left;
       const grabOffsetTop = e.clientY - rect.top;
-
+      /*
       console.log("---START DRAG e.client (X,Y)---", e.clientX, e.clientY);
       console.log("---START DRAG rect position=---", rect.left, rect.top);
       console.log(
@@ -127,32 +125,35 @@ export default {
         grabOffsetLeft,
         grabOffsetTop
       );
+      */
       e.dataTransfer.setData("grabOffsetLeft", grabOffsetLeft.toString());
       e.dataTransfer.setData("grabOffsetTop", grabOffsetTop.toString());
 
       this.$emit("onDragStart", data);
 
-      // set the global sharedData (YUK!)
-      // only because dragEnter can't see insides of the dataTransfer object
-      const draggedWidth = e.currentTarget.offsetWidth;
-      const draggedHeight = e.currentTarget.offsetHeight;
-      const dragInformation = JSON.stringify({
-        draggedWidth: draggedWidth,
-        draggedHeight: draggedHeight,
-        drageeType: "render_statement",
-        drageeConnectorID: undefined,
-      });
-      console.log("SETTING DRAG INFORMATION = ", dragInformation);
-      this.$emit("update-shared-data", dragInformation);
+      // the following geometry information is used by the Target boxes in the connectors to change size dynamically.
+      // However the spec for the drag, dragenter, dragleave, dragover and dragend events the drag data store mode is protected mode.
+      // this means you can see the types but not the values. So the workaround is to encode the values into the type names.
+      const widthTypeStr = "draggedWidth/"+e.currentTarget.offsetWidth;
+        e.dataTransfer.setData(widthTypeStr,0 /* i.e. the zero is a dummy value*/ );
+        const heightTypeStr = "draggedHeight/"+e.currentTarget.offsetHeight;
+        e.dataTransfer.setData(heightTypeStr,0 /* i.e. the zero is a dummy value*/ );
+        const typeTypeStr = "draggedType/"+"render_statement";
+        e.dataTransfer.setData(typeTypeStr,0 /* i.e. the zero is a dummy value*/ );
+        const connectorIDTypeStr = "draggedConnectorID/";
+        e.dataTransfer.setData(connectorIDTypeStr,0 /* i.e. the zero is a dummy value*/ );
+
+        console.log(" SET UP DATA TRANSFER:",widthTypeStr,heightTypeStr,typeTypeStr,connectorIDTypeStr)
+
     },
 
     onDrop(e) {
       e.stopImmediatePropagation();
       const type = e.dataTransfer.getData("type");
-      console.log("RenderStatement:onDrop type=", type);
+      //console.log("RenderStatement:onDrop type=", type);
       if (type == "connector") {
         // ignore if it was statement droopped on statement
-        console.log(" emitting connector-dropped-on-statement");
+        //console.log(" emitting connector-dropped-on-statement");
         this.$emit("connector-dropped-on-statement", [
           this.statementData.id,
           undefined,
