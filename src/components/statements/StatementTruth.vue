@@ -227,6 +227,11 @@ export default {
       this.answeredData = this.statementData;
     },
   },
+
+  mounted() {
+    console.log("StatementTruth mounted");
+  },
+
 };
 </script>
 

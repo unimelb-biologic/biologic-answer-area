@@ -229,10 +229,13 @@ export default {
           userInputID += 1;
         }
       }
-
       this.answeredData = this.statementData;
     },
   },
+  mounted() {
+    console.log("StatementRoot mounted");
+  },
+
   watch: {
     userSelected: {
       handler: "handleSelectChange",

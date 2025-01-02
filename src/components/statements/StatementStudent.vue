@@ -234,6 +234,9 @@ export default {
   created() {
     this.initContent();
   },
+  mounted() {
+    console.log("StatementStudent mounted");
+  }
 };
 </script>
 

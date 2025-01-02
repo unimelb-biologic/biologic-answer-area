@@ -107,7 +107,7 @@
 
         <!-- TODO: implement delete -->
         <div class="connector-sections" v-if="this.leftType === 'statement'">
-          <RenderStatement
+          <RenderStatement ref="leftChildRenderStatement"
             @delete-statement="
               deleteStatement({ id: this.leftID, position: 'left' })
             "
@@ -227,7 +227,7 @@
 
         <!-- TODO: implement delete -->
         <div class="connector-sections" v-if="this.rightType === 'statement'">
-          <RenderStatement
+          <RenderStatement ref="rightChildRenderStatement"
             @delete-statement="
               deleteStatement({ id: this.rightID, position: 'right' })
             "
@@ -332,7 +332,6 @@ export default {
     "update-connector-content",
     "linkWordChanged",
     "update-stat-data",
-    "setDraggedItem",
     "delDroppedItem",
     "update-child-connector-content",
     "update-child-stat",

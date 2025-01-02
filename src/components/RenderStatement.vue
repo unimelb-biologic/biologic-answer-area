@@ -15,7 +15,7 @@
       top: this.statementData.top + 'px',
     }"
   >
-    <StatementRoot
+    <StatementRoot ref="statementRootRef"
       v-bind="$attrs"
       v-if="this.statementData.statementType === 0"
       :statement-data="this.statementData"
@@ -24,7 +24,7 @@
       @toggle-collapsed-statement-root="toggleCollapsedStatementRoot"
       @toggle-showPopup-fromstatementroot="toggleShowPopupStatementRoot"
     />
-    <StatementTruth
+    <StatementTruth ref="statementTruthRef"
       v-bind="$attrs"
       v-if="this.statementData.statementType === 1"
       :statement-data="this.statementData"
@@ -32,7 +32,7 @@
       @duplicate-statement="duplicateStatement"
       @toggle-collapsed-statement-truth="toggleCollapsedStatementTruth"
     />
-    <StatementStudent
+    <StatementStudent ref="statementStudentRef"
       v-bind="$attrs"
       v-if="this.statementData.statementType === 2"
       :statement-data="this.statementData"
@@ -41,7 +41,7 @@
       @toggle-collapsed-statement-student="toggleCollapsedStatementStudent"
       @toggle-showPopup-fromstatementstudent="toggleShowPopupStatementStudent"
     />
-    <StatementFreeText
+    <StatementFreeText ref="statementFreeTextRef"
       v-bind="$attrs"
       v-if="this.statementData.statementType === 3"
       :statement-statementData="this.statementData"
@@ -88,6 +88,25 @@ export default {
       hide_renderShowPopups: true,
       remove_formats: [".png", ".jpg", ".jpeg"], // array of formats to exclude from the answer string
     };
+  },
+  computed: {
+    concatenatedRenderStatement() {
+      const refMap = {
+        0: this.$refs.statementRootRef,
+        1: this.$refs.statementTruthRef,
+        2: this.$refs.statementStudentRef,
+        3: this.$refs.statementFreeTextRef,
+      };
+      const ref = refMap[this.statementData.statementType];
+      if (ref) {
+        if (typeof ref.concatenatedStatement === "function")
+          return ref.concatenatedStatement();
+        else
+        return "Error: concatenatedStatement is not a function. The type is " + typeof ref.concatenatedStatement;
+      } else {
+        return `Reference for statementType ${this.statementData.statementType} is not available`;
+      }
+    }
   },
   methods: {
     handleDoubleClick(combinedText) {
@@ -266,6 +285,10 @@ export default {
     // this.answeredStat = this.statementData;
     this.initContent();
   },
+  mounted() {
+    console.log("RenderStatement mounted");
+  }
+
 };
 </script>
 

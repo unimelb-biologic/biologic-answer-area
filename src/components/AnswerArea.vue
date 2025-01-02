@@ -12,6 +12,12 @@
     <button id="exitFullScreenBtn" @click="exitFullScreen()">
       Exit FullScreen
     </button>
+    <button id="undoBtn" @click="handleUndo()">
+      Undo
+    </button>
+    <button id="redoBtn" @click="handleRedo()">
+      Redo
+    </button>
   </div>
   <div v-if="isFeedbackAvailable">
     <button @click="toggleAllFeedback">
@@ -59,14 +65,22 @@
       :click-count="allConnectors[rootConnectorID].clickCount" :orientation="allConnectors[rootConnectorID].orientation"
       :selected-phrase="allConnectors[rootConnectorID].selectedPhrase" :conntop="allConnectors[rootConnectorID].top"
       :connleft="allConnectors[rootConnectorID].left" :moveItem="moveItem" :rootConnectorID="rootConnectorID"
-      @delete-child-connector="deleteChildConnector" @delete-connector="deleteConnector"
-      @delete-statement="deleteStatement" @setDraggedItem="setDraggedItem" @dropped-astat="handleAStatementDrop"
-      @dropped-bstat="handleBStatementDrop" @dropped-aconn="handleAConnectorDrop" @dropped-bconn="handleBConnectorDrop"
-      @link-word-changed="handleLinkWordChange" @update-connector-content="handleConnectContentChange"
-      @update-click-count="handleUpdateClickCount" @toggle-orientation="handleToggleOrientation"
-      @update-child-connector-content="handleUpdateChildConnector" @update-child-stat="handleUpdateChildStat"
+      @delete-child-connector="deleteChildConnector" 
+      @delete-connector="deleteConnector"
+      @delete-statement="deleteStatement" 
+      @dropped-astat="handleAStatementDrop"
+      @dropped-bstat="handleBStatementDrop"
+      @dropped-aconn="handleAConnectorDrop" 
+      @dropped-bconn="handleBConnectorDrop"
+      @link-word-changed="handleLinkWordChange" 
+      @update-connector-content="handleConnectContentChange"
+      @update-click-count="handleUpdateClickCount" 
+      @toggle-orientation="handleToggleOrientation"
+      @update-child-connector-content="handleUpdateChildConnector" 
+      @update-child-stat="handleUpdateChildStat"
       @new-connector-dropped-on-connector="handleNewConnectorDroppedOnSomething"
-      @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething" @duplicate-statement="duplicateStatement"
+      @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething" 
+      @duplicate-statement="duplicateStatement"
       @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector" 
       @toggle-showPopup-fromconnector="toggleShowPopupFromConnector" 
        />
@@ -87,14 +101,14 @@ export default {
     "update-answer-area-content",
     "statement-used",
     "statement-removed",
-    "setStatementElements",
-    "setDraggedItem",
-    "setDroppedItems",
     "connector-deleted",
     "answer-data",
     "get-correct-answer",
     "get-reset-answer-area",
     "get-last-working-answer",
+    "answerarea-state-change",
+    "answerarea-undo",
+    "answerarea-redo",
   ],
   props: {
     parentStatementElements: Object, // this is a reference to the statementElements in Home.vue MM
@@ -116,7 +130,7 @@ export default {
       moveY: 0,
       data_Object: {},
       answerContent: {}, // {ID: Content} record the element ID and its content
-      showDataStructures: false,
+      showDataStructures: true,
       showAllFeedback: false, // flag used to toggle all the feedback elements at once
     };
   },
@@ -175,6 +189,12 @@ export default {
 
   methods: {
 
+    handleUndo() {
+      this.$emit("answerarea-undo");
+    },
+    handleRedo() {
+      this.$emit("answerarea-redo");
+    },
     toggleShowDataStructures() {
       this.showDataStructures = !this.showDataStructures;
     },
@@ -220,10 +240,8 @@ export default {
         document.msExitFullscreen();
       }
     },
-
-    convertToJson(isSavingLocally) {
-      console.log("convertToJson isSavingLocally=",isSavingLocally);
-      this.data_Object = {
+    getCurrentState() {
+      const currentState = {
         connectorCount: String(this.connectorCount),
         rootConnectorID_set: Array.from(this.rootConnectorID_set),
         rootConnectorID: this.rootConnectorID,
@@ -242,13 +260,21 @@ export default {
         offsetX: undefined,
         offsetY: undefined,
       };
+      return currentState;
+    },
+
+    convertToJson(isSavingLocally) {
+      console.log("convertToJson isSavingLocally=",isSavingLocally);
+      
+      this.data_Object = this.getCurrentState();
 
       // do not save if answer is still empty
+      /* take this out for now - it's too simplistic. MM Dec 2024.
       if (!this.data_Object.rootConnectorID_set.length && !this.data_Object.rootStatementID_set.length) {
         alert("Empty answer cannot be saved.")
         return this.data_Object;
       }
-
+      */
       // return object if data is being downloaded locally
       if (isSavingLocally) {
         return this.data_Object;
@@ -323,6 +349,9 @@ export default {
       this.allConnectors[connectorID]["leftContent"] = statementContent;
       this.allConnectors[connectorID]["leftStatementIdentifier"] =
         statementIdentifier;
+
+        this.$emit("answerarea-state-change");
+
     },
 
     // If a statement is dropped on the right side of a
@@ -380,12 +409,10 @@ export default {
       this.allConnectors[connectorID]["rightContent"] = statementContent;
       this.allConnectors[connectorID]["rightStatementIdentifier"] =
         statementIdentifier;
-    },
 
-    setDraggedItem(value) {
-      this.$emit("setDraggedItem", value);
-    },
+      this.$emit("answerarea-state-change");
 
+    },
     thingIsInTreeOfconnector(objTypeStr, thingID, connID) {
       console.log(
         "thingIsInTreeOfconnector: is ",
@@ -534,6 +561,8 @@ export default {
         this.allConnectors[droppedConnectorID]["top"]] = this.calculateNewPositionWithinAnswerArea(evt);
         evt.stopImmediatePropagation();
 
+        this.$emit("answerarea-state-change");
+
         return;
       }
 
@@ -600,6 +629,9 @@ export default {
 
       // Record content
       this.answerContent[droppedConnectorID] = info[2];
+
+      this.$emit("answerarea-state-change");
+
     },
 
     handleBConnectorDrop(info) {
@@ -627,6 +659,11 @@ export default {
         [this.allConnectors[droppedConnectorID]["left"],
         this.allConnectors[droppedConnectorID]["top"]] = this.calculateNewPositionWithinAnswerArea(evt);
         evt.stopImmediatePropagation();
+
+
+        this.$emit("answerarea-state-change");
+
+
         return;
       }
 
@@ -694,6 +731,9 @@ export default {
 
       // Record content
       this.answerContent[droppedConnectorID] = info[2];
+
+      this.$emit("answerarea-state-change");
+
     },
 
     handleStatementDroppedOnStatement(info) {
@@ -771,6 +811,9 @@ export default {
       this.allStatements[droppedStatementID]["position"] = "absolute";
       this.allStatements[droppedStatementID]["top"] = topWithinAnswerArea;
       this.allStatements[droppedStatementID]["left"] = leftWithinAnswerArea;
+
+      this.$emit("answerarea-state-change");
+
     },
 
     handleNewConnectorDroppedOnSomething(info) {
@@ -890,6 +933,10 @@ export default {
         [this.allConnectors[droppedConnectorID]["left"],
         this.allConnectors[droppedConnectorID]["top"]] = this.calculateNewPositionWithinAnswerArea(e);
         e.stopImmediatePropagation();
+
+
+        this.$emit("answerarea-state-change");
+
 
         return;
       }
@@ -1034,7 +1081,7 @@ export default {
           }
         }
       }
-
+      this.$emit("answerarea-state-change");
     },
 
     onDrop(e) {
@@ -1043,8 +1090,9 @@ export default {
       //retrieve the internal grab offsets that were recorded at the start of the drag
       const grabOffsetLeft = parseInt(e.dataTransfer.getData("grabOffsetLeft"));
       const grabOffsetTop = parseInt(e.dataTransfer.getData("grabOffsetTop"));
+      
+      console.log("\n\n--------------ANSWER AREA onDrop-------------------\n\n\n");
       /*
-      console.log("\n--------------ANSWER AREA onDrop-------------------");
       console.log(
         " grabOffset: ",
         grabOffsetLeft.toFixed(2),
@@ -1231,6 +1279,8 @@ export default {
         }
         this.answerContent[statementID] = transContent;
       }
+
+      this.$emit("answerarea-state-change");
     },
 
     connectorDroppedOnStatement(statementID, e) {
@@ -1284,14 +1334,19 @@ export default {
           // if
         }
       }
+
+      this.$emit("answerarea-state-change");
+
     },
 
     handleConnectContentChange(info) {
+      console.log("AnswerArea:handleConnectContentChange");
       const currConnectID = info[0];
       this.answerContent[currConnectID] = info[1];
     },
 
     handleUpdateChildStat(info) {
+      console.log("AnswerArea:handleUpdateChildStat");
       const currConn = info[0];
       if (info[2] === "left") {
         this.allConnectors[currConn]["leftContent"] = info[1];
@@ -1301,6 +1356,7 @@ export default {
     },
 
     handleUpdateChildConnector(info) {
+      console.log("AnswerArea:handleUpdateChildConnector");
       const currParent = info[2];
       if (info[3] === "left") {
         this.allConnectors[currParent]["leftContent"] = info[1];
@@ -1312,6 +1368,7 @@ export default {
     // invoked when student statement choice is changed to
     // update the answer string area
     handleUpdateStatementContent(contentText, statementID) {
+      console.log("AnswerArea:handleUpdateStatementContent");
       this.answerContent[statementID] = contentText[0];
     },
 
@@ -1406,6 +1463,7 @@ export default {
         delete this.answerContent[id];
       }
       this.$emit("connector-deleted", id);
+      this.$emit("answerarea-state-change");
     },
 
     duplicateStatement(id) {
@@ -1430,12 +1488,14 @@ export default {
       this.allStatements[duplicatedStatement.id]["left"] = baseLeft + 25;
       this.rootStatementID_set.add(duplicatedStatement.id);
       this.$emit("statement-used", duplicatedStatement.id);
+      this.$emit("answerarea-state-change");
     },
 
     toggleCollapsedRenderStatement(id) {
       console.log("AnswerArea:toggleCollapsedRenderStatement ID:", id);
       this.allStatements[id]["collapsed"] =
         !this.allStatements[id]["collapsed"];
+      this.$emit("answerarea-state-change");
     },
 
     toggleCollapsedRenderStatementFromConnector(id) {
@@ -1445,6 +1505,7 @@ export default {
       );
       this.allStatements[id]["collapsed"] =
         !this.allStatements[id]["collapsed"];
+      this.$emit("answerarea-state-change");
     },
 
     toggleShowPopupFromRenderStatement(id) {
@@ -1455,6 +1516,7 @@ export default {
         "AnswerArea:toggleShowPopupFromRenderStatement is now",
         this.allStatements[id]["showPopup"]
       );
+      this.$emit("answerarea-state-change");
     },
 
     toggleShowPopupFromConnector(id) {
@@ -1465,6 +1527,7 @@ export default {
         "AnswerArea:toggleShowPopupFromConnector is now",
         this.allStatements[id]["showPopup"]
       );
+      this.$emit("answerarea-state-change");
     },
 
     duplicateLastStatement() {
@@ -1479,6 +1542,7 @@ export default {
         this.parentStatementElements.push(duplicatedStatement); // Push the duplicated element to the parent array
         this.allStatements[duplicatedStatement.id] = duplicatedStatement; // now add to the keyed list
       }
+    this.$emit("answerarea-state-change");
     },
 
     deleteStatement(params) {

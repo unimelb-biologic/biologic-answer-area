@@ -77,12 +77,18 @@
                   <AnswerArea ref="answerAreaRef"  
                     :parentStatementElements="statementElements"
                     @get-reset-answer-area="getResetAnswerArea"
-                    @get-correct-answer="getCorrectWorkingAnswer" @get-last-working-answer="getLastWorkingAnswer"
-                    @answer-data="updateJsonOutput" @setDraggedItem="onDragStart" @addDroppedItems="addDroppedItems"
-                    @delDroppedItem="delDroppedItem" @update-show-my-answer="updateShowMyAnswer"
+                    @get-correct-answer="getCorrectWorkingAnswer" 
+                    @get-last-working-answer="getLastWorkingAnswer"
+                    @answer-data="updateJsonOutput" 
+                    @update-show-my-answer="updateShowMyAnswer"
                     @update-show-correct-answer="updateShowCorrectAnswer"
-                    @update-answer-area-content="handleUpdateAnswerContent" @statement-used="handleStatementUsed"
-                    @statement-removed="handleStatementRemoval" @enable-area="(n) => toggleAnswerArea(n)"
+                    @update-answer-area-content="handleUpdateAnswerContent" 
+                    @statement-used="handleStatementUsed"
+                    @statement-removed="handleStatementRemoval" 
+                    @enable-area="(n) => toggleAnswerArea(n)"
+                    @answerarea-state-change="handleAnswerAreaStateChange"
+                    @answerarea-undo = "handleUndo"
+                    @answerarea-redo = "handleRedo"
                     />
                 </div>
               </pane>
@@ -164,7 +170,10 @@ export default {
       showCorrectAnswer: false,
       feedbackRubricMap: ref({}),
 
-      answerAreaHistory = ;
+      undoStack: [], // record history of state-data for the answerArea.
+      currentState: undefined,
+      redoStack: [],
+      ignoreStateChanges: false, // this is turned on when programmatic changes to the answerarea are happening.
     };
   },
 
@@ -325,10 +334,6 @@ export default {
       this.showMyAnswer = value;
     },
 
-    //sets the dragged statement to the item that has started to be dragged
-    onDragStart(item) {
-    },
-
     onDropWorkspace(e) {
       if (this.answerAreaEnabled === false) {
         return;
@@ -342,6 +347,7 @@ export default {
 
     // Receive all content texts from AnswerArea
     handleUpdateAnswerContent(info) {
+      console.log(" handleUpdateAnswerContent ")
       const rootIDs = Array.from(info[0]);
       const statementIDs = Array.from(info[1]);
       const newAnswerContentObject = info[2];
@@ -357,12 +363,7 @@ export default {
           Object.values(newAnswerContentObject[statementIDs[i]]).join("")
         );
       }
-    },
-    // Handle ExNetJson from FileREader
-    onExNetReadFile(exNetRawData) {
-      console.log("onExNetReadFile ",exNetRawData);
-      const exnetWorkingAnswerJson = JSON.parse(exNetRawData);
-      this.setCurrentExNet(exnetWorkingAnswerJson, true);
+      //this.handleAnswerAreaStateChange(); not sure if this is needed. MM.
     },
 
     getResetAnswerArea() {
@@ -439,6 +440,7 @@ export default {
 
         this.statementElements = data["statementElements"];
         this.$refs.answerAreaRef.loadPreviousAnswer(data);
+        this.resetStateChangeHistory();
       }
     },
 
@@ -546,7 +548,7 @@ export default {
       }
     },
 
-    async getExnet(exnetName, clear = false) {
+    async  getExnet(exnetName, clear = false) {
       console.log("  getExnet",exnetName,"clear=",clear);
       // TODO: reenable this
       let response = await this.sendGetExnetRequest(exnetName);
@@ -563,8 +565,9 @@ export default {
           this.isFeedbackAllowed = response.is_feedback_allowed;
           this.isCorrectAnswerAllowed = response.is_correct_answer_allowed;
 
-          // Successful response code here.
-          this.setCurrentExNet(exnetWorkingAnswerJson, clear);
+          //this.setCurrentExNet(exnetWorkingAnswerJson, clear);     
+          this.setExNetAnswer(exnetWorkingAnswerJson);     
+
         }
       } else {
         // What to do if failed?
@@ -787,11 +790,12 @@ export default {
 
           // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
 
-          this.$refs.answerAreaRef.loadPreviousAnswer(data);
+          await this.$refs.answerAreaRef.loadPreviousAnswer(data);
         }
       } else {
         await this.getExnet(this.selectedQuestion, true);
       }
+      await this.resetStateChangeHistory(); // Since we've just loaded a question we don't want an undo/redo history
     },
 
     // check if student has access to the particular Exnet
@@ -823,6 +827,63 @@ export default {
         // If user clicks No thanks or cancels the dialog, do nothing
       }
     },
+    ignoreStateChanges(ignore=true){
+      this.ignoreStateChanges = ignore;
+    },
+    displayUndoState(str){
+      console.log("--------",str,"---------");
+      console.log("currentState = ",this.currentState);
+      console.log("undoStack length = ",this.undoStack.length);
+      for (let i = 0; i < this.undoStack.length; i++) {
+        console.log("undo", i, this.undoStack[i]);
+      }
+      console.log("redoStack length = ",this.redoStack.length);
+      for (let i = 0; i < this.redoStack.length; i++) {
+        console.log("redo", i, this.redoStack[i]);
+      }
+      console.log(" ");
+    },
+    getDeepCopyOfAnswerAreaCurrentState() {
+      // need to make a deep copy to put on the undo stack.
+      const stateAsJsonString = JSON.stringify(this.$refs.answerAreaRef.getCurrentState());
+      console.log("current state string length = ",stateAsJsonString.length);
+      return JSON.parse(stateAsJsonString);
+    },
+    resetStateChangeHistory() {
+      this.displayUndoState("resetStateChangeHistory START");
+      this.undoStack.length = 0;
+      this.redoStack.length = 0;
+      this.currentState = this.getDeepCopyOfAnswerAreaCurrentState();
+      this.displayUndoState("resetStateChangeHistory FINISH");
+    },
+    handleAnswerAreaStateChange() {
+      this.displayUndoState("handleAnswerAreaStateChange START");
+      if (this.ignoreStateChanges) {
+        console.log(" ignoring state chagnes ");
+        return;
+      }
+      if (this.currentState)
+        this.undoStack.push(this.currentState);
+      this.currentState = this.getDeepCopyOfAnswerAreaCurrentState();
+      this.redoStack.length = 0;
+      this.displayUndoState("handleAnswerAreaStateChange FINISH");
+    },
+    handleUndo() {
+      this.displayUndoState("handleUndo START");
+      if (this.undoStack.length === 0) return;
+      this.redoStack.push(this.currentState);
+      this.currentState = this.undoStack.pop();
+      this.$refs.answerAreaRef.loadPreviousAnswer(this.currentState);
+      this.displayUndoState("handleUndo FINISH");
+    },
+    handleRedo() {
+      this.displayUndoState("handleRedo START");
+      if (this.redoStack.length === 0) return;
+      this.undoStack.push(this.currentState);
+      this.currentState = this.redoStack.pop();
+      this.$refs.answerAreaRef.loadPreviousAnswer(this.currentState);
+      this.displayUndoState("handleRedo FINISH");
+    },
   },
 
   async mounted() {
@@ -853,6 +914,7 @@ export default {
           : this.questions[0];
         await this.getExnet(this.selectedQuestion, true);
         await this.getLastWorkingAnswer(true);
+        await this.resetStateChangeHistory();
       }
     }
   },
