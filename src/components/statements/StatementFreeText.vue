@@ -71,6 +71,9 @@ export default {
   created() {
     this.initContent();
   },
+  mounted() {
+    //console.log("StatementFreeText mounted");
+  }
 };
 </script>
 

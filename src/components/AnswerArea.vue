@@ -1,33 +1,7 @@
 <template>
-  <div>
-    <button id="submitBtn" @click="convertToJson(false)" :disabled="showMyAnswer && !showCorrectAnswer">
-      Submit
-    </button>
-    <button id="resetBtn" @click="resetAnswerArea(selectedExnet)" :disabled="showMyAnswer && !showCorrectAnswer">
-      Reset
-    </button>
-    <button id="fullScreenBtn" @click="goFullScreen()">
-      FullScreen
-    </button>
-    <button id="exitFullScreenBtn" @click="exitFullScreen()">
-      Exit FullScreen
-    </button>
-  </div>
-  <div v-if="isFeedbackAvailable">
-    <button @click="toggleAllFeedback">
-      {{ showAllFeedback ? "Close Feedback" : "Show Feedback" }}
-    </button>
-  </div>
-  <div v-if="isCorrectAnswerAllowed">
-    <button v-if="showCorrectAnswer" @click="getCorrectAnswer">
-      Show Correct Answer
-    </button>
-    <button v-if="showMyAnswer" @click="showUserAnswer">Show My Answer</button>
-  </div>
-  <div id="showDataStructuresButton" v-if="isDev">
-    <button @click="toggleShowDataStructures">show data structures</button>
-  </div>
-  <div v-if="showDataStructures" class="statement-dump">
+
+
+  <div v-if="showDataStructures" class="data-structure-window">
     <pre>
     {{ prettifiedAnswerContentDump }}
     {{ prettifiedStatementsDump }}
@@ -35,17 +9,17 @@
     {{ prettifiedAllConnectorsDump }}
     {{ prettifiedRootConnectorID_List_Dump }}
     {{ prettifiedRootStatementIDs_Dump }}
-        </pre>
+    </pre>
   </div>
-  <div class="answer_area" @dragover.prevent @dragenter.prevent ref="answer_area">
+  <div class="answer_area_class" @drop="onDrop" @dragover.prevent>
+    <!--h4>{{ testProp }} and localTestProp = {{ localTestProp }} this.connectorCount={{ this.connectorCount }}</h4-->
     <RenderStatement v-for="item in rootStatementID_set" :key="item" :statement-data="allStatements[item]"
-      :showToggle="true" :sharedData="sharedData" @duplicate-statement="duplicateStatement"
+      :showToggle="true" @duplicate-statement="duplicateStatement"
       @update-statement-content="handleUpdateStatementContent"
       @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething"
       @statement-dropped-on-statement="handleStatementDroppedOnStatement"
       @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
-      @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement"
-      @update-shared-data="updateSharedData" />
+      @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement" />
 
     <Connector v-for="rootConnectorID in rootConnectorID_set" :key="rootConnectorID"
       :connector-i-d="allConnectors[rootConnectorID].connectorID"
@@ -59,54 +33,47 @@
       :click-count="allConnectors[rootConnectorID].clickCount" :orientation="allConnectors[rootConnectorID].orientation"
       :selected-phrase="allConnectors[rootConnectorID].selectedPhrase" :conntop="allConnectors[rootConnectorID].top"
       :connleft="allConnectors[rootConnectorID].left" :moveItem="moveItem" :rootConnectorID="rootConnectorID"
-      :sharedData="sharedData" @delete-child-connector="deleteChildConnector" @delete-connector="deleteConnector"
-      @delete-statement="deleteStatement" @setDraggedItem="setDraggedItem" @dropped-astat="handleAStatementDrop"
-      @dropped-bstat="handleBStatementDrop" @dropped-aconn="handleAConnectorDrop" @dropped-bconn="handleBConnectorDrop"
-      @link-word-changed="handleLinkWordChange" @update-connector-content="handleConnectContentChange"
-      @update-click-count="handleUpdateClickCount" @toggle-orientation="handleToggleOrientation"
-      @update-child-connector-content="handleUpdateChildConnector" @update-child-stat="handleUpdateChildStat"
+      @delete-child-connector="deleteChildConnector" @delete-connector="deleteConnector"
+      @dropped-astat="handleAStatementDrop" @dropped-bstat="handleBStatementDrop" @dropped-aconn="handleAConnectorDrop"
+      @dropped-bconn="handleBConnectorDrop" @link-word-changed="handleLinkWordChange"
+      @update-connector-content="handleConnectContentChange" @update-click-count="handleUpdateClickCount"
+      @toggle-orientation="handleToggleOrientation" @update-child-connector-content="handleUpdateChildConnector"
+      @update-child-stat="handleUpdateChildStat"
       @new-connector-dropped-on-connector="handleNewConnectorDroppedOnSomething"
       @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething" @duplicate-statement="duplicateStatement"
-      @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector
-        " @toggle-showPopup-fromconnector="toggleShowPopupFromConnector" @update-shared-data="updateSharedData" />
+      @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
+      @toggle-showPopup-fromconnector="toggleShowPopupFromConnector" />
+    <ConnectorArea v-if="!displayOnly" />
   </div>
 </template>
 
 <script>
 import Connector from "@/components/Connector.vue";
 import RenderStatement from "../components/RenderStatement.vue";
+import ConnectorArea from "@/components/ConnectorArea.vue";
 import uniqueId from "lodash.uniqueid";
 import { computed } from "vue";
+import stringify from "json-stringify-pretty-compact";
 
 import { STATEMENT_PROPORTION_REQUIRED } from '../config/constants';
 
 export default {
   name: "AnswerArea",
-  components: { Connector, RenderStatement },
+  components: {
+    Connector,
+    RenderStatement,
+    ConnectorArea,
+  },
   emits: [
     "update-answer-area-content",
-    "statement-used",
-    "statement-removed",
-    "setStatementElements",
-    "setDraggedItem",
-    "setDroppedItems",
     "connector-deleted",
     "answer-data",
-    "get-correct-answer",
-    "get-reset-answer-area",
-    "get-last-working-answer",
-    "update-shared-data",
+    "answerarea-state-change",
   ],
   props: {
-    selectedExnet: String,
-    statements: Object, // this is a reference to the statementElements in Home.vue MM
-    data: Object, // I don't think this is used MM
-    droppedItems: Array, // record the dropped statements
-    draggedItem: Object, // record the dragged statements
-    offsetX: Number, // record the coordinate of x
-    offsetY: Number, // record the coordinate of y
-    dataObject: Object, // I don't think this is used MM
-    sharedData: Object,
+    parentStatementElements: Object, // this is a reference to the statementElements in Home.vue MM
+    displayOnly: Boolean,
+    testProp: Number,
   },
   data() {
     return {
@@ -116,7 +83,7 @@ export default {
       rootConnectorID: null, //not sure if these are used MM
 
       allConnectors: {},
-      allStatements: {}, // this mirrors the statements, but is keyed on the ID
+      allStatements: {}, // this mirrors the parentStatementElements, but is keyed on the ID
       left: 0,
       top: 0,
       // record move item
@@ -125,56 +92,58 @@ export default {
       moveY: 0,
       data_Object: {},
       answerContent: {}, // {ID: Content} record the element ID and its content
-      showDataStructures: false,
       showAllFeedback: false, // flag used to toggle all the feedback elements at once
+
+      localTestProp: 1,
     };
   },
   provide() {
+    //console.log("\n\n*******************\n\n AnswerArea::provide() being called OK\n\n\n\n\n")
     return {
       showAllFeedback: computed(() => this.showAllFeedback),
+      displayOnly: this.displayOnly,
     };
   },
   inject: [
     "isFeedbackAvailable",
-    "isCorrectAnswerAllowed",
-    "showCorrectAnswer",
-    "showMyAnswer",
+    "showDataStructures",
+    "ignoreStateChanges"
   ],
   computed: {
     prettifiedAnswerContentDump() {
       return (
         "-----------this.answerContent--------------\n" +
-        JSON.stringify(this.answerContent, null, 4)
+        stringify(this.answerContent)
       );
     },
     prettifiedStatementsDump() {
       return (
-        "-----------this.statements--------------\n" +
-        JSON.stringify(this.statements, null, 4)
+        "-----------this.parentStatementElements--------------\n" +
+        stringify(this.parentStatementElements)
       );
     },
     prettifiedAllStatementsDump() {
       return (
         "-----------this.allstatements--------------\n" +
-        JSON.stringify(this.allStatements, null, 4)
+        stringify(this.allStatements)
       );
     },
     prettifiedAllConnectorsDump() {
       return (
         "-----------this.allConnectors--------------\n" +
-        JSON.stringify(this.allConnectors, null, 4)
+        stringify(this.allConnectors)
       );
     },
     prettifiedRootConnectorID_List_Dump() {
       return (
         "-----------this.rootConnectorID_set--------------\n" +
-        JSON.stringify(Array.from(this.rootConnectorID_set), null, 4)
+        stringify(Array.from(this.rootConnectorID_set))
       );
     },
     prettifiedRootStatementIDs_Dump() {
       return (
         "-----------this.rootStatementID_set--------------\n" +
-        JSON.stringify(Array.from(this.rootStatementID_set), null, 4)
+        stringify(Array.from(this.rootStatementID_set))
       );
     },
     isDev() {
@@ -183,74 +152,9 @@ export default {
   },
 
   methods: {
-    updateSharedData(newValue) {
-      this.$emit("update-shared-data", newValue);
-    },
-    toggleShowDataStructures() {
-      this.showDataStructures = !this.showDataStructures;
-    },
 
-    getCorrectAnswer() {
-
-      if (this.checkSufficientAnswerSize()) {
-        alert(STATEMENT_PROPORTION_REQUIRED + "% of statements must be used in the answer in order to show the correct answer");
-        return false;
-      }
-
-      this.$emit("update-show-correct-answer", false);
-      this.$emit("update-show-my-answer", true);
-
-      this.$emit("get-correct-answer");
-    },
-
-    showUserAnswer() {
-      this.$emit("update-show-correct-answer", true);
-      this.$emit("update-show-my-answer", false);
-
-      this.$emit("get-last-working-answer", false);
-    },
-
-    resetAnswerArea(selectedExnet) {
-      this.$emit("get-reset-answer-area", selectedExnet);
-    },
-
-    goFullScreen() {
-      var elem = document.getElementById("displayWorkspaceID")
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      } else if (elem.mozRequestFullScreen) { // Firefox
-        elem.mozRequestFullScreen();
-      } else if (elem.webkitRequestFullscreen) { // Chrome, Safari, and Opera
-        elem.webkitRequestFullscreen();
-      } else if (elem.msRequestFullscreen) { // IE/Edge
-        elem.msRequestFullscreen();
-      }
-    },
-    exitFullScreen() {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.mozCancelFullScreen) { // Firefox
-        document.mozCancelFullScreen();
-      } else if (document.webkitExitFullscreen) { // Chrome, Safari, and Opera
-        document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) { // IE/Edge
-        document.msExitFullscreen();
-      }
-    },
-    checkSufficientAnswerSize() {
-      // check if more than N% of statements are used before showing feedback
-      // N% defined in constants.js
-
-      let currentAllStatements = Object.values(this.allStatements);
-      let mimimumStatementsRequired = Math.floor(currentAllStatements.length * parseFloat(STATEMENT_PROPORTION_REQUIRED / 100));
-      let usedStatements = currentAllStatements.filter((statement) => statement.visible === false)
-
-      return (usedStatements.length < mimimumStatementsRequired);
-
-    },
-
-    convertToJson(isSavingLocally) {
-      this.data_Object = {
+    getCurrentState() {
+      const currentState = {
         connectorCount: String(this.connectorCount),
         rootConnectorID_set: Array.from(this.rootConnectorID_set),
         rootConnectorID: this.rootConnectorID,
@@ -265,30 +169,12 @@ export default {
         statementFlag: this.statementFlag,
         statementsType: this.statementsType,
         rootContent: this.rootContent,
-        answerContent: this.answerContent,
-        offsetX: undefined,
-        offsetY: undefined,
+        answerContent: this.answerContent
       };
-
-      // do not save if answer is still empty
-      if (!this.data_Object.rootConnectorID_set.length && !this.data_Object.rootStatementID_set.length) {
-        alert("Empty answer cannot be saved.")
-        return this.data_Object;
-      }
-
-      // return object if data is being downloaded locally
-      if (isSavingLocally) {
-        return this.data_Object;
-      }
-
-      // enables the correct answer option
-      this.$emit("update-show-correct-answer", true);
-      this.$emit("update-show-my-answer", false);
-
-      // Emit the dataObject and saveJson() result
-      this.$emit("answer-data", this.data_Object);
-      //console.log(this.data_Object);
+      return currentState;
     },
+
+
 
     handleLinkWordChange(info) {
       const connectorID = info[0];
@@ -296,7 +182,7 @@ export default {
     },
 
     handleAStatementDrop(info) {
-      console.log("AnswerArea:handleAStatementDrop");
+      //console.log("AnswerArea:handleAStatementDrop");
 
       const connectorID = info[0]; // this is the connectorID of the connector that was dropped on.
       const statementID = info[1];
@@ -315,19 +201,19 @@ export default {
       this.allStatements[statementID]["side"] = "left";
 
       if (statementOldParent === undefined) {
-        console.log(
+        /*console.log(
           "AnswerArea:handAStatementDrop: A statement was dragged directly onto connector left side."
-        );
+        );*/
         this.$emit("statement-used", statementID);
       } else if (statementOldParent === -1) {
-        console.log(
+        /*console.log(
           "AnswerArea:handAStatementDrop: A statement was dragged from ans area onto connector left side."
-        );
+        );*/
         this.rootStatementID_set.delete(statementID);
       } else {
-        console.log(
+        /*console.log(
           "AnswerArea:handAStatementDrop: A statement was dragged from a connector to a connector left side."
-        );
+        );*/
         if (statementOldSide === "left") {
           this.allConnectors[statementOldParent]["leftID"] = undefined;
           this.allConnectors[statementOldParent]["leftType"] = undefined;
@@ -350,11 +236,14 @@ export default {
       this.allConnectors[connectorID]["leftContent"] = statementContent;
       this.allConnectors[connectorID]["leftStatementIdentifier"] =
         statementIdentifier;
+
+      this.$emit("answerarea-state-change");
+
     },
 
     // If a statement is dropped on the right side of a
     handleBStatementDrop(info) {
-      console.log("AnswerArea:handleBStatementDrop");
+      globalConsoleLog("net", "AnswerArea:handleBStatementDrop", "geom");
       const connectorID = info[0]; // this is the connectorID of the connector that was dropped on.
       const statementID = info[1];
       const statementContent = info[2];
@@ -372,17 +261,17 @@ export default {
       this.allStatements[statementID]["side"] = "right";
 
       if (statementOldParent === undefined) {
-        console.log(
+        globalConsoleLog("net",
           "A statement was dragged directly onto connector right side."
         );
         this.$emit("statement-used", statementID);
       } else if (statementOldParent === -1) {
-        console.log(
+        globalConsoleLog("net",
           "A statement was dragged from ans area onto connector right side."
         );
         this.rootStatementID_set.delete(statementID);
       } else {
-        console.log(
+        globalConsoleLog("net",
           "A statement was dragged from a connector to a connector right side."
         );
         if (statementOldSide === "left") {
@@ -407,14 +296,12 @@ export default {
       this.allConnectors[connectorID]["rightContent"] = statementContent;
       this.allConnectors[connectorID]["rightStatementIdentifier"] =
         statementIdentifier;
-    },
 
-    setDraggedItem(value) {
-      this.$emit("setDraggedItem", value);
-    },
+      this.$emit("answerarea-state-change");
 
+    },
     thingIsInTreeOfconnector(objTypeStr, thingID, connID) {
-      console.log(
+      globalConsoleLog("net",
         "thingIsInTreeOfconnector: is ",
         objTypeStr,
         " ID=",
@@ -431,8 +318,8 @@ export default {
       const rightID = this.allConnectors[connID]["rightID"];
       const leftType = this.allConnectors[connID]["leftType"];
       const rightType = this.allConnectors[connID]["rightType"];
-      console.log("leftside type=", leftType, " leftID=", leftID);
-      console.log("rightside type=", rightType, " rightID=", rightID);
+      globalConsoleLog("net", "leftside type=", leftType, " leftID=", leftID);
+      globalConsoleLog("net", "rightside type=", rightType, " rightID=", rightID);
 
       if (leftID !== undefined) { // can't be in left tree if we've hit the target
         if (leftType == "connector") { // if conns match then we're done. Otherwise call recursively
@@ -449,7 +336,7 @@ export default {
         }
       }
       const finalResult = inLeftTree || inRightTree;
-      console.log(
+      globalConsoleLog("net",
         " FINAL result = inLeftTree=",
         inLeftTree,
         " || inRightTree=",
@@ -461,7 +348,7 @@ export default {
     },
 
     dropIsPermissible(objectTypeString, thingBeingDroppedOnID, connectorBeingDroppedID) {
-      console.log(
+      globalConsoleLog("net",
         "checking if ",
         connectorBeingDroppedID,
         " can be dropped on ",
@@ -470,16 +357,16 @@ export default {
         thingBeingDroppedOnID
       );
       if (objectTypeString === "connector" && thingBeingDroppedOnID === connectorBeingDroppedID) {
-        console.log("theyre the same connector, so NO");
+        globalConsoleLog("net", "theyre the same connector, so NO");
         return false;
       } else {
-        console.log("check inTree");
+        globalConsoleLog("net", "check inTree");
         const inTree = this.thingIsInTreeOfconnector(
           objectTypeString,
           thingBeingDroppedOnID,
           connectorBeingDroppedID
         );
-        console.log("inTree = ", inTree);
+        globalConsoleLog("net", "inTree = ", inTree);
         return !inTree;
       }
     },
@@ -488,13 +375,14 @@ export default {
       //retrieve the internal grab offsets that were recorded at the start of the drag
       const grabOffsetLeft = parseInt(e.dataTransfer.getData("grabOffsetLeft"));
       const grabOffsetTop = parseInt(e.dataTransfer.getData("grabOffsetTop"));
-      console.log(
+
+      globalConsoleLog("geom",
         " grabOffset: ",
         grabOffsetLeft.toFixed(2),
         grabOffsetTop.toFixed(2)
       );
 
-      console.log(
+      globalConsoleLog("geom",
         "onDrop evt(i.e. mouse) e.client i.e. global position=(",
         e.clientX,
         e.clientY,
@@ -512,18 +400,20 @@ export default {
         e.currentTarget.closest(".displayWorkspace");
       const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
       const scrollTop = scrollableDisplayWorkspace.scrollTop;
-      console.log("parent scroll=", scrollLeft, ",", scrollTop, ")");
-      console.log("parent position=", scrollableDisplayWorkspace.offsetLeft, ",", scrollableDisplayWorkspace.offsetTop, ")");
+      globalConsoleLog("geom", "parent scroll=", scrollLeft, ",", scrollTop, ")");
+      globalConsoleLog("geom", "parent position=", scrollableDisplayWorkspace.offsetLeft, ",", scrollableDisplayWorkspace.offsetTop, ")");
 
       leftWithinAnswerArea =
         e.clientX - scrollableDisplayWorkspace.offsetLeft - grabOffsetLeft + scrollLeft;
       topWithinAnswerArea =
         e.clientY - scrollableDisplayWorkspace.offsetTop - grabOffsetTop + scrollTop;
-      console.log(
+
+      globalConsoleLog("geom",
         "SOOOO (left,top) Within AnswerArea = ",
         leftWithinAnswerArea,
         topWithinAnswerArea
       );
+
       return [leftWithinAnswerArea, topWithinAnswerArea];
     },
 
@@ -536,7 +426,7 @@ export default {
       const evt = info[3];
       let droppedConnectorID = data.connectorID;
 
-      console.log(
+      globalConsoleLog("net",
         "AnswerArea::handleAConnectorDrop     old connector id",
         connectorID,
         "droppedConnectorID ",
@@ -551,12 +441,14 @@ export default {
         droppedConnectorID !== undefined &&
         !this.dropIsPermissible("connector", connectorID, droppedConnectorID)
       ) {
-        console.log("ERROR CIRCULAR REFERENCE");
+        globalConsoleLog("net", "ERROR CIRCULAR REFERENCE");
 
         evt.preventDefault();
         [this.allConnectors[droppedConnectorID]["left"],
         this.allConnectors[droppedConnectorID]["top"]] = this.calculateNewPositionWithinAnswerArea(evt);
         evt.stopImmediatePropagation();
+
+        this.$emit("answerarea-state-change");
 
         return;
       }
@@ -588,7 +480,7 @@ export default {
           this.rootConnectorID_set.delete(droppedConnectorID);
         }
 
-        //        console.log("Assigning ConnectorID", droppedConnectorID);
+        //       globalConsoleLog("net","Assigning ConnectorID", droppedConnectorID);
 
         this.allConnectors[droppedConnectorID]["parent"] = connectorID;
       } else {
@@ -624,6 +516,9 @@ export default {
 
       // Record content
       this.answerContent[droppedConnectorID] = info[2];
+
+      this.$emit("answerarea-state-change");
+
     },
 
     handleBConnectorDrop(info) {
@@ -633,7 +528,7 @@ export default {
 
       let droppedConnectorID = data.connectorID;
 
-      console.log(
+      globalConsoleLog("net",
         "AnswerArea::handleBConnectorDrop     old connector id",
         connectorID,
         "droppedConnectorID ",
@@ -646,16 +541,21 @@ export default {
         droppedConnectorID !== undefined &&
         !this.dropIsPermissible("connector", connectorID, data.connectorID)
       ) {
-        console.log("ERROR CIRCULAR REFERENCE");
+        globalConsoleLog("net", "ERROR CIRCULAR REFERENCE");
         evt.preventDefault();
         [this.allConnectors[droppedConnectorID]["left"],
         this.allConnectors[droppedConnectorID]["top"]] = this.calculateNewPositionWithinAnswerArea(evt);
         evt.stopImmediatePropagation();
+
+
+        this.$emit("answerarea-state-change");
+
+
         return;
       }
 
-      //      console.log(data);
-      //      console.log(data.connectorID);
+      //     globalConsoleLog("net",data);
+      //     globalConsoleLog("net",data.connectorID);
 
       // A new connector is dropped into here!
       if (droppedConnectorID === undefined) {
@@ -683,7 +583,7 @@ export default {
           this.rootConnectorID_set.delete(droppedConnectorID);
         }
 
-        console.log("Assigning ConnectorID", droppedConnectorID);
+        globalConsoleLog("net", "Assigning ConnectorID", droppedConnectorID);
 
         this.allConnectors[droppedConnectorID]["parent"] = connectorID;
       } else {
@@ -718,6 +618,9 @@ export default {
 
       // Record content
       this.answerContent[droppedConnectorID] = info[2];
+
+      this.$emit("answerarea-state-change");
+
     },
 
     handleStatementDroppedOnStatement(info) {
@@ -731,30 +634,33 @@ export default {
       const statementData = JSON.parse(e.dataTransfer.getData("data"));
 
       let droppedStatementID = statementData.id;
-      console.log(
+
+      globalConsoleLog("net",
         "AnswerArea::handleStatementDroppedOnStatement  statement",
         droppedStatementID,
         " dropped on ",
         droppedOnStatementID
       );
 
+
       // this method is to deal with a topLevel statement being moved.
       // so it's parent would be -1 (i.e. the AnswerArea)
       if (this.allStatements[droppedStatementID]["parent"] != -1) {
-        console.log("parent wasn't answer area so do nothing");
+        globalConsoleLog("net", "parent wasn't answer area so do nothing");
         return;
       }
       //retrieve the internal grab offsets that were recorded at the start of the drag
       const grabOffsetLeft = parseInt(e.dataTransfer.getData("grabOffsetLeft"));
       const grabOffsetTop = parseInt(e.dataTransfer.getData("grabOffsetTop"));
-      console.log("\n--------------ANSWER AREA onDrop-------------------");
-      console.log(
+
+      globalConsoleLog("geom", "\n--------------ANSWER AREA onDrop-------------------");
+      globalConsoleLog("geom",
         " grabOffset: ",
         grabOffsetLeft.toFixed(2),
         grabOffsetTop.toFixed(2)
       );
 
-      console.log(
+      globalConsoleLog("geom",
         "onDrop evt(i.e. mouse) global position=(",
         e.clientX,
         e.clientY,
@@ -762,6 +668,7 @@ export default {
         e.currentTarget.offsetLeft,
         e.currentTarget.offsetTop
       );
+
       let leftWithinAnswerArea = 0;
       let topWithinAnswerArea = 0;
 
@@ -771,10 +678,10 @@ export default {
         e.currentTarget.closest(".displayWorkspace");
       const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
       const scrollTop = scrollableDisplayWorkspace.scrollTop;
-      console.log("parent scroll=", scrollLeft, ",", scrollTop, ")");
+      globalConsoleLog("geom", "parent scroll=", scrollLeft, ",", scrollTop, ")");
 
       const sRect = scrollableDisplayWorkspace.getBoundingClientRect();
-      console.log("parent pos=", sRect.left, ",", sRect.top, ")");
+      globalConsoleLog("geom", "parent pos=", sRect.left, ",", sRect.top, ")");
       const posWithinWorkspaceLeft = e.clientX - sRect.left;
       const posWithinWorkspaceTop = e.clientY - sRect.top;
 
@@ -782,7 +689,7 @@ export default {
         posWithinWorkspaceLeft - grabOffsetLeft + scrollLeft;
       topWithinAnswerArea = posWithinWorkspaceTop - grabOffsetTop + scrollTop;
 
-      console.log(
+      globalConsoleLog("geom",
         "SOOOO (left,top) Within AnswerArea = ",
         leftWithinAnswerArea,
         topWithinAnswerArea
@@ -791,6 +698,9 @@ export default {
       this.allStatements[droppedStatementID]["position"] = "absolute";
       this.allStatements[droppedStatementID]["top"] = topWithinAnswerArea;
       this.allStatements[droppedStatementID]["left"] = leftWithinAnswerArea;
+
+      this.$emit("answerarea-state-change");
+
     },
 
     handleNewConnectorDroppedOnSomething(info) {
@@ -904,12 +814,16 @@ export default {
           droppedOn_is_Statement ? droppedOnStatementID : droppedOnConnectorID,
           droppedConnectorID)
       ) {
-        console.log("ERROR CIRCULAR REFERENCE");
+        globalConsoleLog("net", "ERROR CIRCULAR REFERENCE");
         // if droppedConnectorID is at the top level, i.e. parent == -1 then we should just move it
         e.preventDefault();
         [this.allConnectors[droppedConnectorID]["left"],
         this.allConnectors[droppedConnectorID]["top"]] = this.calculateNewPositionWithinAnswerArea(e);
         e.stopImmediatePropagation();
+
+
+        this.$emit("answerarea-state-change");
+
 
         return;
       }
@@ -918,16 +832,16 @@ export default {
       // determine that it has a free target and choose which one
       let targetStr = undefined;
       if (droppedConnectorID == undefined) {
-        console.log("BRAND NEW CONNECTOR - so use the left target");
+        globalConsoleLog("net", "BRAND NEW CONNECTOR - so use the left target");
         targetStr = "left";
       } else if (this.allConnectors[droppedConnectorID]["leftID"] == undefined) {
-        console.log("left is free so use the left target");
+        globalConsoleLog("net", "left is free so use the left target");
         targetStr = "left";
       } else if (this.allConnectors[droppedConnectorID]["rightID"] == undefined) {
-        console.log("left is busy so use the right target");
+        globalConsoleLog("net", "left is busy so use the right target");
         targetStr = "right";
       } else {
-        console.log("no free targets so return");
+        globalConsoleLog("net", "no free targets so return");
         return;
       }
       if (droppedConnectorID !== undefined) // i.e. it isn't brand new so it should have a parent
@@ -997,11 +911,11 @@ export default {
       let parentConnID = undefined;
       if (droppedOn_is_Statement) // we dropped the connector onto a statement
       {
-        console.log("droppedOn_is_Statement");
+        globalConsoleLog("net", "droppedOn_is_Statement");
         parentConnID = this.allStatements[droppedOnStatementID]["parent"];
         this.allStatements[droppedOnStatementID]["parent"] = droppedConnectorID;
         if (parentConnID === -1) { // the statement was at the top level
-          console.log("parentConnID === -1");
+          globalConsoleLog("net", "parentConnID === -1");
           // remove the statement from the root statementID set
           if (this.rootStatementID_set.has(droppedOnStatementID)) {
             this.rootStatementID_set.delete(droppedOnStatementID);
@@ -1017,19 +931,19 @@ export default {
           this.allStatements[droppedOnStatementID]["left"] = undefined; //since it's now part of a tree
           this.allStatements[droppedOnStatementID]["side"] = "left";
         } else {// we need to make the parent of the droppedOnStatement replace its left or right child with the droppedConnector
-          console.log("parentConnID isn't -1 it is: ", parentConnID);
+          globalConsoleLog("net", "parentConnID isn't -1 it is: ", parentConnID);
           if (this.allConnectors[parentConnID]["leftID"] == droppedOnStatementID) {
-            console.log("this.allConnectors[parentConnID][leftID]==droppedOnStatementID");
+            globalConsoleLog("net", "this.allConnectors[parentConnID][leftID]==droppedOnStatementID");
             this.allConnectors[parentConnID]["leftID"] = droppedConnectorID;
             this.allConnectors[parentConnID]["leftType"] = "connector";
           } else {
-            console.log("this.allConnectors[parentConnID][rightID]==droppedOnStatementID");
+            globalConsoleLog("net", "this.allConnectors[parentConnID][rightID]==droppedOnStatementID");
             // must be the right side.
             this.allConnectors[parentConnID]["rightID"] = droppedConnectorID;
             this.allConnectors[parentConnID]["rightType"] = "connector";
           }
           this.allConnectors[droppedConnectorID]["parent"] = parentConnID; // finally the droppedConnector needs to know its new parent.
-          console.log("all done");
+          globalConsoleLog("net", "all done");
         }
       } else { // we dropped the connector onto a connector
         parentConnID = this.allConnectors[droppedOnConnectorID]["parent"];
@@ -1046,7 +960,7 @@ export default {
           if (
             this.allConnectors[parentConnID]["leftID"] == droppedOnConnectorID
           ) {
-            console.log("parent's left side = ");
+            globalConsoleLog("net", "parent's left side = ");
             this.allConnectors[parentConnID]["leftID"] = droppedConnectorID;
           } else {
             // must be the right side.
@@ -1054,29 +968,38 @@ export default {
           }
         }
       }
-
+      this.$emit("answerarea-state-change");
     },
 
     onDrop(e) {
+      if (this.displayOnly) {
+        globalConsoleLog("face", "AnswerArea::onDrop but returning because it's readOnly");
+        return;
+      }
+
+
       e.preventDefault();
 
       //retrieve the internal grab offsets that were recorded at the start of the drag
       const grabOffsetLeft = parseInt(e.dataTransfer.getData("grabOffsetLeft"));
       const grabOffsetTop = parseInt(e.dataTransfer.getData("grabOffsetTop"));
-      console.log("\n--------------ANSWER AREA onDrop-------------------");
-      console.log(
+
+      globalConsoleLog("geom", "\n\n--------------ANSWER AREA onDrop-------------------\n\n\n");
+
+      globalConsoleLog("geom",
         " grabOffset: ",
         grabOffsetLeft.toFixed(2),
         grabOffsetTop.toFixed(2)
       );
 
-      console.log(
+      globalConsoleLog("geom",
         "onDrop evt(i.e. mouse) e.client i.e. global position=(",
         e.clientX,
         e.clientY,
         ") e.currentTarget.offset i.e. offset_within_thing_dropped_on = (",
         e.currentTarget.offsetLeft,
-        e.currentTarget.offsetTop
+        e.currentTarget.offsetTop,
+        "the actual currentTarget=", e.currentTarget
       );
 
       let leftWithinAnswerArea = 0;
@@ -1088,13 +1011,24 @@ export default {
         e.currentTarget.closest(".displayWorkspace");
       const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
       const scrollTop = scrollableDisplayWorkspace.scrollTop;
-      console.log("parent scroll=", scrollLeft, ",", scrollTop, ")");
+      globalConsoleLog("geom", "parent scroll=", scrollLeft, ",", scrollTop, ")");
+      /*
+            leftWithinAnswerArea =
+              e.clientX - e.currentTarget.offsetLeft - grabOffsetLeft + scrollLeft;
+            topWithinAnswerArea =
+              e.clientY - e.currentTarget.offsetTop - grabOffsetTop + scrollTop;
+      */
+      const sRect = e.currentTarget.getBoundingClientRect();
+      globalConsoleLog("geom", "answer_area pos=", sRect.left, ",", sRect.top, ")");
+      const posWithinWorkspaceLeft = e.clientX - sRect.left;
+      const posWithinWorkspaceTop = e.clientY - sRect.top;
+      globalConsoleLog("geom", "poisiton within answerArea =", posWithinWorkspaceLeft, ",", posWithinWorkspaceTop, ")");
+      leftWithinAnswerArea = posWithinWorkspaceLeft - grabOffsetLeft + scrollLeft;
+      topWithinAnswerArea = posWithinWorkspaceTop - grabOffsetTop + scrollTop;
 
-      leftWithinAnswerArea =
-        e.clientX - e.currentTarget.offsetLeft - grabOffsetLeft + scrollLeft;
-      topWithinAnswerArea =
-        e.clientY - e.currentTarget.offsetTop - grabOffsetTop + scrollTop;
-      console.log(
+
+
+      globalConsoleLog("geom",
         "SOOOO (left,top) Within AnswerArea = ",
         leftWithinAnswerArea,
         topWithinAnswerArea
@@ -1108,11 +1042,15 @@ export default {
       // Receive the content of dropped object
       const transContent = e.dataTransfer.getData("content");
 
+      this.ignoreStateChanges.value = true;
+
       // Deal with the dropped type is 'Connector' and with no child
       if (type === "connector") {
-        console.log(
+        /*
+       globalConsoleLog("net",
           " Connector Dropped   ID=", data.connectorID, ""
         );
+        */
         if (data.connectorID === undefined) {
           this.allConnectors[this.connectorCount] = data;
 
@@ -1133,17 +1071,16 @@ export default {
             undefined;
           this.allConnectors[this.connectorCount]["clickCount"] = 0;
           this.allConnectors[this.connectorCount]["orientation"] = "row";
-
-          const answerAreaHeight =
-            document.getElementById("answerArea").offsetHeight;
-          const submitBtnHeight =
-            document.getElementById("submitBtn").offsetHeight;
-          const topOffset = answerAreaHeight + submitBtnHeight;
-
+          /*
+                    const answerAreaHeight =
+                      document.getElementById("answerArea").offsetHeight;
+                    const submitBtnHeight =
+                      document.getElementById("submitBtn").offsetHeight;
+                    const topOffset = answerAreaHeight + submitBtnHeight;
+          */
           //this.allConnectors[this.connectorCount]["top"] = topWithinAnswerArea - topOffset;
           this.allConnectors[this.connectorCount]["top"] = topWithinAnswerArea;
-          this.allConnectors[this.connectorCount]["left"] =
-            leftWithinAnswerArea;
+          this.allConnectors[this.connectorCount]["left"] = leftWithinAnswerArea;
 
           this.rootConnectorID_set.add(this.connectorCount);
 
@@ -1152,7 +1089,7 @@ export default {
 
           this.connectorCount++;
         } else {
-          console.log(" connector is already in answer area and has ID ", data.connectorID, " and parent ", this.allConnectors[data.connectorID]["parent"]);
+          //console.log(" connector is already in answer area and has ID ", data.connectorID, " and parent ", this.allConnectors[data.connectorID]["parent"]);
           // A connector is already in answerArea.
           this.allConnectors[data.connectorID]["parent"] = -1; // parent = -1 indicates it is not part of a tree, but is a direct child of the answer area
 
@@ -1189,9 +1126,11 @@ export default {
         }
       } else if (type === "statement") {
         const statementID = data.id;
-        console.log(
+        /*
+       globalConsoleLog("net",
           " Statement Dropped   ID=", statementID
         );
+        */
         const getStatement = this.allStatements[statementID];
         let statementOldParent = undefined;
         if (getStatement) {
@@ -1245,13 +1184,16 @@ export default {
         }
         this.answerContent[statementID] = transContent;
       }
+      this.ignoreStateChanges.value = false;
+
+      this.$emit("answerarea-state-change");
     },
 
     connectorDroppedOnStatement(statementID, e) {
       const type = e.dataTransfer.getData("type");
       const data = JSON.parse(e.dataTransfer.getData("data"));
       const transContent = e.dataTransfer.getData("content");
-      console.log(
+      globalConsoleLog("net",
         "AnswerArea:connectorDroppedOnStatement  type=",
         type,
         " data=",
@@ -1286,7 +1228,7 @@ export default {
         this.rootConnectorID_set.add(this.connectorCount);
         this.answerContent[this.connectorCount] = transContent;
         this.connectorCount++;
-        console.log(
+        globalConsoleLog("net",
           " A new connector from the right (undefined) is dropped onto statement."
         );
         this.handleAStatementDrop([
@@ -1298,14 +1240,20 @@ export default {
           // if
         }
       }
+
+      this.$emit("answerarea-state-change");
+
     },
 
+
     handleConnectContentChange(info) {
+      globalConsoleLog("undo", "AnswerArea:handleConnectContentChange");
       const currConnectID = info[0];
       this.answerContent[currConnectID] = info[1];
     },
 
     handleUpdateChildStat(info) {
+      globalConsoleLog("undo", "AnswerArea:handleUpdateChildStat");
       const currConn = info[0];
       if (info[2] === "left") {
         this.allConnectors[currConn]["leftContent"] = info[1];
@@ -1315,6 +1263,7 @@ export default {
     },
 
     handleUpdateChildConnector(info) {
+      globalConsoleLog("undo", "AnswerArea:handleUpdateChildConnector");
       const currParent = info[2];
       if (info[3] === "left") {
         this.allConnectors[currParent]["leftContent"] = info[1];
@@ -1326,7 +1275,10 @@ export default {
     // invoked when student statement choice is changed to
     // update the answer string area
     handleUpdateStatementContent(contentText, statementID) {
+      //console.log("AnswerArea:handleUpdateStatementContent ",contentText,statementID);
       this.answerContent[statementID] = contentText[0];
+      this.allStatements[statementID].content.userInput = contentText[1].content.userInput;
+      this.$emit("answerarea-state-change");
     },
 
     emitUpdateContent(newAnswerContentObject) {
@@ -1356,22 +1308,15 @@ export default {
     },
 
     clearWorkspace() {
-      this.connectorCount = 0;
-      this.rootConnectorID_set = new Set();
-      this.rootStatementID_set = new Set();
-      this.rootConnectorID = null;
-
-      this.allConnectors = {};
-      this.allStatements = {}; // Record all user input
-
-      this.left = 0;
-      this.top = 0;
-
-      this.answerContent = {}; // {ID: Content} record the element ID and its content
+      globalConsoleLog("any", "AnswerArea:clearWorkspace");
+      this.initialiseWithStatementElements();
     },
 
-    loadPreviousAnswer(parameter) {
+    async loadPreviousAnswer(parameter, newPropValue = -1) {
+      //comment
       this.connectorCount = parseInt(parameter["connectorCount"]);
+      globalConsoleLog("any", "AnswerArea:loadPreviousAnswer parameter[connectorCount] = ", parameter["connectorCount"],
+        " this.connectorCount=", this.connectorCount);
       this.rootConnectorID_set = new Set(parameter.rootConnectorID_set);
       this.rootStatementID_set = new Set(parameter.rootStatementID_set);
       this.rootConnectorID = parameter["rootConnectorID"];
@@ -1381,7 +1326,10 @@ export default {
       this.top = parseInt(parameter["top"]);
 
       this.answerContent = parameter["answerContent"];
-      //console.log(parameter);
+
+      this.localTestProp = newPropValue;
+
+      await this.$nextTick();
     },
 
     deleteChildConnector(params) {
@@ -1419,10 +1367,11 @@ export default {
         delete this.answerContent[id];
       }
       this.$emit("connector-deleted", id);
+      this.$emit("answerarea-state-change");
     },
 
     duplicateStatement(id) {
-      console.log("AnswerArea:duplicateStatement");
+      globalConsoleLog("any", "AnswerArea:duplicateStatement");
       const theStatement = this.allStatements[id];
       const duplicatedStatement = JSON.parse(JSON.stringify(theStatement)); // Create a copy of the last element
       duplicatedStatement.id = uniqueId(); //just need a new unique number
@@ -1431,7 +1380,6 @@ export default {
       duplicatedStatement["position"] = "absolute";
       duplicatedStatement["showPopup"] = theStatement["showPopup"];
       duplicatedStatement["collapsed"] = theStatement["collapsed"];
-      this.statements.push(duplicatedStatement); // Push the duplicated element to the parent array
       this.allStatements[duplicatedStatement.id] = duplicatedStatement; // now add to the keyed list
       let baseTop = 100;
       let baseLeft = 100;
@@ -1439,69 +1387,49 @@ export default {
         baseTop = theStatement["top"];
         baseLeft = theStatement["left"];
       }
-      this.allStatements[duplicatedStatement.id]["top"] = baseTop + 25;
-      this.allStatements[duplicatedStatement.id]["left"] = baseLeft + 25;
+      this.allStatements[duplicatedStatement.id]["top"] = 0;//baseTop + 25;
+      this.allStatements[duplicatedStatement.id]["left"] = 0;//baseLeft + 75;
       this.rootStatementID_set.add(duplicatedStatement.id);
-      this.$emit("statement-used", duplicatedStatement.id);
+      this.$emit("answerarea-state-change");
     },
 
     toggleCollapsedRenderStatement(id) {
-      console.log("AnswerArea:toggleCollapsedRenderStatement ID:", id);
+      globalConsoleLog("any", "AnswerArea:toggleCollapsedRenderStatement ID:", id);
       this.allStatements[id]["collapsed"] =
         !this.allStatements[id]["collapsed"];
+      this.$emit("answerarea-state-change");
     },
 
     toggleCollapsedRenderStatementFromConnector(id) {
-      console.log(
+      globalConsoleLog("any",
         "AnswerArea:toggleCollapsedRenderStatementFromConnector ID:",
         id
       );
       this.allStatements[id]["collapsed"] =
         !this.allStatements[id]["collapsed"];
+      this.$emit("answerarea-state-change");
     },
 
     toggleShowPopupFromRenderStatement(id) {
-      console.log("AnswerArea:toggleShowPopupFromRenderStatement");
+      globalConsoleLog("any", "AnswerArea:toggleShowPopupFromRenderStatement");
       this.allStatements[id]["showPopup"] =
         !this.allStatements[id]["showPopup"];
-      console.log(
+      globalConsoleLog("any",
         "AnswerArea:toggleShowPopupFromRenderStatement is now",
         this.allStatements[id]["showPopup"]
       );
+      this.$emit("answerarea-state-change");
     },
 
     toggleShowPopupFromConnector(id) {
-      console.log("AnswerArea:toggleShowPopupFromConnector");
+      globalConsoleLog("any", "AnswerArea:toggleShowPopupFromConnector");
       this.allStatements[id]["showPopup"] =
         !this.allStatements[id]["showPopup"];
-      console.log(
+      globalConsoleLog("any",
         "AnswerArea:toggleShowPopupFromConnector is now",
         this.allStatements[id]["showPopup"]
       );
-    },
-
-    duplicateLastStatement() {
-      if (this.statements.length > 0) {
-        const lastStatement = this.statements[this.statements.length - 1];
-        const duplicatedStatement = JSON.parse(JSON.stringify(lastStatement)); // Create a copy of the last element
-        duplicatedStatement.id = duplicatedStatement.id + 1; //just need a new unique number
-        duplicatedStatement.statementIdentifier =
-          duplicatedStatement.statementIdentifier;
-        duplicatedStatement["parent"] = undefined;
-        duplicatedStatement["visible"] = true;
-        this.statements.push(duplicatedStatement); // Push the duplicated element to the parent array
-        this.allStatements[duplicatedStatement.id] = duplicatedStatement; // now add to the keyed list
-      }
-    },
-
-    deleteStatement(params) {
-      // Remove the connector from allConnectors object
-      const { id, parentId, position } = params;
-      if (position) {
-        this.$emit("statement-used", id, true);
-        delete this.allConnectors[parentId][`${position}ID`];
-        delete this.allConnectors[parentId][`${position}Type`];
-      }
+      this.$emit("answerarea-state-change");
     },
 
     toggleAllFeedback() {
@@ -1514,22 +1442,55 @@ export default {
 
       this.showAllFeedback = !this.showAllFeedback;
     },
+
+    /**
+     * Takes the list of statementElements in the parent and creates statements in the answerArea.
+     * Makes a deep copy of the statementElements rather than referring back to the parent.
+     * This was a change so that we can dispense with the StatementArea.
+     */
+    initialiseWithStatementElements() {
+      globalConsoleLog("any", "AnswerArea:initialiseWithStatementElements");
+      this.connectorCount = 0;
+      this.left = 0;
+      this.top = 0;
+      this.rootConnectorID_set = new Set();
+      this.rootStatementID_set = new Set();
+      this.rootConnectorID = null;
+      this.allConnectors = {};
+      this.allStatements = {};
+
+      if (this.parentStatementElements === undefined) {
+        globalConsoleLog("any", "AnswerArea:parentStatementElements undefined")
+        return;
+      } else if (this.parentStatementElements.length === 0) {
+        globalConsoleLog("any", "AnswerArea:parentStatementElements empty")
+        return;
+      }
+      const statementCount = this.parentStatementElements.length;
+      if (statementCount > 50) {
+        globalConsoleLog("any", "statementCount error!");
+        return;
+      }
+      let i = 0;
+      this.answerContent = {};
+      while (i < statementCount) {
+        const item = JSON.parse(JSON.stringify(this.parentStatementElements[i]));
+        this.allStatements[item.id] = item;
+        this.rootStatementID_set.add(item.id);
+        this.allStatements[item.id]["parent"] = -1;
+        this.allStatements[item.id]["position"] = "absolute";
+        this.allStatements[item.id]["top"] = i * 100;
+        this.allStatements[item.id]["left"] = 20;
+        this.allStatements[item.id]["side"] = undefined;
+        this.answerContent[item.id] = "dummy" + i;
+        i++;
+      }
+    }
   },
 
   mounted() {
-    const statementCount = this.statements.length;
-    if (statementCount > 50) {
-      console.log("statementCount error!");
-      return;
-    }
-    let i = 0;
-
-    while (i < statementCount) {
-      const item = this.statements[i];
-
-      this.allStatements[item.id] = item;
-      i++;
-    }
+    globalConsoleLog("any", "AnswerArea:mounted");
+    this.initialiseWithStatementElements();
   },
 
   watch: {
@@ -1540,12 +1501,10 @@ export default {
       deep: true,
     },
 
-    statements(newStatements) {
-      this.allStatements = {};
-      for (let item in newStatements) {
-        item = newStatements[item];
-        this.allStatements[item.id] = item;
-      }
+    parentStatementElements(newStatements) {
+      globalConsoleLog("any", "AnswerArea:parentStatementElements watch");
+      // newStatements should be the same as just referencing the original prop for the parentStatementElements
+      this.initialiseWithStatementElements();
     },
   }
 
@@ -1553,12 +1512,21 @@ export default {
 </script>
 
 <style>
-/* version1 */
-.answer_area>.connectorContainer {
+.answer_area_class {
+  position: static;
+  min-height: 100%;
+  height: auto;
+  display: flex;
+  border: 1px solid rgb(180, 43, 43);
+  flex-grow: 1;
+  flex-direction: column;
+}
+
+.answer_area_class>.connectorContainer {
   position: absolute;
 }
 
-.answer_area .connectorText {
+.answer_area_class .connectorText {
   max-width: 200px;
 }
 
@@ -1575,5 +1543,22 @@ export default {
   padding: 10px;
   border: 1px solid #ccc;
   background-color: #f8f8f8;
+}
+
+.data-structure-window {
+  position: fixed;
+  font-weight: bold;
+  font-size: x-small;
+  top: 150px;
+  left: 100px;
+  width: 300px;
+  height: 400px;
+  background: rgb(251, 229, 229);
+  border: 1px solid #ccc;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  padding: 10px;
+
+  overflow: auto;
 }
 </style>

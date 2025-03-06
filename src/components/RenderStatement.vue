@@ -15,7 +15,10 @@
       top: this.statementData.top + 'px',
     }"
   >
-    <StatementRoot
+  
+    <div class="drag-handle"> &nbsp;</div>
+
+    <StatementRoot ref="statementRootRef"
       v-bind="$attrs"
       v-if="this.statementData.statementType === 0"
       :statement-data="this.statementData"
@@ -24,7 +27,7 @@
       @toggle-collapsed-statement-root="toggleCollapsedStatementRoot"
       @toggle-showPopup-fromstatementroot="toggleShowPopupStatementRoot"
     />
-    <StatementTruth
+    <StatementTruth ref="statementTruthRef"
       v-bind="$attrs"
       v-if="this.statementData.statementType === 1"
       :statement-data="this.statementData"
@@ -32,7 +35,7 @@
       @duplicate-statement="duplicateStatement"
       @toggle-collapsed-statement-truth="toggleCollapsedStatementTruth"
     />
-    <StatementStudent
+    <StatementStudent ref="statementStudentRef"
       v-bind="$attrs"
       v-if="this.statementData.statementType === 2"
       :statement-data="this.statementData"
@@ -41,7 +44,7 @@
       @toggle-collapsed-statement-student="toggleCollapsedStatementStudent"
       @toggle-showPopup-fromstatementstudent="toggleShowPopupStatementStudent"
     />
-    <StatementFreeText
+    <StatementFreeText ref="statementFreeTextRef"
       v-bind="$attrs"
       v-if="this.statementData.statementType === 3"
       :statement-statementData="this.statementData"
@@ -57,6 +60,7 @@ import StatementRoot from "@/components/statements/StatementRoot.vue";
 import StatementTruth from "@/components/statements/StatementTruth.vue";
 import StatementStudent from "@/components/statements/StatementStudent.vue";
 import StatementFreeText from "@/components/statements/StatementFreeText.vue";
+import "@/assets/biologic.css";
 
 export default {
   name: "RenderStatement",
@@ -69,19 +73,19 @@ export default {
   emits: [
     "update-statement-content",
     "onDragStart",
-    "delete-statement",
     "connector-dropped-on-statement",
     "statement-dropped-on-statement",
     "duplicate-statement",
     "toggle-collapsed-renderstatement",
     "toggle-showPopup-fromrenderstatement",
-    "update-shared-data",
   ],
   inheritAttrs: false,
   props: {
     statementData: Object,
-    sharedData: Object,
   },
+  inject: [
+    "displayOnly" // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
+  ],
   data() {
     return {
       contentText: "",
@@ -91,21 +95,45 @@ export default {
       remove_formats: [".png", ".jpg", ".jpeg"], // array of formats to exclude from the answer string
     };
   },
+  computed: {
+    concatenatedRenderStatement() {
+      const refMap = {
+        0: this.$refs.statementRootRef,
+        1: this.$refs.statementTruthRef,
+        2: this.$refs.statementStudentRef,
+        3: this.$refs.statementFreeTextRef,
+      };
+      const ref = refMap[this.statementData.statementType];
+      if (ref) {
+        if (typeof ref.concatenatedStatement === "function")
+          return ref.concatenatedStatement();
+        else
+        return "Error: concatenatedStatement is not a function. The type is " + typeof ref.concatenatedStatement;
+      } else {
+        return `Reference for statementType ${this.statementData.statementType} is not available`;
+      }
+    }
+  },
   methods: {
     handleDoubleClick(combinedText) {
       this.renderedText = combinedText;
     },
     handleDragOveringRenderStatement(e) {
-      console.log("render over event");
+      //console.log("render over event");
     },
     handleDragEnteringRenderStatement(e) {
-      console.log("render enter event");
+      //console.log("render enter event");
     },
     handleDragLeavingRenderStatement(e) {
-      console.log("render leave event");
+      //console.log("render leave event");
     },
 
     startDrag(e, data) {
+      if (this.displayOnly) {
+        console.log("\n\nCANT DRAG RENDERSTATEMENT BECAUSE WERE IN DISPLAYONLY MODE\n\n");
+        return;
+      }
+
       // e.target.className = 'dragEffect';
       e.dataTransfer.dropEffect = "move";
       e.dataTransfer.effectAllowed = "move";
@@ -119,7 +147,7 @@ export default {
       var rect = mmBox.getBoundingClientRect();
       const grabOffsetLeft = e.clientX - rect.left;
       const grabOffsetTop = e.clientY - rect.top;
-
+      /*
       console.log("---START DRAG e.client (X,Y)---", e.clientX, e.clientY);
       console.log("---START DRAG rect position=---", rect.left, rect.top);
       console.log(
@@ -127,32 +155,40 @@ export default {
         grabOffsetLeft,
         grabOffsetTop
       );
+      */
       e.dataTransfer.setData("grabOffsetLeft", grabOffsetLeft.toString());
       e.dataTransfer.setData("grabOffsetTop", grabOffsetTop.toString());
 
       this.$emit("onDragStart", data);
 
-      // set the global sharedData (YUK!)
-      // only because dragEnter can't see insides of the dataTransfer object
-      const draggedWidth = e.currentTarget.offsetWidth;
-      const draggedHeight = e.currentTarget.offsetHeight;
-      const dragInformation = JSON.stringify({
-        draggedWidth: draggedWidth,
-        draggedHeight: draggedHeight,
-        drageeType: "render_statement",
-        drageeConnectorID: undefined,
-      });
-      console.log("SETTING DRAG INFORMATION = ", dragInformation);
-      this.$emit("update-shared-data", dragInformation);
+      // the following geometry information is used by the Target boxes in the connectors to change size dynamically.
+      // However the spec for the drag, dragenter, dragleave, dragover and dragend events the drag data store mode is protected mode.
+      // this means you can see the types but not the values. So the workaround is to encode the values into the type names.
+      const widthTypeStr = "draggedWidth/"+e.currentTarget.offsetWidth;
+        e.dataTransfer.setData(widthTypeStr,0 /* i.e. the zero is a dummy value*/ );
+        const heightTypeStr = "draggedHeight/"+e.currentTarget.offsetHeight;
+        e.dataTransfer.setData(heightTypeStr,0 /* i.e. the zero is a dummy value*/ );
+        const typeTypeStr = "draggedType/"+"render_statement";
+        e.dataTransfer.setData(typeTypeStr,0 /* i.e. the zero is a dummy value*/ );
+        const connectorIDTypeStr = "draggedConnectorID/";
+        e.dataTransfer.setData(connectorIDTypeStr,0 /* i.e. the zero is a dummy value*/ );
+
+        console.log(" SET UP DATA TRANSFER:",widthTypeStr,heightTypeStr,typeTypeStr,connectorIDTypeStr)
+
     },
 
     onDrop(e) {
+      if (this.displayOnly) {
+        console.log("RenderStatement:onDrop but display only so return ");
+        return;
+      }
+
       e.stopImmediatePropagation();
       const type = e.dataTransfer.getData("type");
-      console.log("RenderStatement:onDrop type=", type);
+      //console.log("RenderStatement:onDrop type=", type);
       if (type == "connector") {
         // ignore if it was statement droopped on statement
-        console.log(" emitting connector-dropped-on-statement");
+        //console.log(" emitting connector-dropped-on-statement");
         this.$emit("connector-dropped-on-statement", [
           this.statementData.id,
           undefined,
@@ -171,6 +207,7 @@ export default {
       this.contentText = info[0];
       this.answeredStat = info[1];
       const statementID = info[1]["id"];
+      //console.log("RenderStatement::emitting update-statement-content ",this.contentText,this.answeredStat);
       this.$emit(
         "update-statement-content",
         [this.contentText, this.answeredStat],
@@ -190,6 +227,9 @@ export default {
     },
 
     duplicateStatement(id) {
+      if (this.displayOnly)
+        return;
+
       console.log(
         "RenderStatement:duplicateStatement - calling emit duplicate-statement"
       );
@@ -245,10 +285,7 @@ export default {
       this.answeredStat = this.statementData;
     },
 
-    deleteStatement() {
-      // Emit an event to the parent component indicating that this connector should be deleted
-      this.$emit("delete-statement");
-    },
+
   },
   watch: {
     data() {
@@ -265,34 +302,32 @@ export default {
     // this.answeredStat = this.statementData;
     this.initContent();
   },
+  mounted() {
+    //console.log("RenderStatement mounted with injected displayOnly=",this.displayOnly);
+  }
+
 };
 </script>
 
 <style scoped>
-.delete-button {
-  margin-left: 10px;
-  padding: 5px;
-  background-color: #ff0000;
-  color: #ffffff;
-  border: none;
-  cursor: pointer;
-  border-radius: 20%;
-}
+
 .statement-box {
   background-color: #ffffff;
   display: inline-block; /* Display as inline block */
-  border: 1px solid rgb(210, 158, 199); /* Optional: Add border for visualization */
+  border: 1px solid rgb(209, 210, 158); /* Optional: Add border for visualization */
   position: relative;
 }
 .statement-box:hover {
   background-color: #dbbaba;
   display: inline-block; /* Display as inline block */
-  border: 2px solid rgb(190, 37, 157); /* Optional: Add border for visualization */
+  border: 2px solid var(--biologic-hover-border-color); /* Optional: Add border for visualization */
   transform: translate(-1px, -1px);
   position: relative;
+  cursor: move;
 }
 
 .statement-box:hover .iconContainer {
   border: 5px solid rgb(12, 0, 246);
 }
+
 </style>

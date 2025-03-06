@@ -1,125 +1,280 @@
 <template>
-  <div>
-    <div v-if="!authorised">
+  <div id="top-level" style="display:flex; flex: 1 1 auto; flex-direction: row;">
+    <div v-if="!authorised" style="width: 100%;">
       <div style="display: flex; flex-direction: row; align-items: center">
-        <img src="https://murraym678.github.io/images/biologic/BiologicEditor_Icon_for_poster.png" width="50" />
+        <img src="src/assets/BioLogic_BlueGreen_Icon.jpg" width="100" />
+        <h1><span style="color: var(--biologic-blue-color);">&nbsp;Bio</span><span style="color: var(--biologic-green-color);">Logic</span></h1>
+        <h2 class="biologic-component">&nbsp;EDITOR</h2>
+      </div>
+      <div style="height: 100vh; width: 100%;">
+        <v-container class="text-center" fluid>
+          <v-row justify="center">
+            <v-col cols="12" md="6">
+              <v-card class="mx-auto pa-12 pb-8" elevation="10" max-width="448">
+                <v-text-field label="USERID" v-model="clientIdInput" prepend-inner-icon="mdi-account" outlined
+                  @keyup.enter="handleConnectToServer"></v-text-field>
+                <v-btn color="primary" class="mb-4" style="width: 100%;" @click="handleConnectToServer">
+                  Login
+                </v-btn>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
 
-        <button @click="logIn('Enter your Student ID')" v-if="!authorised" class="biologic_login_button">
-          Biologic Log in
-        </button>
       </div>
       <br />
     </div>
+    <div v-if="authorised" style="display:flex; flex: 1 1 auto;width: 100%;">
+      <v-container fluid class="mainContainer">
+        <v-row class="content-row" style="">
+          <!--MenuBar :userID="userID" :clientType="clientType" @setExNetAnswer="setExNetAnswer"
+            @onDownloadExNet="onDownloadExNet" @logout="handleLogout" /               DECIDED TO BRING THIS CODE UP TO THE TOP LEVEL (MM)-->
 
-    <splitpanes v-if="authorised" class="mainContainer" horizontal>
-      <pane max-size="10" style="height: 50px" min-size="5">
-        <MenuBar :userID="userID" :clientType="clientType" @setExNetAnswer="setExNetAnswer"
-          @onDownloadExNet="onDownloadExNet" @logout="handleLogout" />
-      </pane>
-      <pane min-size="5">
-        <Splitpanes>
-          <pane max-size="24" class="statementContainer" min-size="5">
-            <!-- Displays Statements -->
-            <h2 class="areaHeading">Statements</h2>
-            <div class="tooltips">
-              Please see the instruction here.
-              <span class="tooltip_info">
-                This is statement section, you can drag any statement to the
-                answer area.
-              </span>
+
+          <div style="
+              position: relative;
+              display: flex;
+              flex-direction: row;
+              justify-content: space-between;
+              width:100%;
+            ">
+
+            <div style="display: flex; flex-direction: row; align-items: center">
+              <img src="src/assets/BioLogic_BlueGreen_Icon.jpg" height="50" />
+              <!--img src="src/assets/BioLogic_Word.jpg" height="50px;" /-->
+              <h1><span style="color: var(--biologic-blue-color);">&nbsp;Bio</span><span style="color: var(--biologic-green-color);">Logic</span></h1>
+
+              <h2 class="biologic-component">&nbsp;EDITOR</h2>
+            </div>
+            <div class="biologic-medium-text" style="display: flex; flex-direction: row; align-items: center">
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;Question:</p>
+            <select @change="getLastWorkingAnswer()" v-model="selectedQuestion" class="dropdown-shadow">
+              <option v-for="item in questions" :value="item" :key="item">
+                {{ item.endsWith(".data") ? item.slice(0, -5) : item }}
+              </option>
+            </select>
+          </div>
+
+            <div class="biologic-medium-text" v-if="showFileButtons"
+              style="display: flex; flex-direction: row; align-items: center; ">
+
+              <div>
+                <file-reader :title="'Open:'" @read-file="onExNetReadFile"></file-reader>
+              </div>
+
+
+                <div style="display: flex; flex-direction: row; align-items: center ">
+                  <div class="biologic-medium-text">
+                    <label for="save-file">&nbsp;</label>
+                  </div>
+                  <v-btn style="color: var(--biologic-green-color); background-color: transparent;" id="save-file"
+                    @click="onDownloadExNet">
+                    Save
+                  </v-btn>
+                </div>
+
+
+
             </div>
 
-            <StatementArea :statements="this.statementElements" :sharedData="this.sharedData" @onDragStart="onDragStart"
-              @update-shared-data="updateSharedData" />
-          </pane>
-          <pane min-size="5">
-            <splitpanes horizontal>
-              <pane min-size="5">
-                <!-- Displays the question -->
-                <div class="displayQuery">
-                  <h2 class="areaHeading">
-                    Question:
-                    <!-- {{ this.exNetName }} -->
-                    <select @change="getLastWorkingAnswer(true)" v-model="selectedQuestion">
-                      <option v-for="item in questions" :value="item" :key="item">
-                        {{ item.endsWith(".data") ? item.slice(0, -5) : item }}
-                      </option>
-                    </select>
+            <div class="right_menu">
 
-                    <!--div class="button-container">
-                      <router-link to="/feedback" class="button-link">link to feedback</router-link>
-                    </div -->
-                  </h2>
+              <Tooltip text="current user">
+                <h3 style="color:var(--biologic-green-color)">{{ clientType }}: {{ userID }}</h3>
+              </Tooltip>
 
-                  <div class="tooltips">
-                    Please see the instruction here.
-                    <span class="tooltip_info">
-                      This is question section, you can view questions here.
-                    </span>
-                  </div>
-                  <QuestionArea :prompttext="this.promptText" />
+              <Tooltip text="Show buttons to allow read and write to local disk">
+                <v-btn style="color:var(--biologic-green-color)" @click="showFileButtons = !showFileButtons">
+                  <v-icon>mdi-file-arrow-up-down-outline</v-icon>
+                </v-btn>
+              </Tooltip>
+
+              <Tooltip text="logout">
+                <v-btn class="biologic_logout_button" @click="handleLogout">
+                  <v-icon>mdi-logout</v-icon>
+                </v-btn>
+              </Tooltip>
+
+            </div>
+          </div>
+
+
+
+
+        </v-row>
+
+        <v-row class="pa-3 grow-row" no-gutters>
+          <div id="displayIDForFullScreen">
+            <v-row class="content-row" no-gutters> <!-- header bar with icons -->
+
+              <div class="answer-area-header">
+                <span v-if="showQuestion">
+                  <Tooltip text="Hide Question">
+                    <v-btn @click="toggleEditor" color="var(--biologic-grey-color)">
+                      <v-icon>mdi-chevron-left</v-icon>&nbsp;QUESTION
+                    </v-btn>
+                  </Tooltip>
+                </span>
+                <span v-if="!showQuestion">
+                  <!-- IF QUESTION IS HIDDEN JUST SHOW ICON TO GET IT BACK -->
+                  <Tooltip text="Show Question">
+                    <v-btn v-if="!showQuestion" @click="toggleEditor">
+                      <v-icon>mdi-chevron-right</v-icon>QUESTION
+                    </v-btn>
+                  </Tooltip>
+                </span>
+
+                <v-spacer></v-spacer>
+                <span class="answer-area-title">ANSWER</span>
+
+                <v-spacer></v-spacer>
+
+                <div class="answer-area-buttons">
+
+                  <Tooltip text="Show Data Structures">
+                    <v-btn class="answer-area-button" size="small" id="showDataStructuresBtn" @click="toggleShowDataStructures">
+                      <v-icon class="answer-area-icon" size="24">mdi-code-braces</v-icon>
+                    </v-btn>
+                  </Tooltip>
+                  <Tooltip text="Save Answer">
+                    <v-btn class="answer-area-button" size="small" id="submitBtn" @click="submitAnswer">
+                      <v-icon class="answer-area-icon" size="24">mdi-content-save-outline</v-icon>
+                    </v-btn>
+                  </Tooltip>
+                  <v-snackbar class="snackbar-message" v-model="snackbar" timeout="2000" 
+                              location="top right"
+                              contained color=var(--biologic-green-color)>
+                    {{ snackbarText }}
+                  </v-snackbar>
+
+                  <Tooltip text="Reset Answer">
+                    <v-btn class="answer-area-button" size="small" id="resetBtn" @click="getResetAnswerArea">
+                      <v-icon class="answer-area-icon" size="24">mdi-restart</v-icon>
+                    </v-btn>
+                  </Tooltip>
+
+                  <Tooltip text="Full Screen">
+                    <v-btn class="answer-area-button" size="small" v-if="!fullScreen" id="fullScreenBtn"
+                      @click="goFullScreen()">
+                      <v-icon class="answer-area-icon" size="24">mdi-fullscreen</v-icon>
+                    </v-btn>
+                  </Tooltip>
+
+                  <Tooltip text="Exit Full Screen">
+                    <v-btn class="answer-area-button" size="small" v-if="fullScreen" id="exitFullScreenBtn"
+                      @click="exitFullScreen()">
+                      <v-icon class="answer-area-icon" size="24">mdi-fullscreen-exit</v-icon>
+                    </v-btn>
+                  </Tooltip>
+
+                  <Tooltip text="Undo">
+                    <v-btn class="answer-area-button" size="small" id="undoBtn" @click="handleUndo()">
+                      <v-icon class="answer-area-icon" size="24">mdi-undo</v-icon>
+                    </v-btn>
+                  </Tooltip>
+
+                  <Tooltip text="Redo">
+                    <v-btn class="answer-area-button" size="small" id="redoBtn" @click="handleRedo()">
+                      <v-icon class="answer-area-icon" size="24">mdi-redo</v-icon>
+                    </v-btn>
+                  </Tooltip>
+
+                  <v-btn size="small" v-if="isFeedbackAvailable" @click="toggleAllFeedback">
+                    {{ showAllFeedback ? "Close Feedback" : "Show Feedback" }}
+                  </v-btn>
+
+                  <Tooltip :text="showMyAnswer?'Hide My Answer' : 'Show My Answer'">
+                    <v-btn class="answer-area-button" 
+                      :color="showMyAnswerButtonColor" 
+                      size="small"
+                      @click="toggleShowMyAnswer">
+                      <v-icon class="answer-area-icon" size="24">mdi-eye-outline</v-icon>
+                    </v-btn>
+                  </Tooltip>
+
+                  <Tooltip :text="showCorrectAnswer?'Hide Correct Answer' : 'Show Correct Answer'">
+                    <v-btn class="answer-area-button" 
+                      :color="showCorrectAnswerButtonColor" 
+                      size="small"
+                      v-if="isCorrectAnswerAllowed" 
+                      :disabled="!okToShowCorrectAnswer" 
+                      @click="toggleShowCorrectAnswer">
+                      <v-icon class="answer-area-icon" size="24">mdi-eye-check-outline</v-icon>
+                    </v-btn>
+                  </Tooltip>
+
                 </div>
-              </pane>
-              <pane min-size="5">
-                <!-- Displays workspace -->
-                <div id="displayWorkspaceID" class="displayWorkspace" @drop="onDropWorkspace($event)" @dragover.prevent
-                  @dragenter.prevent>
-                  <div id="answerArea" class="sectionTitle">
-                    <h2 class="areaHeading">Answer</h2>
-                    <div class="tooltips">
-                      Please see the instruction here.
-                      <span class="tooltip_info">
-                        This is answer section, you can drag any statement or
-                        connector to answer the question.
-                      </span>
+
+
+              </div>
+
+            </v-row>
+
+            <v-row class="grow-row" no-gutters>
+
+              <v-col v-if="showQuestion" :cols="colsForQuestion" class="flex-col"> <!-- QUESTION AREA -->
+                <v-row class="content-row">
+                </v-row>
+
+                <v-row class="grow-row">
+                  <v-col class="pa-5 rounded-lg">
+                    <div class="displayQuery">
+                      <QuestionArea :prompttext="this.promptText" />
                     </div>
-                  </div>
+                  </v-col>
+                </v-row>
 
-                  <AnswerArea ref="workspace" :selectedExnet="selectedQuestion" :droppedItems="droppedItems"
-                    :draggedItem="draggedItem" :offsetX="offsetX" :offsetY="offsetY" :statements="statementElements"
-                    :sharedData="this.sharedData" @get-reset-answer-area="getResetAnswerArea"
-                    @get-correct-answer="getCorrectWorkingAnswer" @get-last-working-answer="getLastWorkingAnswer"
-                    @answer-data="updateJsonOutput" @setDraggedItem="onDragStart" @addDroppedItems="addDroppedItems"
-                    @delDroppedItem="delDroppedItem" @update-show-my-answer="updateShowMyAnswer"
-                    @update-show-correct-answer="updateShowCorrectAnswer"
-                    @update-answer-area-content="handleUpdateAnswerContent" @statement-used="handleStatementUsed"
-                    @statement-removed="handleStatementRemoval" @enable-area="(n) => toggleAnswerArea(n)"
-                    @update-shared-data="updateSharedData" />
+              </v-col>
+
+              <v-col v-if="showMyAnswer" cols="colsForStudentAnswer" class="flex-col"> <!-- STUDENT ANSWER AREA -->
+
+                <div id="displayWorkspaceID_HIDE" class="displayWorkspace grow-row">
+                  <AnswerArea ref="answerAreaRef" :parentStatementElements="statementElements" :displayOnly="false" :testProp="testProp"
+                    @answer-data="updateJsonOutput" @update-answer-area-content="handleUpdateAnswerContent"
+                    @enable-area="(n) => toggleAnswerArea(n)" @answerarea-state-change="handleAnswerAreaStateChange" />
                 </div>
-              </pane>
-              <pane min-size="5">
-                <!-- Displays worded answer, automatically formed -->
-                <div class="displayWordedOutput">
-                  <h4>Check your answer here</h4>
+
+                <div class="readout-area content-row" style="height:20%;">
                   <!-- Get texts from AnswerArea -->
                   <AnswerTextGeneratorArea :answerText="this.answerText" />
                 </div>
-              </pane>
-            </splitpanes>
-          </pane>
-          <pane max-size="14" class="connectorContainer" min-size="5">
-            <!-- Displays the connectors -->
-            <div class="displayConnectors">
-              <h2 class="areaHeading">Connectors</h2>
-              <ConnectorArea :sharedData="this.sharedData" @update-shared-data="updateSharedData" />
-            </div>
-          </pane>
-        </Splitpanes>
-      </pane>
-    </splitpanes>
+
+
+              </v-col>
+
+              <v-col v-if="showCorrectAnswer" cols="colsForCorrectAnswer"> <!-- CORRECT ANSWER AREA -->
+                <div id="correctDisplayWorkspaceID" class="displayWorkspace">
+                  <AnswerArea ref="correctAnswerAreaRef" :parentStatementElements="statementElementsEmpty"
+                    :displayOnly="true" @update-answer-area-content="handleUpdateCorrectAnswerContent" />
+                </div>
+                <div class="readout-area">
+                  <h4>CORRECT ANSWER READOUT</h4>
+                  <AnswerTextGeneratorArea :answerText="this.correctAnswerText" />
+                </div>
+              </v-col>
+
+
+            </v-row>
+
+            
+
+          </div>
+
+        </v-row>
+
+      </v-container>
+    </div>
   </div>
 </template>
-
 <script>
 import QuestionArea from "@/components/QuestionArea.vue";
 import StatementArea from "@/components/StatementArea.vue";
-import ConnectorArea from "@/components/ConnectorArea.vue";
 import AnswerArea from "@/components/AnswerArea.vue";
 import AnswerTextGeneratorArea from "@/components/AnswerTextGeneratorArea.vue";
 import FileReader from "@/components/FileReader.vue";
 import MenuBar from "@/components/MenuBar.vue";
-import { Splitpanes, Pane } from "splitpanes";
-import "splitpanes/dist/splitpanes.css";
+import Tooltip from "@/components/Tooltip.vue";
+
 import download from "downloadjs";
 import {
   BASE_URL,
@@ -130,6 +285,10 @@ import {
 } from "../config/constants";
 import { buildFeedbackRubricMap } from "@/utils/common";
 import { computed, ref } from "vue";
+import "@/assets/biologic.css";
+import isEqual from "lodash/isEqual";
+
+
 
 export default {
   name: "App",
@@ -144,20 +303,17 @@ export default {
       exNetRelativePath: null,
       exNetName: "",
       statementElements: [],
+      statementElementsEmpty: [],
 
-      statements: [],
-      connectors: [],
-      droppedItems: [],
-      draggedItem: null,
-      offsetX: 0,
-      offsetY: 0,
       answerAreaEnabled: true,
       clientID: null,
+      clientIdInput: '',  // Bound to the USERNAME input field
       authorised: false, // TODO: automatically bypass login - for prototyping purpose
       secret_key: null,
       userID: null,
       clientType: "Student", // Setting client Type to lowest type as default
       answerText: [], // Receive all content texts from AnswerArea
+      correctAnswerText: [], // Receive all content texts from CorrectAnswerArea
       jsonOutput: {},
       jsonData: [],
       dataObject: {},
@@ -165,14 +321,36 @@ export default {
       isFeedbackAvailable: false, // flag used to check whether client_feedback is there
       isCorrectAnswerAllowed: false, // flag used to check whether student can see the correct answer
       feedback: null,
-      showMyAnswer: false,
-      showCorrectAnswer: false,
+      showMyAnswer: true,
+      okToShowCorrectAnswer: true, // student needs to submit an answer before we let them see.
+      showCorrectAnswer: false,   // toggle whether correct answer is visible
+      showQuestion: true,
+      showDataStructures: false, // just for debugging purposes
+      activeTab: "1",
       feedbackRubricMap: ref({}),
-      sharedData: "", // awful solution to passing information during drag!
+
+      globalTooltipState: {showTooltips:true, animal:"dog"},  
+
+      undoStack: [], // record history of state-data for the answerArea.
+      currentState: undefined,
+      redoStack: [],
+      ignoreStateChanges: { // wrap it in an object so it is reactive for the provide/inject mechanism
+        value: false,// this is turned on when programmatic changes to the answerarea are happening.
+      },
+      fullScreen: false,
+      correctAnswer: undefined,
+      correctAnswerData: undefined,
+
+      showFileButtons: false,
+      snackbar: false,
+      snackbarText: " ",
+
+      testProp: 0,
     };
   },
-
+ 
   provide() {
+    //console.log("\n\n*******************\n\n Home::provide() being called OK\n\n\n\n\n")
     return {
       feedbackRubricMap: computed(() => {
         return this.feedbackRubricMap.value;
@@ -180,22 +358,22 @@ export default {
       isFeedbackAvailable: computed(
         () => this.isFeedbackAvailable && this.isFeedbackAllowed
       ),
-      showMyAnswer: computed(() => this.showMyAnswer),
-      showCorrectAnswer: computed(() => this.showCorrectAnswer),
-      isCorrectAnswerAllowed: computed(() => this.isCorrectAnswerAllowed),
+      globalTooltipState: this.globalTooltipState,
+      showDataStructures: computed(
+        () => this.showDataStructures
+      ),
+      ignoreStateChanges: this.ignoreStateChanges,
     };
   },
 
   components: {
     AnswerArea,
-    ConnectorArea,
     QuestionArea,
     StatementArea,
     AnswerTextGeneratorArea,
-    Splitpanes,
-    Pane,
     FileReader,
     MenuBar,
+    Tooltip,
   },
 
   created() {
@@ -206,10 +384,98 @@ export default {
       statement["collapsed"] = false;
     }
   },
+  computed: {
+    colsForQuestion() {
+      if (!this.showQuestion)
+        return 0;
+      else {
+        if (this.showMyAnswer && this.showCorrectAnswer)
+          return 4; // split three ways
+        else if (this.showMyAnswer || this.showCorrectAnswer)
+          return 6; // split two ways
+        else
+          return 12; // just the question
+      }
+      return 4; // shouldn't happen
+    },
+    colsForStudentAnswer() {
+      if (!this.showMyAnswer)
+        return 0;
+      else {
+        if (this.showQuestion && this.showCorrectAnswer)
+          return 4; // split three ways
+        else if (this.showQuestion || this.showCorrectAnswer)
+          return 6; // split two ways
+        else
+          return 12; // just the question
+      }
+      return 4; // shouldn't happen    
+    },
+    colsForCorrectAnswer() {
+      if (!this.showCorrectAnswer)
+        return 0;
+      else {
+        if (this.showQuestion && this.showMyAnswer)
+          return 4; // split three ways
+        else if (this.showQuestion || this.showMyAnswer)
+          return 6; // split two ways
+        else
+          return 12; // just the question
+      }
+      return 4; // shouldn't happen    
+    },
+    showCorrectAnswerButtonColor() {
+      return this.showCorrectAnswer ? "white" : "#f4d4d4";
+    },
+    showMyAnswerButtonColor() {
+      return this.showMyAnswer ? "white" : "#f4d4d4";
+    },
 
+  },
   methods: {
     // Sends login request and processes returned promise.
+
+        // Function to toggle the editor display
+    toggleEditor() {
+      this.showQuestion = !this.showQuestion;
+    },
+    toggleShowDataStructures() { 
+      this.showDataStructures = !this.showDataStructures;
+    },
+
+    // Function to toggle the correct answer visibility
+    async toggleShowCorrectAnswer() {
+      if (this.showCorrectAnswer) {
+        if (this.showMyAnswer || this.showQuestion)  // i.e. we will only hide correctAnswer if one of the other panes is visible.
+          this.showCorrectAnswer = false;
+      } else {
+        this.showCorrectAnswer = true;
+        await this.$nextTick(); // make sure DOM updates are done
+        if (this.$refs.correctAnswerAreaRef && this.correctAnswerData) 
+          await this.$refs.correctAnswerAreaRef.loadPreviousAnswer(this.correctAnswerData);
+      }
+    },
+
+    // Function to toggle the correct answer visibility
+    toggleShowMyAnswer() {
+      if (this.showMyAnswer) {
+        if (this.showCorrectAnswer || this.showQuestion)  // i.e. we will only hide myAnswer if one of the other panes is visible. 
+          this.showMyAnswer = false;
+      } else
+        this.showMyAnswer = true;
+    },
+
+    async handleConnectToServer(){
+      const userId = this.clientIdInput.trim();
+      if (!userId){
+        alert("Please enter a valid Client ID.");
+        return;
+      }
+      this.logIn(userId);
+    },
+    
     async logIn(userId) {
+
       let response = await this.sendLoginRequest(userId);
 
       if (response && response["success"] === true) {
@@ -236,7 +502,7 @@ export default {
             ? urlParams.exnetName
             : this.questions[0];
           await this.getExnet(this.selectedQuestion, true);
-          await this.getLastWorkingAnswer(true);
+          await this.getLastWorkingAnswer();
         }
         //window.alert("Successfully authorised!");
       } else {
@@ -245,8 +511,7 @@ export default {
     },
 
     // Sends the login HTTP request to the server.
-    async sendLoginRequest(user_name = DEFAULT_USER_ID) {
-      let userID = window.prompt("Enter your Student ID.");
+    async sendLoginRequest(userID) {
       this.userID = userID;
       await this.digestMessage(userID).then((digestHex) => {
         userID = digestHex;
@@ -265,7 +530,7 @@ export default {
         });
         return await response.json();
       } catch (error) {
-        console.log(error);
+       globalConsoleLog("net",error);
       }
     },
 
@@ -273,13 +538,11 @@ export default {
     handleLogout() {
       sessionStorage.clear();
       this.authorised = false;
-      this.showSurveyPrompt();
+      //this.showSurveyPrompt();
     },
 
     async updateJsonOutput(dataObject) {
       this.dataObject = dataObject;
-      this.dataObject["offsetX"] = String(this.offsetX);
-      this.dataObject["offsetY"] = String(this.offsetY);
       this.dataObject["statementElements"] = this.statementElements;
       this.jsonOutput = this.dataObject;
 
@@ -293,12 +556,13 @@ export default {
 
     // // Selects a specific question from the list.
     // questionSelected() {
-    //     // console.log("Displaying question", this.selectedQuestion)
+    //     //globalConsoleLog("net","Displaying question", this.selectedQuestion)
     //     this.getExnet(this.selectedQuestion,true)
     // },
 
     // When a statement is dropped onto a connector, this fires.
     // Set the corresponding statement's "visible" property to false.
+    // THIS IS OUT OF DATE AND NEEDS TO BE REMOVED MM 1 Mar 2025
     handleStatementUsed(statementID, state = false) {
       for (let statement of this.statementElements) {
         if (statement["id"] === statementID) {
@@ -308,66 +572,7 @@ export default {
       }
     },
 
-    // invoked when a connector with statements is deleted.
-    // Set the corresponding statement to be visible in Statement Area
-    // and removes references to the deleted connector.
-    handleStatementRemoval(statementID, state = false) {
-      for (let statement of this.statementElements) {
-        if (statement["id"] === statementID) {
-          statement["visible"] = state;
-          statement["parent"] = undefined;
-          return;
-        }
-      }
-    },
 
-    updateShowCorrectAnswer(value) {
-      this.showCorrectAnswer = value;
-    },
-
-    updateShowMyAnswer(value) {
-      this.showMyAnswer = value;
-    },
-
-    // add the statement to the droppedItem array
-    addDroppedItems(data) {
-      this.droppedItems.push(data);
-    },
-
-    // remove the dropped statement on the answerArea
-    delDroppedItem(data) {
-      this.droppedItems = this.droppedItems.filter(
-        (item) => item.id !== data.id
-      );
-    },
-
-    //sets the dragged statement to the item that has started to be dragged
-    onDragStart(item) {
-      this.draggedItem = item;
-    },
-
-    updateSharedData(newValue) {
-      // newValue is a JSON.stringified version of
-      // {
-      //    "draggedWidth" : value;
-      //    "draggedHeight" : value;
-      //    "drageeType" : "connector";      (or could be "render_statement")
-      // }
-      this.sharedData = newValue;
-    },
-
-    //Record the coordinate of X,Y when it clicked
-    onMousedown(e) {
-      this.offsetX = e.offsetX;
-      this.offsetY = e.offsetY;
-    },
-
-    onDropWorkspace(e) {
-      if (this.answerAreaEnabled === false) {
-        return;
-      }
-      this.$refs.workspace.onDrop(e);
-    },
 
     toggleAnswerArea(e) {
       this.answerAreaEnabled = e;
@@ -375,6 +580,7 @@ export default {
 
     // Receive all content texts from AnswerArea
     handleUpdateAnswerContent(info) {
+      //console.log("*******\n*******\n*******\n handleUpdateAnswerContent ",info, "*******\n*******\n*******\n")
       const rootIDs = Array.from(info[0]);
       const statementIDs = Array.from(info[1]);
       const newAnswerContentObject = info[2];
@@ -390,25 +596,40 @@ export default {
           Object.values(newAnswerContentObject[statementIDs[i]]).join("")
         );
       }
-    },
-    // Handle ExNetJson from FileREader
-    onExNetReadFile(exNetRawData) {
-      console.log(exNetRawData);
-      const exnetWorkingAnswerJson = JSON.parse(exNetRawData);
-      this.setCurrentExNet(exnetWorkingAnswerJson, true);
+      //this.handleAnswerAreaStateChange(); not sure if this is needed. MM.
     },
 
-    getResetAnswerArea(selectedExnet) {
-      this.getExnet(selectedExnet, true);
+    // Receive all content texts from CorrectAnswerArea
+    handleUpdateCorrectAnswerContent(info) {
+     globalConsoleLog("undo","*******\n*******\n*******\n handleUpdateCorrectAnswerContent ",info, "*******\n*******\n*******\n")
+      const rootIDs = Array.from(info[0]);
+      const statementIDs = Array.from(info[1]);
+      const newAnswerContentObject = info[2];
+
+      this.correctAnswerText = [];
+      for (let i = 0; i < rootIDs.length; i++) {
+        this.correctAnswerText.push(
+          Object.values(newAnswerContentObject[rootIDs[i]]).join("")
+        );
+      }
+      for (let i = 0; i < statementIDs.length; i++) {
+        this.correctAnswerText.push(
+          Object.values(newAnswerContentObject[statementIDs[i]]).join("")
+        );
+      }
+      //this.handleAnswerAreaStateChange(); not sure if this is needed. MM.
+    },
+
+    getResetAnswerArea() {
+     globalConsoleLog("net","getResetAnswerArea");
+      this.getExnet(this.selectedQuestion, true);
     },
 
     // Download ExNetJson
     onDownloadExNet() {
-      let processedData = this.$refs.workspace.convertToJson(true);
+      let processedData = this.$refs.answerAreaRef.getCurrentState();
 
       this.dataObject = processedData;
-      this.dataObject["offsetX"] = String(this.offsetX);
-      this.dataObject["offsetY"] = String(this.offsetY);
       this.dataObject["statementElements"] = this.statementElements;
       this.jsonOutput = this.dataObject;
 
@@ -416,14 +637,14 @@ export default {
         activeExNetQuestionPack: {
           promptText: [this.promptText, this.dataObject],
           exNetRelativePath: "Explanation Networks/" + this.exNetName,
-          questionName: this.selectedQuestion,
+          questionName: this.selectedQuestion, // MM. don't think we need this. It is just the exNetName.
           exNetName: this.exNetName,
           statementElements: this.statementElements,
         },
         statementElements: [],
         connectorElements: [],
       };
-      console.log(exNetTemplate);
+     globalConsoleLog("net","onDownloadExNet ",exNetTemplate);
       download(
         JSON.stringify(exNetTemplate),
         this.exNetName + "_exnet_question.json",
@@ -436,16 +657,22 @@ export default {
      * @param {object} exNetData - The parsed ExNet data from a json file
      * @returns {void}
      */
-    setExNetAnswer(exNetData) {
-      const questionName = exNetData.activeExNetQuestionPack.questionName;
-
-      this.promptText = exNetData.activeExNetQuestionPack.promptText;
+    async setExNetAnswer(exNetData) {
+     globalConsoleLog("net","\n\n.................setExNetAnswer exNetData=",exNetData);
+      //const questionName = exNetData.activeExNetQuestionPack.questionName; MM. don't think we need questionName. it is just the same as exNetName.
+      if (typeof exNetData.activeExNetQuestionPack.promptText === "object") {
+        // then the actual prompt is the first element of the array.
+        this.promptText = exNetData.activeExNetQuestionPack.promptText[0];
+      } else {
+        this.promptText = exNetData.activeExNetQuestionPack.promptText;
+      }
       this.exNetRelativePath =
         exNetData.activeExNetQuestionPack.exNetRelativePath;
       this.exNetName = exNetData.activeExNetQuestionPack.exNetName;
       this.statementElements =
         exNetData.activeExNetQuestionPack.statementElements;
-      this.selectedQuestion = questionName;
+      //this.selectedQuestion = questionName;   MM. don't think we need questionName. it is just the same as exNetName.
+      this.selectedQuestion = this.exNetName;
       for (let statement of this.statementElements) {
         statement["visible"] = true;
         statement["collapsed"] = false;
@@ -462,18 +689,31 @@ export default {
           }
         }
       }
-
-      if (typeof this.promptText === "object") {
-        let data = this.promptText[1];
-        this.offsetX = parseInt(data["offsetX"]);
-        this.offsetY = parseInt(data["offsetY"]);
-
+ 
+      if (typeof exNetData.activeExNetQuestionPack.promptText === "object") {
+        let data = exNetData.activeExNetQuestionPack.promptText[1];
+       globalConsoleLog("net","prompt[1] answer available")
         this.statementElements = data["statementElements"];
-        this.$refs.workspace.loadPreviousAnswer(data);
+        this.testProp = this.testProp+1;
+        await this.$nextTick(); // make sure DOM updates are done
+        if (this.$refs.answerAreaRef){
+          await this.$refs.answerAreaRef.loadPreviousAnswer(data, this.testProp+10);
+        } else {
+         globalConsoleLog("net"," ERROR ERROR ref not set yet ")
+        }
+        
       }
+      else {
+        // we need to clear the answer area and initialise it with the statements layed out down the left hand side.
+       globalConsoleLog("net","No prompt[1] answer available so just clear Workspace")
+        this.$refs.answerAreaRef.clearWorkspace();
+      }
+      this.resetStateChangeHistory();
     },
 
+  /* MM. not being used
     setCurrentExNet(exNetData, clear = false) {
+     globalConsoleLog("net","setCurrentExNet",exNetData," clear = ",clear);
       this.promptText = exNetData.activeExNetQuestionPack.promptText;
 
       this.exNetRelativePath =
@@ -503,10 +743,10 @@ export default {
 
       this.showQuestionList = false;
       if (clear) {
-        this.$refs.workspace.clearWorkspace();
-        this.droppedItems = [];
+        this.$refs.answerAreaRef.clearWorkspace();
       }
     },
+    */
 
     // TODO: Remove this once hashing is not required.
     async digestMessage(msg) {
@@ -538,7 +778,7 @@ export default {
 
         return await response.json();
       } catch (error) {
-        console.log(error);
+       globalConsoleLog("net",error);
       }
     },
 
@@ -553,6 +793,7 @@ export default {
     },
 
     async sendGetExnetRequest(exnetName) {
+     globalConsoleLog("net","     sendGetExnetRequest ",exnetName);
       try {
         // FIXME: HTTP request here.
         // Is this GET or POST?
@@ -572,11 +813,12 @@ export default {
         });
         return await response.json();
       } catch (error) {
-        console.log(error);
+       globalConsoleLog("net",error);
       }
     },
 
-    async getExnet(exnetName, clear = false) {
+    async  getExnet(exnetName, clear = false) {
+     globalConsoleLog("net","\n\n ------->  getExnet ",exnetName,"clear=",clear);
       // TODO: reenable this
       let response = await this.sendGetExnetRequest(exnetName);
 
@@ -584,6 +826,7 @@ export default {
       // let response = {"success": true, "exnet_name": "sky_question.data", "exnet_working_answer_json": "{\"activeExNetQuestionPack\": {\"promptText\": \"<table style=\\\"border-collapse: collapse; width: 50.0213%; margin:10px;\\\" border=\\\"1\\\"> <tbody> <tr> <td style=\\\"width: 49.949%;\\\"> <h4><span style=\\\"color: #ba372a;\\\"><em><strong>When you look up at the sky,</strong></em></span></h4> <p>the sun is yellow, while the sky is blue.</p> <h4><span style=\\\"text-decoration: underline;\\\"><span style=\\\"color: #169179; text-decoration: underline;\\\"><strong>Explain why the sky is blue.</strong>.</span></span></h4> </td> <td><img src=\\\"blue_sky.jpg\\\" alt=\\\"blue_sky.jpg\\\" width=\\\"100\\\" height=\\\"158\\\" data-api-endpoint=\\\"https://canvas.lms.unimelb.edu.au/api/v1/courses/63494/files/13454251\\\" data-api-returntype=\\\"File\\\" /></td> </tr> </tbody> </table>\", \"exNetRelativePath\": \"Explanation Networks/sky\", \"exNetName\": \"sky\", \"statementElements\": [{\"statementType\": 0, \"id\": 140255704346928, \"content\": {\"originalFacts\": [\"The sky is blue\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 20, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348560, \"content\": {\"originalFacts\": [\"light is comprised of multiple wavelengths\", \"light_has_multiple_wavelengths.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 59, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348608, \"content\": {\"originalFacts\": [\"blue light has a short wavelength\", \"blue_light.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 221, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348704, \"content\": {\"originalFacts\": [\"yellow light has a long wavelength\", \"yellow_light.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 338, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 2, \"id\": 140255704348800, \"content\": {\"originalFacts\": [\"the\", [\"--choose--\", \"smaller\", \"longer\"], \"the wavelength the more it is scattered\"], \"userInput\": [\"--choose--\"]}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 455, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 2, \"id\": 140255704348896, \"content\": {\"originalFacts\": [[\"blue light\", \"yellow light\"], \"is scattered more than\", [\"yellow light\", \"blue light\"]], \"userInput\": [\"blue light\", \"yellow light\"]}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 568, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348992, \"content\": {\"originalFacts\": [\"the light we see when we arent looking at the sun\", \"direct_indirect_light.jpg\", \"is scattered light\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 683, \"fontSizeStr\": \"12px\"}}]}, \"statementElements\": [{\"statementType\": 0, \"id\": 140255704346928, \"content\": {\"originalFacts\": [\"The sky is blue\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 20, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348560, \"content\": {\"originalFacts\": [\"light is comprised of multiple wavelengths\", \"light_has_multiple_wavelengths.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 59, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348608, \"content\": {\"originalFacts\": [\"blue light has a short wavelength\", \"blue_light.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 221, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348704, \"content\": {\"originalFacts\": [\"yellow light has a long wavelength\", \"yellow_light.jpg\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 338, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 2, \"id\": 140255704348800, \"content\": {\"originalFacts\": [\"the\", [\"--choose--\", \"smaller\", \"longer\"], \"the wavelength the more it is scattered\"], \"userInput\": [\"--choose--\"]}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 455, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 2, \"id\": 140255704348896, \"content\": {\"originalFacts\": [[\"blue light\", \"yellow light\"], \"is scattered more than\", [\"yellow light\", \"blue light\"]], \"userInput\": [\"blue light\", \"yellow light\"]}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 568, \"fontSizeStr\": \"12px\"}}, {\"statementType\": 1, \"id\": 140255704348992, \"content\": {\"originalFacts\": [\"the light we see when we arent looking at the sun\", \"direct_indirect_light.jpg\", \"is scattered light\"], \"userInput\": []}, \"graphicalContent\": {\"xPosInParent\": 10, \"yPosInParent\": 683, \"fontSizeStr\": \"12px\"}}], \"connectorElements\": []}"}
 
       if (response["success"] === true) {
+       globalConsoleLog("net"," got question OK");
         if (clear) {
           const exnetWorkingAnswerJson = JSON.parse(
             response.exnet_working_answer_json
@@ -592,8 +835,39 @@ export default {
           this.isFeedbackAllowed = response.is_feedback_allowed;
           this.isCorrectAnswerAllowed = response.is_correct_answer_allowed;
 
-          // Successful response code here.
-          this.setCurrentExNet(exnetWorkingAnswerJson, clear);
+          //this.setCurrentExNet(exnetWorkingAnswerJson, clear);
+         globalConsoleLog("net","calling setExNetAnswer");
+          this.snackbarText = "Loading ExNet Starting Answer";
+          this.snackbar = true;
+          this.setExNetAnswer(exnetWorkingAnswerJson);     
+
+          // now if there is a correctAnswer then grab that too.
+          
+          if (response["exnet_correct_answer_json"] != null &&
+              response["exnet_correct_answer_json"] != "") {
+           globalConsoleLog("net","there is a correct answer available");
+            this.snackbarText = "Sample Correct Answer Available";
+            this.snackbar = true;
+            // we just want to get the prompt[1] and pass it to the AnswerArea that is for showing the correct answer.
+            this.correctAnswer = await JSON.parse(  response["exnet_correct_answer_json"]  );
+            let activeExNetQuestionPack =  this.correctAnswer["activeExNetQuestionPack"];
+            let promptText = activeExNetQuestionPack["promptText"];
+            if (typeof promptText === "object") {
+             globalConsoleLog("net","correct answer prompText[1] is available");
+              this.correctAnswerData = promptText[1];
+              this.okToShowCorrectAnswer = true; // make sure the html object is there
+              await this.$nextTick(); // make sure DOM updates are done
+              if (this.$refs.correctAnswerAreaRef) {
+               globalConsoleLog("net","loading Correct Answer");
+                await this.$refs.correctAnswerAreaRef.loadPreviousAnswer(this.correctAnswerData);
+              }
+            }
+          } else {
+            if (this.$refs.correctAnswerAreaRef) {
+               globalConsoleLog("net","Clearing Correct Answer");
+                this.$refs.correctAnswerAreaRef.clearWorkspace();
+            }
+          }
         }
       } else {
         // What to do if failed?
@@ -603,25 +877,35 @@ export default {
     },
 
     async StoreLastWorkingAnswer(exnetName) {
+     globalConsoleLog("net","StoreLastWorkingAnswer ",exnetName);
       try {
         let response = await this.getExnet(exnetName, false);
 
-        // console.log("Get exnet response\n", response);
+        //globalConsoleLog("net","Get exnet response\n", response);
         let exnetQuestionPack = response["exnet_working_answer_json"];
-        // console.log(JSON.parse(exnetQuestionPack))
+        //globalConsoleLog("net",JSON.parse(exnetQuestionPack))
         exnetQuestionPack = JSON.parse(exnetQuestionPack);
 
         let activeExNetQuestionPack =
           exnetQuestionPack["activeExNetQuestionPack"];
         let promptText = activeExNetQuestionPack["promptText"];
-        promptText = [promptText, this.dataObject];
+        let actualPromptText = "";
+        
+        // since ExNet questions can now have a partial answer which is stored in promptText[1] and here,
+        // we just want the actual prompt, we need to check.
+        if (typeof promptText === "object") {
+          actualPromptText = promptText[0];
+        } else {
+          actualPromptText = promptText;
+        }
+        promptText = [actualPromptText, this.dataObject];
 
         activeExNetQuestionPack["promptText"] = promptText;
         exnetQuestionPack["activeExNetQuestionPack"] = activeExNetQuestionPack;
         exnetQuestionPack["questionName"] = this.selectedQuestion;
         exnetQuestionPack = JSON.stringify(exnetQuestionPack);
-        // console.log("working answer data")
-        // console.log(exnetQuestionPack)
+        //globalConsoleLog("net","working answer data")
+        //globalConsoleLog("net",exnetQuestionPack)
 
         let msgBody = {
           [API_BODY_PARAMS.CLIENT_ID_BODY_PARAM]: this.clientID,
@@ -630,7 +914,7 @@ export default {
           working_answer_data: exnetQuestionPack,
         };
 
-        // console.log("msgBody", msgBody);
+        //globalConsoleLog("net","msgBody", msgBody);
         msgBody = JSON.stringify(msgBody);
 
         let storeWorkingAnswerUrl =
@@ -649,11 +933,12 @@ export default {
 
         return await postResponse.json();
       } catch (error) {
-        console.log(error);
+       globalConsoleLog("net",error);
       }
     },
 
-    async sendGetExnetAnswer(exnetName) {
+    async sendGetExnetLastWorkingAnswerRequest(exnetName) {
+     globalConsoleLog("net","sendGetExnetLastWorkingAnswerRequest ",exnetName);
       try {
         // FIXME: HTTP request here.
         // Is this GET or POST?
@@ -675,12 +960,12 @@ export default {
         });
         return await response.json();
       } catch (error) {
-        console.log(error);
+       globalConsoleLog("net",error);
       }
     },
 
     async sendGetFeedback(exnetName) {
-      // console.log(this.jsonOutput, this.jsonOutput, 'this.jsonOutput)')
+      //globalConsoleLog("net",this.jsonOutput, this.jsonOutput, 'this.jsonOutput)')
       const params = {
         activeExNetQuestionPack: {
           promptText: [this.promptText, this.dataObject],
@@ -714,13 +999,14 @@ export default {
         const data = await response.json();
         this.updateFeedback(data.client_feedback);
       } catch (error) {
-        console.log(`Failed to fetch ${exnetName}!`);
+       globalConsoleLog("net",`Failed to fetch ${exnetName}!`);
       }
 
       //console.log(JSON.stringify(params))
     },
 
     async getCorrectWorkingAnswer() {
+     globalConsoleLog("net","getCorrectWorkingAnswer");
       this.updateFeedback(null);
 
       // TODO: check if this call is required, as we all already getting exnet on changing question
@@ -731,36 +1017,20 @@ export default {
         response["exnet_correct_answer_json"] != null &&
         response["exnet_correct_answer_json"] != ""
       ) {
+        // we just want to get the prompt[1] and pass it to the AnswerArea that is for showing the correct answer.
         let lastWorkingAnswerData = await JSON.parse(
           response["exnet_correct_answer_json"]
         );
         let activeExNetQuestionPack =
           lastWorkingAnswerData["activeExNetQuestionPack"];
 
-        // 4. get the query entry via activeExNetQuestionPack > promptText
         let promptText = activeExNetQuestionPack["promptText"];
 
-        // 5. Check promptText is a LIST and not just a string. If it is a string - there is no information
-        // that has been stored. Display the question similar to the getExnet above.
-        await this.getExnet(this.selectedQuestion, true);
-        if (typeof promptText === "string") {
-          //console.log(promptText);
-        }
-
-        // 6. If promptText is a LIST, LIST[0] is the query itself - display directly.
-        // 7. LIST[1] contains all the parameters passed when saving. Extract entries and replace those in App.vue.
-        // let data = LIST[1];
-        // this.offSetX = data["offSetX"]
-        else if (typeof promptText === "object") {
+        if (typeof promptText === "object") {
           let data = promptText[1];
-          this.offsetX = parseInt(data["offsetX"]);
-          this.offsetY = parseInt(data["offsetY"]);
-
-          this.statementElements = data["statementElements"];
-
-          // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
-
-          this.$refs.workspace.loadPreviousAnswer(data);
+          this.showCorrectAnswer = true;
+          await this.$nextTick(); // make sure DOM updates are done
+          await this.$refs.correctAnswerAreaRef.loadPreviousAnswer(data, this.testProp+10);
         }
       } else {
         // If fetching the correct working answer fails, log an error
@@ -768,20 +1038,21 @@ export default {
       }
     },
 
-    async getLastWorkingAnswer(isNewExnet) {
+    async getLastWorkingAnswer() { 
+     globalConsoleLog("net","\n\n************ getLastWorkingAnswer\n\n")
       this.updateFeedback(null);
 
       // TODO: check if this call is required, as we all already getting exnet on changing question
-      let response = await this.sendGetExnetAnswer(this.selectedQuestion);
+      let response = await this.sendGetExnetLastWorkingAnswerRequest(this.selectedQuestion);
 
       // disabling the show correct answer and show my answer buttons
       // whenever there is a change in the exnet question from dropdown
-      if (isNewExnet) {
-        this.showMyAnswer = false;
-        this.showCorrectAnswer = false;
-      }
+
       // FIX ME: Success spell is wrong!
       if (response["success"]) {
+       globalConsoleLog("net"," GOT IT! ");
+        this.snackbarText = "Loading previously saved answer"
+        this.snackbar = true;
         let lastWorkingAnswerData = await JSON.parse(
           response["last_working_answer_data"]
         );
@@ -789,34 +1060,42 @@ export default {
           lastWorkingAnswerData["activeExNetQuestionPack"];
 
         // 4. get the query entry via activeExNetQuestionPack > promptText
-        let promptText = activeExNetQuestionPack["promptText"];
+        let tmpPromptText = activeExNetQuestionPack["promptText"];
+       globalConsoleLog("net","the prompt =",tmpPromptText);
 
         // 5. Check promptText is a LIST and not just a string. If it is a string - there is no information
         // that has been stored. Display the question similar to the getExnet above.
-        await this.getExnet(this.selectedQuestion, true);
+        //await this.getExnet(this.selectedQuestion, true);
 
-        if (typeof promptText === "string") {
-          //console.log(promptText);
+        if (typeof tmpPromptText === "string") {
+         globalConsoleLog("net","orgindary prompt =",tmpPromptText);
+          this.promptText = tmpPromptText;
         }
 
         // 6. If promptText is a LIST, LIST[0] is the query itself - display directly.
         // 7. LIST[1] contains all the parameters passed when saving. Extract entries and replace those in App.vue.
-        // let data = LIST[1];
-        // this.offSetX = data["offSetX"]
-        else if (typeof promptText === "object") {
-          let data = promptText[1];
-          this.offsetX = parseInt(data["offsetX"]);
-          this.offsetY = parseInt(data["offsetY"]);
 
+        else if (typeof tmpPromptText === "object") {
+         globalConsoleLog("net","composite prompt.",tmpPromptText);
+          this.promptText=tmpPromptText[0];
+          let data = tmpPromptText[1];
           this.statementElements = data["statementElements"];
-
           // 8. Pass LIST[1] into AnswerArea.vue using $refs, and have AnswerArea modify the corresponding entries.
-
-          this.$refs.workspace.loadPreviousAnswer(data);
+         globalConsoleLog("net"," LOADING ANSWER ");
+          this.testProp = this.testProp + 1;
+          await this.$nextTick(); // make sure DOM updates are done
+          if (this.$refs.answerAreaRef) {
+            await this.$refs.answerAreaRef.loadPreviousAnswer(data, this.testProp+10);
+          } else {
+           globalConsoleLog("net","ERROR ERRROR ref not set yet")
+          }
         }
       } else {
+        // no answer saved so just get the starting ExNet question
+       globalConsoleLog("net","student has no previous answer so just load question");
         await this.getExnet(this.selectedQuestion, true);
       }
+      await this.resetStateChangeHistory(); // Since we've just loaded a question we don't want an undo/redo history
     },
 
     // check if student has access to the particular Exnet
@@ -848,6 +1127,123 @@ export default {
         // If user clicks No thanks or cancels the dialog, do nothing
       }
     },
+    displayUndoState(str){
+     globalConsoleLog("undo","--------",str,"---------");
+      //console.log("undoStack length = ",this.undoStack.length);
+      for (let i = 0; i < this.undoStack.length; i++) {
+       globalConsoleLog("undo","undo", i, this.undoStack[i]);
+      }
+     globalConsoleLog("undo","currentState = ",this.currentState);
+      //console.log("redoStack length = ",this.redoStack.length);
+      for (let i = this.redoStack.length-1; i >= 0 ; i--) {
+       globalConsoleLog("undo","redo", i, this.redoStack[i]);
+      }
+     globalConsoleLog("undo"," ");
+    },
+    getDeepCopyOfAnswerAreaCurrentState() {
+      // need to make a deep copy to put on the undo stack.
+      const stateAsJsonString = JSON.stringify(this.$refs.answerAreaRef.getCurrentState());
+      //console.log("current state string length = ",stateAsJsonString.length);
+      return JSON.parse(stateAsJsonString);
+    },
+    async resetStateChangeHistory() {
+      //this.displayUndoState("resetStateChangeHistory START");
+      this.undoStack.length = 0;
+      this.redoStack.length = 0;
+      this.currentState = this.getDeepCopyOfAnswerAreaCurrentState();
+      this.displayUndoState("resetStateChangeHistory FINISH");
+    },
+    async handleAnswerAreaStateChange() {
+      //this.displayUndoState("handleAnswerAreaStateChange START");
+      if (this.ignoreStateChanges.value) {
+       globalConsoleLog("undo"," ignoring state chagnes ");
+        return;
+      }
+      let theNewCurrentState = this.getDeepCopyOfAnswerAreaCurrentState();
+      if (this.currentState) {
+        if (!isEqual(this.currentState,theNewCurrentState)) {
+         globalConsoleLog("undo","undo: -----------------a real state change has occurred");
+          this.undoStack.push(this.currentState);
+        }
+        else {
+         globalConsoleLog("undo","undo: -----------------no real change so just return");
+          return;
+        }
+      }
+      this.currentState = theNewCurrentState;
+      this.redoStack.length = 0;
+      this.displayUndoState("handleAnswerAreaStateChange FINISH");
+    },
+    async handleUndo() {
+      //this.displayUndoState("handleUndo START");
+      if (this.undoStack.length === 0) return;
+      this.redoStack.push(this.currentState);
+      this.currentState = this.undoStack.pop();
+      await this.$nextTick(); // make sure DOM updates are done
+      await this.$refs.answerAreaRef.loadPreviousAnswer(this.currentState);
+      this.displayUndoState("handleUndo FINISH");
+    },
+    async handleRedo() {
+      //this.displayUndoState("handleRedo START");
+      if (this.redoStack.length === 0) return;
+      this.undoStack.push(this.currentState);
+      this.currentState = this.redoStack.pop();
+      await this.$nextTick(); // make sure DOM updates are done
+      await this.$refs.answerAreaRef.loadPreviousAnswer(this.currentState);
+      this.displayUndoState("handleRedo FINISH");
+    },
+    async submitAnswer() {
+      this.dataObject = this.$refs.answerAreaRef.getCurrentState();
+      this.dataObject["statementElements"] = this.statementElements;
+      this.jsonOutput = this.dataObject;
+      let response = await this.StoreLastWorkingAnswer(this.selectedQuestion);
+      if (response["success"] === true) {
+        await this.sendGetFeedback(this.selectedQuestion);
+        //window.alert("Submission successful!");
+        this.okToShowCorrectAnswer = true;
+        this.snackbarText = "ExNet Saved"
+        this.snackbar = true;
+      } else {
+        window.alert("Error: Submission unsuccessful.");
+      }
+
+      },
+    goFullScreen() {
+      var elem = document.getElementById("displayIDForFullScreen")
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+        this.fullScreen = true;
+      } else if (elem.mozRequestFullScreen) { // Firefox
+        elem.mozRequestFullScreen();
+        this.fullScreen = true;
+      } else if (elem.webkitRequestFullscreen) { // Chrome, Safari, and Opera
+        elem.webkitRequestFullscreen();
+        this.fullScreen = true;
+      } else if (elem.msRequestFullscreen) { // IE/Edge
+        elem.msRequestFullscreen();
+        this.fullScreen = true;
+      }
+    },
+    exitFullScreen() {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        this.fullScreen = false;
+      } else if (document.mozCancelFullScreen) { // Firefox
+        document.mozCancelFullScreen();
+        this.fullScreen = false;
+      } else if (document.webkitExitFullscreen) { // Chrome, Safari, and Opera
+        document.webkitExitFullscreen();
+        this.fullScreen = false;
+      } else if (document.msExitFullscreen) { // IE/Edge
+        document.msExitFullscreen();
+        this.fullScreen = false;
+      }
+    },
+    onExNetReadFile(exNetRawData) {
+      const exnetWorkingAnswerJson = JSON.parse(exNetRawData);
+      this.setExNetAnswer(exnetWorkingAnswerJson);
+    },
+
   },
 
   async mounted() {
@@ -864,8 +1260,6 @@ export default {
         this.clientType = sessionStorage.getItem("clientType");
         this.clientID = sessionStorage.getItem("clientID");
         this.userID = sessionStorage.getItem("userID");
-      } else {
-        await this.logIn();
       }
     }
 
@@ -877,7 +1271,8 @@ export default {
           ? urlParams.exnetName
           : this.questions[0];
         await this.getExnet(this.selectedQuestion, true);
-        await this.getLastWorkingAnswer(true);
+        await this.getLastWorkingAnswer();
+        await this.resetStateChangeHistory();
       }
     }
   },
@@ -885,6 +1280,9 @@ export default {
 </script>
 
 <style>
+
+
+
 body {
   margin: 0px;
   padding: 0px;
@@ -932,38 +1330,72 @@ body {
   /* Move button down by 2 pixels when pressed */
 }
 
-.displayWorkspace {
+.displayQuery{
+  background: rgb(255, 255, 255);
+  padding:5px;
+  height: 100%;
+  overflow-y: scroll;
+}
+
+.displayWorkspace{
+  background: #ffffff;
+  padding-left: 1px;
+  padding-top: 5px;
+  padding-bottom: 0px;
+  height: 80%;
+  overflow-y: scroll;
   position: relative;
 }
 
-.sectionTitle {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
+.displayWordedOutput{
+  background: #ffffff;
+  padding-left: 10px;
+  padding-top: 5px;
+  height: 100%;
+  overflow-y: scroll;
 }
 
-.sectionTitle h2 {
-  width: 220px;
-  margin: 0px 0px 0px 10px;
-}
 
-.splitpanes--vertical>.splitpanes__splitter {
-  min-width: 20px;
-  background: rgb(224, 224, 224);
-}
-
-.splitpanes--horizontal>.splitpanes__splitter {
-  min-height: 20px;
-  background: rgb(213, 213, 213);
-}
 
 .mainContainer {
-  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow:auto;
+  flex: 1 0 auto;
+}
+
+.grow-row {
+ /* border: 1px solid rgb(150, 98, 0);*/
+flex: 1 0 auto !important;
+display: flex;
+width: 100%; /* Force it to respect parent width */
+  max-width: 100%; /* Prevent overshooting */
+  /*  overflow: hidden;Stops unintended expansion */
+}
+
+.content-row {
+ /* border: 1px solid rgb(150, 98, 0);*/
+flex: 0 0 auto !important;
+display: flex;
+flex-direction: column;
+}
+.flex-col {
+  display: flex;
+  flex-direction: column; /* Stack rows vertically */
+  height: 100%; /* Ensure the column fills its container */
 }
 
 .statementContainer {
   overflow-y: scroll;
+}
+
+#displayIDForFullScreen {
+  display:flex;
+  flex-direction:column; 
+  background-color: white;
+  width: 100%;
+  max-width: 100%;
 }
 
 .connectorContainer {
@@ -989,5 +1421,94 @@ body {
 
 .areaHeading {
   color: #9f0000;
+}
+
+.auto-col {
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+  flex-basis: auto !important;
+}
+
+.biologic-component {
+  color:var(--biologic-green-color);
+  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size:xx-large;
+}
+
+.answer-area-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between; /* Push title to the left and buttons to the right */
+  align-items: center; /* Vertically center items */
+  padding: 4px 8px; /* Add some padding */
+  background-color: var(--biologic-grey-color); /* Light background for better visibility */
+  color:var(--biologic-blue-color);
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.4); /* Drop shadow */
+}
+
+/* Title Styling */
+.answer-area-title {
+  font-size: 18px;
+}
+
+/* Button Group Styling */
+.answer-area-buttons v-btn {
+  margin-left: 8px; /* Add spacing between buttons */
+}
+
+.readout-area {
+  /*border: 1px solid red;*/
+}
+
+.answer-area-button {
+
+}
+
+.answer-area-icon {
+   color:var(--biologic-blue-color);
+}
+
+.right_menu {
+  position: relative;
+  top: 0;
+  right: 16px;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  /*height: 50px;*/
+}
+.biologic_logout_button {
+  font-size: 20px;
+  color: var(--biologic-green-color);
+  background-color: #fff;
+  margin: 2px;
+  padding: 4px;
+  align-items: top;
+  border-bottom: 2px solid #595959; /* Darker green for bevel effect */
+  border-right: 2px solid #595959; /* Darker green for bevel effect */
+}
+
+.biologic_logout_button:hover {
+  background-color: #e1e1e1; /* Change color on hover */
+  border-bottom: 2px solid #7a5a5a; /* Darker green for bevel effect on hover */
+  border-right: 2px solid #7a5a5a; /* Darker green for bevel effect on hover */
+}
+
+.biologic_logout_button:active {
+  background-color: #ffffff; /* Darker green when button is pressed */
+  border-bottom: 0; /* Remove bottom border when button is pressed */
+  border-right: 0; /* Remove right border when button is pressed */
+  transform: translate(
+    1px,
+    1px
+  ); /* Move button down by 2 pixels when pressed */
+}
+
+.snackbar-message {
+  position:absolute;
+  left:100px;
+  top:100px;
+  color: red;
 }
 </style>

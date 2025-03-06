@@ -2,53 +2,37 @@
   <!-- record the statement position-->
   <div class="StatementTruth">
     <FeedbackRubric :isVisible="showFeedback" :exnetID="id" />
+     
     <div class="content-wrapper">
+
       <div class="iconContainer">
-        <button
-          v-if="showToggle && this.statementData.collapsed"
-          @click="toggleCollapsedStatement"
-          class="statementButton"
-        >
-          <img
-            class="toggle-expand-collapse"
-            src="../../assets/expand_icon.png"
-            alt="ToggleExpandCollapse"
-            width="20"
-          />
-        </button>
-        <button
-          v-if="showToggle && !this.statementData.collapsed"
-          @click="toggleCollapsedStatement"
-          class="statementButton"
-        >
-          <img
-            class="toggle-expand-collapse"
-            src="../../assets/collapse_icon.png"
-            alt="ToggleExpandCollapse"
-            width="20"
-          />
+
+        <Tooltip text=" expand this statement ">
+          <v-btn  size="x-small" v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement"
+            class="statementButton">
+            <v-icon>mdi-arrow-expand</v-icon>
+        </v-btn>
+        </Tooltip>
+        <Tooltip text=" collapse this statement ">
+        <v-btn  size="x-small" v-if="showToggle && !this.statementData.collapsed" @click="toggleCollapsedStatement"
+          class="statementButton">
+          <v-icon>mdi-arrow-collapse</v-icon>
+        </v-btn>
+      </Tooltip>
+
+
+        <Tooltip text="duplicate this statement">
+        <v-btn size="x-small" v-if="showToggle && !displayOnly" @click="duplicateMe" class="statementButton">
+          <!--img class="statementButtonImage" src="../../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
+          <v-icon>mdi-content-duplicate</v-icon>
+        </v-btn>
+      </Tooltip>
+
+        <button v-if="showToggle && isFeedbackAvailable" @click="showFeedback = !showFeedback" class="statementButton">
+          <img src="../../assets/feedback-rubric.png" alt="FeedbackStatement" width="20" />
         </button>
 
-        <button @click="duplicateMe" class="statementButton">
-          <img
-            class="duplicate-statement-button"
-            src="../../assets/duplicate_icon.png"
-            alt="DuplicateStatement"
-            width="20"
-          />
-        </button>
-
-        <button
-          v-if="showToggle && isFeedbackAvailable"
-          @click="showFeedback = !showFeedback"
-          class="statementButton"
-        >
-          <img
-            src="../../assets/feedback-rubric.png"
-            alt="FeedbackStatement"
-            width="20"
-          />
-        </button>
+        
       </div>
       <div class="main-content">
         <div v-if="this.statementData.collapsed" class="concatenated-statement">
@@ -69,7 +53,7 @@
               </div>
             </div>
             <div v-else>
-              <select v-model="userSelected[index]">
+              <select v-model="userSelected[index]" class="dropdown-shadow">
                 <option v-for="item in segment" :value="item" :key="item">
                   {{ item }}
                 </option>
@@ -79,22 +63,23 @@
         </div>
       </div>
     </div>
-    <!-- Display tooltips for this statement-->
-    <span v-if="statementData.visible" class="StatementTruth_tooltip">
-      The content in this statement is a fact. It is always correct.
-    </span>
   </div>
 </template>
 
 <script>
 import FeedbackRubric from "../FeedbackRubric.vue";
+import Tooltip from '../Tooltip.vue';
 
 export default {
   name: "StatementTruth",
   components: {
     FeedbackRubric,
+    Tooltip,
   },
-  emits: [
+  inject: [
+    "displayOnly" // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
+  ],
+    emits: [
     "user-choice-changed",
     "duplicate-statement",
     "toggle-collapsed-statement-truth",
@@ -107,7 +92,7 @@ export default {
       default: true,
     },
   },
-  inject: ["isFeedbackAvailable", "showAllFeedback"],
+  inject: ["isFeedbackAvailable", "showAllFeedback","displayOnly"],
   data() {
     return {
       //TODO: confirm that the first entry is text, 2nd entry is image.
@@ -227,6 +212,11 @@ export default {
       this.answeredData = this.statementData;
     },
   },
+
+  mounted() {
+    //console.log("StatementTruth mounted");
+  },
+
 };
 </script>
 
@@ -234,14 +224,10 @@ export default {
 @import "@/assets/tooltips.css";
 .StatementTruth {
   background-color: rgb(233, 255, 212);
-  font-size: 14px;
-  width: fit-content;
-  height: fit-content;
-  text-align: left;
+  font-size: var(--biologic-statement-font-size);
   padding: 2px;
   margin: 2px;
   position: relative;
-  display: inline-block;
   white-space: pre-wrap;
   max-width: 150px;
 }

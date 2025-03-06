@@ -4,12 +4,12 @@
     :key="statement.id"
     :statement-data="statement"
     :showToggle="true"
-    :sharedData = "sharedData"
+
     @onDragStart="onDragStart(statement)"
     @mousedown="$emit('onclick', $event)"
     @toggle-collapsed="toggleCollapsed"
     @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement"
-    @update-shared-data="updateSharedData"
+
   />
 </template>
 
@@ -20,9 +20,8 @@ export default {
   name: "StatementArea",
   props: {
     statements: Object,
-    sharedData: Object,
   },
-  emits: ["onDragStart", "onclick", "update-shared-data"],
+  emits: ["onDragStart", "onclick"],
   components: {
     RenderStatement,
   },
@@ -42,10 +41,6 @@ export default {
         console.log("StatementArea:toggleShowPopupFromRenderStatement");
         this.statements[id]["showPopup"] = !this.statements[id]["showPopup"];
     },
-
-    updateSharedData(newValue) {
-      this.$emit("update-shared-data",newValue);
-    }
 
   },
   computed: {

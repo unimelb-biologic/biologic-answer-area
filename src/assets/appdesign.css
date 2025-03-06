@@ -12,62 +12,6 @@ body {
   background: #ffffff;
 }
 
-/* Create two unequal columns that floats next to each other */
-/* Left column */
-
-.left_column {
-  float: left;
-  width: 20%;
-  background: #ffffff;
-  padding: 0px 10px;
-  max-height: 100vh;
-  overflow-y: scroll;
-}
-
-.centre_column {
-  float: left;
-  width: 66%;
-}
-
-.displayQuery{
-  background: rgb(255, 255, 255);
-  padding:5px;
-  height: 100%;
-  overflow-y: scroll;
-}
-
-.displayWorkspace{
-  background: #ffffff;
-  padding-left: 1px;
-  padding-top: 5px;
-  padding-bottom: 0px;
-  height: 100%;
-  overflow-y: scroll;
-}
-
-.displayWordedOutput{
-  background: #ffffff;
-  padding-left: 10px;
-  padding-top: 5px;
-  height: 100%;
-  overflow-y: scroll;
-}
-
-.right_column {
-  float: left;
-  width: 14%;
-  background: #ffffff;
-  padding-left: 10px;
-  max-height: 100vh;
-  overflow-y: scroll;
-}
-
-.displayConnectors{
-  min-height: 300px;
-  overflow-y: scroll;
-}
-
-
 /* Clear floats after the columns */
 .main_workspace:after {
   content: "";
