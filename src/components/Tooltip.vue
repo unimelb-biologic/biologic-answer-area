@@ -38,12 +38,15 @@ export default {
     transition: opacity 0.5s;
     pointer-events: none;
 
-    color: #33008a;
+    color: #16003c;
     text-align: center;
     padding: 5px 0;
     border-radius: 2px;
     min-width: 120px;
-    background: #dde6df;
+    background: #f4f2fe;
+    box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.4); /* Drop shadow */
+    font-size: small;
+
 
     position: absolute;
     z-index: 10;

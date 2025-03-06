@@ -43,7 +43,8 @@
       </div>
 
 
-
+      <Tooltip
+        text="Yellow statements are called STUDENT statements. Choose the menu/radiobutton options to modify the statement.">
       <div class="main-content">
         <div v-if="this.statementData.collapsed" class="concatenated-statement">
           {{ concatenatedStatement }}
@@ -62,21 +63,21 @@
               </div>
             </div>
             <div v-else class="statementRadioButtons">
-              <Tooltip text="Choose an option">
+              
               <div v-for="item in segment">
                 <div v-if="item.indexOf('--')">
                   <input :disabled="displayOnly" type="radio" :id="item" :value="item" v-model="userSelected[index]">
                   <label :for="item in segment">{{item}}</label><br>
                 </div>
               </div>
-            </Tooltip>
+            
             </div>
           </div>
         </div>
 
         <div v-else>
           <!-- dropdown format -->
-          <Tooltip text="Choose an option from the menu">
+          
             <div v-for="(segment, index) in this.statementData.content.originalFacts" :key="index">
               <!-- render the text from selection -->
               <div v-if="typeof segment === 'string'">
@@ -100,9 +101,10 @@
 
               </div>
             </div>
-          </Tooltip>
+          
         </div>
       </div>
+      </Tooltip>
     </div>
   </div>
 </template>

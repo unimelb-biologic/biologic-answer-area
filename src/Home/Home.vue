@@ -50,11 +50,13 @@
             </div>
             <div class="biologic-medium-text" style="display: flex; flex-direction: row; align-items: center">
               <p>&nbsp;&nbsp;&nbsp;&nbsp;Question:</p>
+              <Tooltip text="Change Question">
               <select @change="getLastWorkingAnswer()" v-model="selectedQuestion" class="dropdown-shadow">
                 <option v-for="item in questions" :value="item" :key="item">
                   {{ item.endsWith(".data") ? item.slice(0, -5) : item }}
                 </option>
               </select>
+            </Tooltip>
             </div>
 
             <div class="biologic-medium-text" v-if="showFileButtons"
@@ -133,12 +135,12 @@
 
                 <div class="answer-area-buttons">
 
-                  <Tooltip text="Show Data Structures">
+                  <!--Tooltip text="Show Data Structures">
                     <v-btn class="answer-area-button" size="small" id="showDataStructuresBtn"
                       @click="toggleShowDataStructures">
                       <v-icon class="answer-area-icon" size="24">mdi-code-braces</v-icon>
                     </v-btn>
-                  </Tooltip>
+                  </Tooltip-->
                   <Tooltip text="Save Answer">
                     <v-btn class="answer-area-button" size="small" id="submitBtn" @click="submitAnswer">
                       <v-icon class="answer-area-icon" size="24">mdi-content-save-outline</v-icon>

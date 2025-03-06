@@ -11,9 +11,11 @@
     :handles="['tl', 'tr', 'bl', 'br', 'tm', 'bm', 'ml', 'mr']">
     <div class="header">
       <span>CONNECTORS </span><!--{{ position.x }}, {{ position.y }}-->
+      <Tooltip :text=" collapsed ? 'Show Connector Palette' : 'Hide Connector Palette'">
       <v-btn  size="xx-small" @click="toggleCollapse">
         <v-icon >{{ collapsed?'mdi-chevron-down':'mdi-chevron-up' }}</v-icon>
       </v-btn>
+      </Tooltip>
     </div>
     <div v-show="!collapsed" class="content-container">
       <Connector v-for="connector in this.connectors" :key="connector" :connector-i-d="undefined" :selected-phrase="0"
@@ -27,13 +29,18 @@ import Connector from "@/components/Connector.vue";
 import VueDraggableResizable from "vue-draggable-resizable";
 import "@/assets/VueDraggableResizable_Style.css";
 import "@/assets/biologic.css";
+import Tooltip from "@/components/Tooltip.vue";
 
 export default {
   name: "ConnectorArea",
   props: {
   },
   emits: [],
-  components: { Connector, VueDraggableResizable },
+  components: { 
+    Connector, 
+    VueDraggableResizable, 
+    Tooltip 
+  },
   methods: {
     onDragging(newX,newY) {
       this.position.x = newX;

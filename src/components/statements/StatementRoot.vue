@@ -7,30 +7,31 @@
       <div class="iconContainer">
 
         <Tooltip text=" expand this statement ">
-          <v-btn  size="x-small" v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement"
+          <v-btn size="x-small" v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement"
             class="statementButton">
             <v-icon>mdi-arrow-expand</v-icon>
-        </v-btn>
+          </v-btn>
         </Tooltip>
         <Tooltip text=" collapse this statement ">
-        <v-btn  size="x-small" v-if="showToggle && !this.statementData.collapsed" @click="toggleCollapsedStatement"
-          class="statementButton">
-          <v-icon>mdi-arrow-collapse</v-icon>
-        </v-btn>
-      </Tooltip>
+          <v-btn size="x-small" v-if="showToggle && !this.statementData.collapsed" @click="toggleCollapsedStatement"
+            class="statementButton">
+            <v-icon>mdi-arrow-collapse</v-icon>
+          </v-btn>
+        </Tooltip>
 
-      <Tooltip text="switch between menus and radio-buttons">
-        <v-btn size="x-small" v-if="showToggle && !this.statementData.collapsed" @click="toggleShowPopup" class="statementButton">
-          <img class="statementButtonImage" src="../../assets/popup_radio_icon.png" alt="RadioPopupToggle" />
-        </v-btn>
-      </Tooltip>
+        <Tooltip text="switch between menus and radio-buttons">
+          <v-btn size="x-small" v-if="showToggle && !this.statementData.collapsed" @click="toggleShowPopup"
+            class="statementButton">
+            <img class="statementButtonImage" src="../../assets/popup_radio_icon.png" alt="RadioPopupToggle" />
+          </v-btn>
+        </Tooltip>
 
         <Tooltip text="duplicate this statement">
-        <v-btn size="x-small" v-if="showToggle && !displayOnly" @click="duplicateMe" class="statementButton">
-          <!--img class="statementButtonImage" src="../../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
-          <v-icon>mdi-content-duplicate</v-icon>
-        </v-btn>
-      </Tooltip>
+          <v-btn size="x-small" v-if="showToggle && !displayOnly" @click="duplicateMe" class="statementButton">
+            <!--img class="statementButtonImage" src="../../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
+            <v-icon>mdi-content-duplicate</v-icon>
+          </v-btn>
+        </Tooltip>
 
         <button v-if="showToggle && isFeedbackAvailable" @click="showFeedback = !showFeedback" class="statementButton">
           <img src="../../assets/feedback-rubric.png" alt="FeedbackStatement" width="20" />
@@ -38,64 +39,70 @@
 
       </div>
 
-      <div class="main-content">
-        <div v-if="this.statementData.collapsed" class="concatenated-statement">
-          {{ concatenatedStatement }}
-        </div>
+      <Tooltip
+        text="Blue statements are called ROOT statements. They will usually form the first or last statement of your answer.">
+        <div class="main-content">
 
-        <div v-else-if="!this.statementData.showPopup" class="radio-statement">
-          <!-- radio button format -->
-          <Tooltip text="choose an option">
-          <div v-for="(segment, index) in this.statementData.content.originalFacts" :key="index" style="float: left; ">
-            <div v-if="typeof segment === 'string'" class="segmentString">
+          <div v-if="this.statementData.collapsed" class="concatenated-statement">
+            {{ concatenatedStatement }}
+          </div>
+
+          <div v-else-if="!this.statementData.showPopup" class="radio-statement">
+            <!-- radio button format -->
+            
+              <div v-for="(segment, index) in this.statementData.content.originalFacts" :key="index"
+                style="float: left; ">
+                <div v-if="typeof segment === 'string'" class="segmentString">
 
 
-              <div v-if="isImage(segment)">
-                <img :src="segment" class="biologicImage">
-              </div>
-              <div v-else class="segmentString">
-                {{ segment }}
-              </div>
+                  <div v-if="isImage(segment)">
+                    <img :src="segment" class="biologicImage">
+                  </div>
+                  <div v-else class="segmentString">
+                    {{ segment }}
+                  </div>
 
-            </div>
-            <div v-else class="statementRadioButtons">
-              <div v-for="item in segment">
-                <div v-if="item.indexOf('--')">
-                  <input :disabled="displayOnly" type="radio" :id="item" :value="item" v-model="userSelected[index]">
-                  <label :for="item in segment">{{item}}</label><br>
+                </div>
+                <div v-else class="statementRadioButtons">
+                  <div v-for="item in segment">
+                    <div v-if="item.indexOf('--')">
+                      <input :disabled="displayOnly" type="radio" :id="item" :value="item"
+                        v-model="userSelected[index]">
+                      <label :for="item in segment">{{ item }}</label><br>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            
           </div>
-        </Tooltip>
-        </div>
-        <div v-else>
-          <!-- dropdown format -->
-          <Tooltip text="Choose an option from the dropdown menu.">
-          <div v-for="(segment, index) in this.statementData.content.originalFacts" :key="index">
-            <!-- render the text from selection -->
-            <div v-if="typeof segment === 'string'">
+          <div v-else>
+            <!-- dropdown format -->
+            
+              <div v-for="(segment, index) in this.statementData.content.originalFacts" :key="index">
+                <!-- render the text from selection -->
+                <div v-if="typeof segment === 'string'">
 
-              <div v-if="isImage(segment)">
-                <img :src="segment" class="biologicImage">
-              </div>
-              <div v-else>
-                {{ segment }}
-              </div>
+                  <div v-if="isImage(segment)">
+                    <img :src="segment" class="biologicImage">
+                  </div>
+                  <div v-else>
+                    {{ segment }}
+                  </div>
 
-            </div>
-            <!-- render the options -->
-            <div v-else>
-              <select :disabled="displayOnly" v-model="userSelected[index]" class="dropdown-shadow">
-                <option v-for="item in segment" :value="item" :key="item">
-                  {{ item }}
-                </option>
-              </select>
-            </div>
+                </div>
+                <!-- render the options -->
+                <div v-else>
+                  <select :disabled="displayOnly" v-model="userSelected[index]" class="dropdown-shadow">
+                    <option v-for="item in segment" :value="item" :key="item">
+                      {{ item }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            
           </div>
-        </Tooltip>
         </div>
-      </div>
+      </Tooltip>
     </div>
   </div>
 </template>
@@ -105,13 +112,13 @@ import FeedbackRubric from '../FeedbackRubric.vue';
 import Tooltip from '../Tooltip.vue';
 import "@/assets/biologic.css";
 
-export default {  
+export default {
   name: "StatementRoot",
   components: {
     FeedbackRubric,
     Tooltip,
   },
-  emits: ["user-choice-changed","duplicate-statement","toggle-showPopup-fromstatementroot","toggle-collapsed-statement-root"],
+  emits: ["user-choice-changed", "duplicate-statement", "toggle-showPopup-fromstatementroot", "toggle-collapsed-statement-root"],
   inject: [
     "displayOnly" // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
   ],
@@ -123,7 +130,7 @@ export default {
       default: true
     }
   },
-  inject: ['isFeedbackAvailable', 'showAllFeedback','displayOnly'],
+  inject: ['isFeedbackAvailable', 'showAllFeedback', 'displayOnly'],
   data() {
     return {
       statementType: this.statementData.statementType,
@@ -132,47 +139,47 @@ export default {
       previousUserInput: this.statementData.content.userInput,
       userSelected: [],
       answeredData: null,
-      hide_collapsed : false,
-      hide_showPopup : true,
+      hide_collapsed: false,
+      hide_showPopup: true,
       showFeedback: false
     };
   },
   computed: {
     concatenatedStatement() {
-      return this.statementData.content.originalFacts.map((segment, index) => 
-        typeof segment === 'string' ? (this.isImage(segment)?"":segment) : this.userSelected[index] || segment[0]
+      return this.statementData.content.originalFacts.map((segment, index) =>
+        typeof segment === 'string' ? (this.isImage(segment) ? "" : segment) : this.userSelected[index] || segment[0]
       ).join(" ");
     },
-    getCollapseExpandIcon(){
+    getCollapseExpandIcon() {
       return this.collapsed ? "src/assets/expand_icon.png" : "src/assets/collapse_icon.png";
     }
 
   },
   methods: {
-    handleDragEnteringStatementRoot(e){
+    handleDragEnteringStatementRoot(e) {
       console.log("statementRoot enter event");
-//      e.preventDefault();
-            // Prevent child events from reaching the parent
+      //      e.preventDefault();
+      // Prevent child events from reaching the parent
       e.stopPropagation();
     },
-    handleDragLeavingStatementRoot(e){
+    handleDragLeavingStatementRoot(e) {
       console.log("statementRoot leave event");
-//      e.preventDefault();
+      //      e.preventDefault();
     },
     isImage(fact) {
       const isImg = fact.endsWith(".jpg") || fact.endsWith(".png") || fact.endsWith(".jpeg");
       //console.log("testing if fact<",fact," is an image - result is ",isImg);
-      return ( isImg );
+      return (isImg);
     },
     toggleCollapsedStatement() {
       //this.collapsed = !this.collapsed;
       console.log("StatementRoot:toggleCollapsedStatement")
-      this.$emit("toggle-collapsed-statement-root", this.id );
+      this.$emit("toggle-collapsed-statement-root", this.id);
     },
-    toggleShowPopup(){
+    toggleShowPopup() {
       //this.showPopup = !this.showPopup;
       console.log("StatementRoot:toggleShowPopup emitting toggle-showPopup-fromstatementroot")
-      this.$emit("toggle-showPopup-fromstatementroot", [ this.id ]);
+      this.$emit("toggle-showPopup-fromstatementroot", [this.id]);
     },
     handleSelectChange() {
       let studentContentText = "";
@@ -200,8 +207,8 @@ export default {
         this.answeredData,
       ]);
     },
-    duplicateMe(){
-      this.$emit("duplicate-statement", [ this.id ]);
+    duplicateMe() {
+      this.$emit("duplicate-statement", [this.id]);
     },
 
 
@@ -247,7 +254,6 @@ export default {
 </script>
 
 <style scoped>
-
 @import "@/assets/tooltips.css";
 
 .StatementRoot {
@@ -259,8 +265,9 @@ export default {
 }
 
 .StatementRoot:hover .iconContainer {
-  opacity:1;
+  opacity: 1;
 }
+
 .content-wrapper {
   display: flex;
   height: 100%;
@@ -275,14 +282,17 @@ export default {
 button {
   margin-right: 2px;
 }
+
 .segmentString {
-  min-height: inherit; 
-  padding:  10% 2px;
+  min-height: inherit;
+  padding: 10% 2px;
 }
+
 .concatenated-statement {
   white-space: pre-wrap;
   max-width: 100px;
 }
+
 .iconContainer {
   display: flex;
   flex-direction: column;
@@ -322,7 +332,4 @@ button {
   max-width: 100%;
   width: 100px;
 }
-
-
-
 </style>

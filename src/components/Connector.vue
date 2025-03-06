@@ -1006,7 +1006,7 @@ export default {
 
 .connectorContainer:hover {
   border: 2px solid var(--biologic-hover-border-color);
-  transform: translate(-1px, -1px);
+  /*transform: translate(-1px, -1px);*/
   cursor: move;
 }
 
@@ -1022,7 +1022,7 @@ export default {
   background-color: rgb(236, 236, 236);
   max-width: 400px;
   overflow-wrap: break-word;
-  aspect-ratio: 2/1;
+  /*aspect-ratio: 2/1;*/
 }
 
 .connector-sections {

@@ -2,66 +2,65 @@
   <!-- record the statement position-->
   <div class="StatementTruth">
     <FeedbackRubric :isVisible="showFeedback" :exnetID="id" />
-     
+
     <div class="content-wrapper">
 
       <div class="iconContainer">
 
         <Tooltip text=" expand this statement ">
-          <v-btn  size="x-small" v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement"
+          <v-btn size="x-small" v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement"
             class="statementButton">
             <v-icon>mdi-arrow-expand</v-icon>
-        </v-btn>
+          </v-btn>
         </Tooltip>
         <Tooltip text=" collapse this statement ">
-        <v-btn  size="x-small" v-if="showToggle && !this.statementData.collapsed" @click="toggleCollapsedStatement"
-          class="statementButton">
-          <v-icon>mdi-arrow-collapse</v-icon>
-        </v-btn>
-      </Tooltip>
+          <v-btn size="x-small" v-if="showToggle && !this.statementData.collapsed" @click="toggleCollapsedStatement"
+            class="statementButton">
+            <v-icon>mdi-arrow-collapse</v-icon>
+          </v-btn>
+        </Tooltip>
 
 
         <Tooltip text="duplicate this statement">
-        <v-btn size="x-small" v-if="showToggle && !displayOnly" @click="duplicateMe" class="statementButton">
-          <!--img class="statementButtonImage" src="../../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
-          <v-icon>mdi-content-duplicate</v-icon>
-        </v-btn>
-      </Tooltip>
+          <v-btn size="x-small" v-if="showToggle && !displayOnly" @click="duplicateMe" class="statementButton">
+            <!--img class="statementButtonImage" src="../../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
+            <v-icon>mdi-content-duplicate</v-icon>
+          </v-btn>
+        </Tooltip>
 
         <button v-if="showToggle && isFeedbackAvailable" @click="showFeedback = !showFeedback" class="statementButton">
           <img src="../../assets/feedback-rubric.png" alt="FeedbackStatement" width="20" />
         </button>
 
-        
+
       </div>
-      <div class="main-content">
-        <div v-if="this.statementData.collapsed" class="concatenated-statement">
-          {{ concatenatedStatement }}
-        </div>
-        <div v-else>
-          <div
-            v-for="(segment, index) in this.statementData.content.originalFacts"
-            :key="index"
-          >
-            <!-- render the text from selection -->
-            <div v-if="typeof segment === 'string'">
-              <div v-if="isImage(segment)">
-                <img :src="segment" class="biologicImage" />
+      <Tooltip text="Green statements are TRUTHs. i.e. a provided fact that you can use in your answer">
+        <div class="main-content">
+          <div v-if="this.statementData.collapsed" class="concatenated-statement">
+            {{ concatenatedStatement }}
+          </div>
+          <div v-else>
+            <div v-for="(segment, index) in this.statementData.content.originalFacts" :key="index">
+              <!-- render the text from selection -->
+              <div v-if="typeof segment === 'string'">
+                <div v-if="isImage(segment)">
+                  <img :src="segment" class="biologicImage" />
+                </div>
+                <div v-else>
+                  {{ segment }}
+                </div>
               </div>
               <div v-else>
-                {{ segment }}
+                <select v-model="userSelected[index]" class="dropdown-shadow">
+                  <option v-for="item in segment" :value="item" :key="item">
+                    {{ item }}
+                  </option>
+                </select>
               </div>
-            </div>
-            <div v-else>
-              <select v-model="userSelected[index]" class="dropdown-shadow">
-                <option v-for="item in segment" :value="item" :key="item">
-                  {{ item }}
-                </option>
-              </select>
             </div>
           </div>
         </div>
-      </div>
+      </Tooltip>
     </div>
   </div>
 </template>
@@ -79,7 +78,7 @@ export default {
   inject: [
     "displayOnly" // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
   ],
-    emits: [
+  emits: [
     "user-choice-changed",
     "duplicate-statement",
     "toggle-collapsed-statement-truth",
@@ -92,7 +91,7 @@ export default {
       default: true,
     },
   },
-  inject: ["isFeedbackAvailable", "showAllFeedback","displayOnly"],
+  inject: ["isFeedbackAvailable", "showAllFeedback", "displayOnly"],
   data() {
     return {
       //TODO: confirm that the first entry is text, 2nd entry is image.
@@ -222,6 +221,7 @@ export default {
 
 <style scoped>
 @import "@/assets/tooltips.css";
+
 .StatementTruth {
   background-color: rgb(233, 255, 212);
   font-size: var(--biologic-statement-font-size);
@@ -235,6 +235,7 @@ export default {
 .StatementTruth:hover .iconContainer {
   opacity: 1;
 }
+
 .statementButton {
   cursor: pointer;
   width: 24px;
