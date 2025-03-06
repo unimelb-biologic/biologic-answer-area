@@ -8,8 +8,8 @@
     ">
 
     <div style="display: flex; flex-direction: row; align-items: center">
-      <img src="src/assets/BioLogic_BlueGreen_Icon.jpg" height="50" />
-      <img src="src/assets/BioLogic_Word.jpg" height="50px;" />
+      <img src="/src/assets/BioLogic_BlueGreen_Icon.jpg" height="50" />
+      <img src="/src/assets/BioLogic_Word.jpg" height="50px;" />
       <h2 class="biologic-component">EDITOR</h2>
     </div>
 
