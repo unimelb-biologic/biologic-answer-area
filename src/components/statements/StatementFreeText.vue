@@ -72,7 +72,7 @@ export default {
     this.initContent();
   },
   mounted() {
-    console.log("StatementFreeText mounted");
+    //console.log("StatementFreeText mounted");
   }
 };
 </script>

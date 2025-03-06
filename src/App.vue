@@ -8,19 +8,14 @@
 
 <script>
 
-
 export default {
   name: 'App',
-
   data() {
       return {
       }
   },
-
   components: {
-   
   },
-
   methods: {
   }
 }
@@ -31,45 +26,29 @@ export default {
 @import "./assets/tooltips.css";
 
 body {
-  margin: 0px;
-  padding: 0px;
+  margin: 100px;
+  padding: 100px;
 }
-
-.displayWorkspace {
-  position: relative;
-}
-
-.sectionTitle {
+#app {
+  margin: 10px; /* Space around the app */
+  padding: 10px; /* Space inside the app */
+  /*background-color: #f5f5f5;  Background for visibility */
+  /*border: 2px solid red;*/
+  box-sizing: border-box; /* Include padding in total width/height */
+  width: calc(100% - 20px); /* Full width minus margin */
+  max-height: calc(100vh - 20px); /* Full height minus margin */
+  min-height: calc(100vh - 20px); /* Full height minus margin */
+  
+  overflow: hidden; /* Prevent elements from spilling outside */
   display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
+  flex-direction: column;
 }
 
-.sectionTitle h2 {
-  width: 220px;
-  margin: 0px 0px 0px 10px;
+#app > div:first-child {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  width:100%;
 }
 
-.splitpanes--vertical > .splitpanes__splitter {
-  min-width: 8px;
-  background: gray;
-}
-
-.splitpanes--horizontal > .splitpanes__splitter {
-  min-height: 8px;
-  background: gray;
-}
-
-.mainContainer {
-  height: 100vh;
-}
-
-.statementContainer {
-  overflow-y: scroll;
-}
-
-.connectorContainer {
-  overflow-y: scroll;
-}
 </style>

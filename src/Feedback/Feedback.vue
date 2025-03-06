@@ -72,8 +72,6 @@
   import ConnectorArea from "@/components/ConnectorArea.vue";
   import AnswerArea from "@/components/AnswerArea.vue";
   import AnswerTextGeneratorArea from "@/components/AnswerTextGeneratorArea.vue";
-  import { Splitpanes, Pane } from "splitpanes";
-  import "splitpanes/dist/splitpanes.css";
   
   export default {
     name: "App",
@@ -112,8 +110,6 @@
       QuestionArea,
       StatementArea,
       AnswerTextGeneratorArea,
-      Splitpanes,
-      Pane,
     },
   
     created() {

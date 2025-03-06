@@ -15,6 +15,9 @@
       top: this.statementData.top + 'px',
     }"
   >
+  
+    <div class="drag-handle"> &nbsp;</div>
+
     <StatementRoot ref="statementRootRef"
       v-bind="$attrs"
       v-if="this.statementData.statementType === 0"
@@ -57,6 +60,7 @@ import StatementRoot from "@/components/statements/StatementRoot.vue";
 import StatementTruth from "@/components/statements/StatementTruth.vue";
 import StatementStudent from "@/components/statements/StatementStudent.vue";
 import StatementFreeText from "@/components/statements/StatementFreeText.vue";
+import "@/assets/biologic.css";
 
 export default {
   name: "RenderStatement",
@@ -69,7 +73,6 @@ export default {
   emits: [
     "update-statement-content",
     "onDragStart",
-    "delete-statement",
     "connector-dropped-on-statement",
     "statement-dropped-on-statement",
     "duplicate-statement",
@@ -80,6 +83,9 @@ export default {
   props: {
     statementData: Object,
   },
+  inject: [
+    "displayOnly" // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
+  ],
   data() {
     return {
       contentText: "",
@@ -123,6 +129,11 @@ export default {
     },
 
     startDrag(e, data) {
+      if (this.displayOnly) {
+        console.log("\n\nCANT DRAG RENDERSTATEMENT BECAUSE WERE IN DISPLAYONLY MODE\n\n");
+        return;
+      }
+
       // e.target.className = 'dragEffect';
       e.dataTransfer.dropEffect = "move";
       e.dataTransfer.effectAllowed = "move";
@@ -167,6 +178,11 @@ export default {
     },
 
     onDrop(e) {
+      if (this.displayOnly) {
+        console.log("RenderStatement:onDrop but display only so return ");
+        return;
+      }
+
       e.stopImmediatePropagation();
       const type = e.dataTransfer.getData("type");
       //console.log("RenderStatement:onDrop type=", type);
@@ -191,6 +207,7 @@ export default {
       this.contentText = info[0];
       this.answeredStat = info[1];
       const statementID = info[1]["id"];
+      //console.log("RenderStatement::emitting update-statement-content ",this.contentText,this.answeredStat);
       this.$emit(
         "update-statement-content",
         [this.contentText, this.answeredStat],
@@ -210,6 +227,9 @@ export default {
     },
 
     duplicateStatement(id) {
+      if (this.displayOnly)
+        return;
+
       console.log(
         "RenderStatement:duplicateStatement - calling emit duplicate-statement"
       );
@@ -265,10 +285,7 @@ export default {
       this.answeredStat = this.statementData;
     },
 
-    deleteStatement() {
-      // Emit an event to the parent component indicating that this connector should be deleted
-      this.$emit("delete-statement");
-    },
+
   },
   watch: {
     data() {
@@ -286,37 +303,31 @@ export default {
     this.initContent();
   },
   mounted() {
-    console.log("RenderStatement mounted");
+    //console.log("RenderStatement mounted with injected displayOnly=",this.displayOnly);
   }
 
 };
 </script>
 
 <style scoped>
-.delete-button {
-  margin-left: 10px;
-  padding: 5px;
-  background-color: #ff0000;
-  color: #ffffff;
-  border: none;
-  cursor: pointer;
-  border-radius: 20%;
-}
+
 .statement-box {
   background-color: #ffffff;
   display: inline-block; /* Display as inline block */
-  border: 1px solid rgb(210, 158, 199); /* Optional: Add border for visualization */
+  border: 1px solid rgb(209, 210, 158); /* Optional: Add border for visualization */
   position: relative;
 }
 .statement-box:hover {
   background-color: #dbbaba;
   display: inline-block; /* Display as inline block */
-  border: 2px solid rgb(190, 37, 157); /* Optional: Add border for visualization */
+  border: 2px solid var(--biologic-hover-border-color); /* Optional: Add border for visualization */
   transform: translate(-1px, -1px);
   position: relative;
+  cursor: move;
 }
 
 .statement-box:hover .iconContainer {
   border: 5px solid rgb(12, 0, 246);
 }
+
 </style>

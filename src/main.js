@@ -2,7 +2,17 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Home from './Home/Home.vue'
-import Feedback from './Feedback/Feedback.vue'
+
+import './assets/biologic.css'; // import global styles
+
+// Vuetify
+import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
+import '@mdi/font/css/materialdesignicons.css'
+
+
 
 // Define route map
 const routes = [
@@ -20,6 +30,24 @@ const router = createRouter({
   routes
 })
 
+// Create Vuetify instance
+const vuetifyInstance = createVuetify({
+  components,
+  directives,
+  icons: {
+      defaultSet: 'mdi', // This is already the default value - only for display purposes
+  },
+})
+
+window.globalConsoleLog = (category = "any", ...args) => {
+//  const allowedCategories = ["geom", "undo", "any","net"];
+  const allowedCategories = ["undo"];
+
+  if (allowedCategories.includes(category)) {
+    console.log(`[${category}]`, ...args); // Spread to preserve multiple arguments
+  }
+};
+
 const app = createApp(App);
 app.config.unwrapInjectedRef = true;
-app.use(router).mount('#app')
+app.use(router).use(vuetifyInstance).mount('#app')

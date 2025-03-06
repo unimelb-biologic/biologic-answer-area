@@ -4,109 +4,104 @@
     <FeedbackRubric :isVisible=showFeedback :exnetID=id />
 
     <div class="content-wrapper">
-      <div class="iconContainer">
-      <button v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement" class="statementButton">
-          <img 
-          class="toggle-expand-collapse"
-          src="../../assets/expand_icon.png"
-          alt="ToggleExpandCollapse"
-          width="20"
-          />
-      </button>
-      <button v-if="showToggle && !this.statementData.collapsed" @click="toggleCollapsedStatement" class="statementButton">
-          <img 
-          class="toggle-expand-collapse"
-          src="../../assets/collapse_icon.png"
-          alt="ToggleExpandCollapse"
-          width="20"
-          />
-      </button>
-      <button v-if="showToggle && !this.statementData.collapsed" @click="toggleShowPopup" class="statementButton">
-        <img
-        class="radio-popup-toggle-button"
-        src="../../assets/popup_radio_icon.png"
-        alt="RadioPopupToggle"
-        width="20"
-        />
-      </button>
-      <button v-if="showToggle" @click="duplicateMe" class="statementButton">
-        <img
-        class="duplicate-statement-button"
-        src="../../assets/duplicate_icon.png"
-        alt="DuplicateStatement"
-        width="20"
-        />
-      </button>
 
-      <button v-if="showToggle && isFeedbackAvailable" @click="showFeedback = !showFeedback" class="statementButton">
-          <img
-            src="../../assets/feedback-rubric.png"
-            alt="FeedbackStatement"
-            width="20"
-          />
-      </button>
+
+
+      <div class="iconContainer">
+
+        <Tooltip text=" expand this statement ">
+          <v-btn size="x-small" v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement"
+            class="statementButton">
+            <v-icon>mdi-arrow-expand</v-icon>
+          </v-btn>
+        </Tooltip>
+        <Tooltip text=" collapse this statement ">
+          <v-btn size="x-small" v-if="showToggle && !this.statementData.collapsed" @click="toggleCollapsedStatement"
+            class="statementButton">
+            <v-icon>mdi-arrow-collapse</v-icon>
+          </v-btn>
+        </Tooltip>
+
+        <Tooltip text="switch between menus and radio-buttons">
+          <v-btn size="x-small" v-if="showToggle && !this.statementData.collapsed" @click="toggleShowPopup"
+            class="statementButton">
+            <img class="statementButtonImage" src="../../assets/popup_radio_icon.png" alt="RadioPopupToggle" />
+          </v-btn>
+        </Tooltip>
+
+        <Tooltip text="duplicate this statement">
+          <v-btn size="x-small" v-if="showToggle && !displayOnly" @click="duplicateMe" class="statementButton">
+            <!--img class="statementButtonImage" src="../../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
+            <v-icon>mdi-content-duplicate</v-icon>
+          </v-btn>
+        </Tooltip>
+
+        <button v-if="showToggle && isFeedbackAvailable" @click="showFeedback = !showFeedback" class="statementButton">
+          <img src="../../assets/feedback-rubric.png" alt="FeedbackStatement" width="20" />
+        </button>
 
       </div>
+
+
+
       <div class="main-content">
         <div v-if="this.statementData.collapsed" class="concatenated-statement">
           {{ concatenatedStatement }}
         </div>
-        
+
         <div v-else-if="!this.statementData.showPopup" class="radio-statement">
           <!-- radio button format -->
-          <div v-for="(segment, index) in this.statementData.content.originalFacts"
-           :key="index" >
-            <div v-if="typeof segment === 'string'" >
+          <div v-for="(segment, index) in this.statementData.content.originalFacts" :key="index">
+            <div v-if="typeof segment === 'string'">
 
               <div v-if="isImage(segment)">
                 <img :src="segment" class="biologicImage">
               </div>
               <div v-else class="segmentString">
-                  {{ segment }}
+                {{ segment }}
               </div>
             </div>
             <div v-else class="statementRadioButtons">
-              <div v-for="item in segment" >
-                <div v-if="item.indexOf('--')"> 
-                <input type="radio" :id="item" :value="item" v-model="userSelected[index]">
-                <label :for="item in segment">{{item}}</label><br>
+              <Tooltip text="Choose an option">
+              <div v-for="item in segment">
+                <div v-if="item.indexOf('--')">
+                  <input :disabled="displayOnly" type="radio" :id="item" :value="item" v-model="userSelected[index]">
+                  <label :for="item in segment">{{item}}</label><br>
                 </div>
               </div>
+            </Tooltip>
             </div>
           </div>
         </div>
 
-        <div v-else class="dropdown-statement">
+        <div v-else>
           <!-- dropdown format -->
-          <div v-for="(segment, index) in this.statementData.content.originalFacts"
-            :key="index" >
-            <!-- render the text from selection -->
-            <div v-if="typeof segment === 'string'" >
+          <Tooltip text="Choose an option from the menu">
+            <div v-for="(segment, index) in this.statementData.content.originalFacts" :key="index">
+              <!-- render the text from selection -->
+              <div v-if="typeof segment === 'string'">
 
-              <div v-if="isImage(segment)">
-                <img :src="segment" class="biologicImage">
-              </div>
-              <div v-else>
+                <div v-if="isImage(segment)">
+                  <img :src="segment" class="biologicImage">
+                </div>
+                <div v-else>
                   {{ segment }}
+                </div>
+
               </div>
+              <!-- render the options -->
+              <div v-else>
+                <select :disabled="displayOnly" v-model="userSelected[index]" class="dropdown-shadow">
+                  <option v-for="item in segment" :value="item" :key="item">
+                    {{ item }}
+                  </option>
+                </select>
 
-            </div>
-            <!-- render the options -->
-            <div v-else>
-              <select v-model="userSelected[index]">
-                <option v-for="item in segment" :value="item" :key="item">
-                  {{ item }}
-                </option>
-              </select>
-            
 
+              </div>
             </div>
-          </div>
+          </Tooltip>
         </div>
-        <!-- Display tooltips for this statement-->
-        <span v-if="statementData.visible" class="StatementStudent_tooltip">
-          You can use this statement to answer the question.
-        </span>
       </div>
     </div>
   </div>
@@ -114,11 +109,13 @@
 
 <script>
 import FeedbackRubric from '../FeedbackRubric.vue';
+import Tooltip from '../Tooltip.vue';
 
 export default {
   name: "StatementStudent",
   components: {
-    FeedbackRubric
+    FeedbackRubric,
+    Tooltip
   },
   emits: ["user-choice-changed","duplicate-statement","toggle-showPopup-fromstatementstudent","toggle-collapsed-statement-student"],
   props: {
@@ -129,7 +126,7 @@ export default {
       default: false
     }
   },
-  inject: ['isFeedbackAvailable', 'showAllFeedback'],
+  inject: ['isFeedbackAvailable', 'showAllFeedback','displayOnly'],
   data() {
     return {
       statementType: this.statementData.statementType,
@@ -235,7 +232,7 @@ export default {
     this.initContent();
   },
   mounted() {
-    console.log("StatementStudent mounted");
+    //console.log("StatementStudent mounted");
   }
 };
 </script>
@@ -244,14 +241,10 @@ export default {
 @import "@/assets/tooltips.css";
 .StatementStudent {
   background-color: rgb(254, 250, 211);
-  font-size: 14px;
-  width: fit-content;
-  height: fit-content;
-  text-align: left;
+  font-size: var(--biologic-statement-font-size);
   padding: 2px;
   margin: 2px;
   position: relative;
-  display: inline-block;
 }
 
 .StatementStudent:hover .iconContainer {
@@ -303,9 +296,12 @@ button {
   cursor: pointer;
   width: 24px;
   height: 24px;
-  margin: 2px;
+  margin: 1px;
   padding: 1px;
   align-items: center;
+}
+.statementButtonImage {
+  width: 20px;
 }
 
 .biologicImage {

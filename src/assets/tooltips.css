@@ -11,7 +11,7 @@
 .tooltips .tooltip_info {
   visibility: hidden;
   width: fit-content;
-  background-color: black;
+  background-color: rgb(124, 124, 124);
   color: white;
   text-align: left;
   /* padding: 5px 0; */

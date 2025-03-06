@@ -1,51 +1,64 @@
 <template>
-  <div
-    style="
+  <div style="
       position: relative;
       display: flex;
       flex-direction: row;
       justify-content: space-between;
-    "
-  >
+      width:100%;
+    ">
+
     <div style="display: flex; flex-direction: row; align-items: center">
-      <img
-        src="https://murraym678.github.io/images/biologic/BiologicEditor_Icon_for_poster.png"
-        width="30"
-      />
-      <h3 style="color: rgb(162, 38, 38)">&nbsp;&nbsp;&nbsp;Biologic Editor</h3>
+      <img src="src/assets/BioLogic_BlueGreen_Icon.jpg" height="50" />
+      <img src="src/assets/BioLogic_Word.jpg" height="50px;" />
+      <h2 class="biologic-component">EDITOR</h2>
     </div>
-    <div v-if="show" style="display: flex; flex-direction: row">
+
+    <div class="biologic-medium-text" v-if="show" style="display: flex; flex-direction: row; align-items: center; ">
+
       <div>
-        <file-reader
-          :title="'Browse ExNet File:'"
-          @read-file="onExNetReadFile"
-        ></file-reader>
+        <file-reader :title="'Open:'" @read-file="onExNetReadFile"></file-reader>
       </div>
+  
       <div>
-        <div style="display: flex; flex-direction: row; align-items: center">
-          <h3 style="padding-right: 10px">
-            <label for="save-file">Save ExNet File: </label>
-          </h3>
-          <button id="save-file" type=" button" @click="onDownloadExNet">
-            Save ExNet
-          </button>
+        <div style="display: flex; flex-direction: row; align-items: center ">
+          <div class="biologic-medium-text">
+            <label for="save-file">Save: </label>
+          </div>
+          <v-btn style="color: var(--biologic-green-color); background-color: transparent;" id="save-file" @click="onDownloadExNet">
+            Save to disk
+          </v-btn>
         </div>
       </div>
+
+
     </div>
 
     <div class="right_menu">
-      <h3>{{ clientType }}: {{ userID }}</h3>
 
-      <button @click="show = !show">Show offline features</button>
-      <button class="biologic_logout_button" @click="handleLogout">
-        Logout
-      </button>
+      <Tooltip text="current user">
+        <h3 style="color:var(--biologic-green-color)">{{ clientType }}: {{ userID }}</h3>
+      </Tooltip>
+
+      <Tooltip text="Show buttons to allow read and write to local disk">
+        <v-btn style="color:var(--biologic-green-color)" @click="show = !show">
+          <v-icon>mdi-file-arrow-up-down-outline</v-icon>
+        </v-btn>
+      </Tooltip>
+
+      <Tooltip text="logout">
+        <v-btn class="biologic_logout_button" @click="handleLogout">
+          <v-icon>mdi-logout</v-icon>
+        </v-btn>
+      </Tooltip>
+
     </div>
   </div>
 </template>
 
 <script>
 import FileReader from "@/components/FileReader.vue";
+import Tooltip from "@/components/Tooltip.vue";
+import "@/assets/biologic.css";
 
 export default {
   name: "MenuBar",
@@ -59,6 +72,7 @@ export default {
   emits: ["onDownloadExNet", "setExNetAnswer", "logout"],
   components: {
     FileReader,
+    Tooltip,
   },
   methods: {
     onExNetReadFile(exNetRawData) {
@@ -77,20 +91,22 @@ export default {
 
 <style scoped>
 .right_menu {
+  position: relative;
+  top: 0;
   right: 16px;
   display: flex;
   flex-direction: row;
   gap: 8px;
   align-items: center;
-  height: 50px;
+  /*height: 50px;*/
 }
 .biologic_logout_button {
   font-size: 20px;
-  color: rgb(162, 38, 38);
+  color: var(--biologic-green-color);
   background-color: #fff;
   margin: 2px;
   padding: 4px;
-  align-items: center;
+  align-items: top;
   border-bottom: 2px solid #595959; /* Darker green for bevel effect */
   border-right: 2px solid #595959; /* Darker green for bevel effect */
 }
