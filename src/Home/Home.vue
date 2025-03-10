@@ -49,14 +49,14 @@
               <h2 class="biologic-component">&nbsp;EDITOR</h2>
             </div>
             <div class="biologic-medium-text" style="display: flex; flex-direction: row; align-items: center">
-              <p>&nbsp;&nbsp;&nbsp;&nbsp;Question:</p>
-              <Tooltip text="Change Question">
-              <select @change="getLastWorkingAnswer()" v-model="selectedQuestion" class="dropdown-shadow">
-                <option v-for="item in questions" :value="item" :key="item">
-                  {{ item.endsWith(".data") ? item.slice(0, -5) : item }}
-                </option>
-              </select>
-            </Tooltip>
+              <p>&nbsp;&nbsp;&nbsp;&nbsp;Select Question&nbsp;:&nbsp;&nbsp;</p>
+              <Tooltip text="Select Active Question">
+                <select @change="getLastWorkingAnswer()" v-model="selectedQuestion" class="dropdown-shadow" style="">
+                  <option v-for="item in questions" :value="item" :key="item">
+                    {{ item.endsWith(".data") ? item.slice(0, -5) : item }}
+                  </option>
+                </select>
+              </Tooltip>
             </div>
 
             <div class="biologic-medium-text" v-if="showFileButtons"
@@ -87,14 +87,14 @@
                 <h3 style="color:var(--biologic-green-color)">{{ clientType }}: {{ userID }}</h3>
               </Tooltip>
 
-              <Tooltip text="Show buttons to allow read and write to local disk">
+              <!--Tooltip text="Show buttons to allow read and write to local disk">
                 <v-btn style="color:var(--biologic-green-color)" @click="showFileButtons = !showFileButtons">
                   <v-icon>mdi-file-arrow-up-down-outline</v-icon>
                 </v-btn>
-              </Tooltip>
+              </Tooltip-->
 
               <Tooltip text="logout">
-                <v-btn class="biologic_logout_button" @click="handleLogout">
+                <v-btn class="biologic_logout_button" @click="handleLogoutWithSurveyDialog">
                   <v-icon>mdi-logout</v-icon>
                 </v-btn>
               </Tooltip>
@@ -112,24 +112,59 @@
             <v-row class="content-row" no-gutters> <!-- header bar with icons -->
 
               <div class="answer-area-header">
-                <span v-if="showQuestion">
-                  <Tooltip text="Hide Question">
-                    <v-btn @click="toggleEditor" color="var(--biologic-grey-color)">
-                      <v-icon>mdi-chevron-left</v-icon>&nbsp;QUESTION
-                    </v-btn>
-                  </Tooltip>
-                </span>
-                <span v-if="!showQuestion">
-                  <!-- IF QUESTION IS HIDDEN JUST SHOW ICON TO GET IT BACK -->
-                  <Tooltip text="Show Question">
-                    <v-btn v-if="!showQuestion" @click="toggleEditor">
-                      <v-icon>mdi-chevron-right</v-icon>QUESTION
-                    </v-btn>
-                  </Tooltip>
-                </span>
+
+                <Tooltip :text="showQuestion ? 'Hide Question' : 'Show Question'">
+                  <v-btn :color="showQuestionButtonColor" size="medium" @click="toggleShowQuestion">
+                    <v-icon class="answer-area-icon" size="36">mdi-help</v-icon>
+                  </v-btn>
+                </Tooltip>
+
 
                 <v-spacer></v-spacer>
-                <span class="answer-area-title">ANSWER</span>
+
+                <Tooltip :text="showMyAnswer ? 'Hide My Answer' : 'Show My Answer'">
+                  <v-btn class="answer-area-button" :color="showMyAnswerButtonColor" size="medium"
+                    @click="toggleShowMyAnswer">
+                    <v-icon class="answer-area-icon" size="36">mdi-graph-outline</v-icon>
+                  </v-btn>
+                </Tooltip>
+
+                <Tooltip text="Submit Answer">
+                  <v-btn class="answer-area-button" :disabled="!showMyAnswer" size="small" id="submitBtn"
+                    @click="submitAnswer">
+                    <v-icon class="answer-area-icon" size="24">mdi-content-save-outline</v-icon>
+                  </v-btn>
+                </Tooltip>
+                <v-snackbar class="snackbar-message" v-model="snackbar" timeout="3000" location="top right" contained
+                  color=var(--biologic-green-color)>
+                  {{ snackbarText }}
+                </v-snackbar>
+
+                <Tooltip text="Reset Answer">
+                  <v-btn class="answer-area-button" :disabled="!showMyAnswer" size="small" id="resetBtn"
+                    @click="getResetAnswerArea">
+                    <v-icon class="answer-area-icon" size="24">mdi-restart</v-icon>
+                  </v-btn>
+                </Tooltip>
+
+
+                <Tooltip text="Undo">
+                  <v-btn class="answer-area-button" :disabled="!showMyAnswer" size="small" id="undoBtn"
+                    @click="handleUndo()">
+                    <v-icon class="answer-area-icon" size="24">mdi-undo</v-icon>
+                  </v-btn>
+                </Tooltip>
+
+                <Tooltip text="Redo">
+                  <v-btn class="answer-area-button" :disabled="!showMyAnswer" size="small" id="redoBtn"
+                    @click="handleRedo()">
+                    <v-icon class="answer-area-icon" size="24">mdi-redo</v-icon>
+                  </v-btn>
+                </Tooltip>
+
+                <!--v-btn size="small" v-if="feedbackIsAvailable" @click="toggleAllFeedback">
+                    {{ showAllFeedback ? "Close Feedback" : "Show Feedback" }}
+                  </v-btn-->
 
                 <v-spacer></v-spacer>
 
@@ -141,22 +176,6 @@
                       <v-icon class="answer-area-icon" size="24">mdi-code-braces</v-icon>
                     </v-btn>
                   </Tooltip-->
-                  <Tooltip text="Save Answer">
-                    <v-btn class="answer-area-button" size="small" id="submitBtn" @click="submitAnswer">
-                      <v-icon class="answer-area-icon" size="24">mdi-content-save-outline</v-icon>
-                    </v-btn>
-                  </Tooltip>
-                  <v-snackbar class="snackbar-message" v-model="snackbar" timeout="2000" location="top right" contained
-                    color=var(--biologic-green-color)>
-                    {{ snackbarText }}
-                  </v-snackbar>
-
-                  <Tooltip text="Reset Answer">
-                    <v-btn class="answer-area-button" size="small" id="resetBtn" @click="getResetAnswerArea">
-                      <v-icon class="answer-area-icon" size="24">mdi-restart</v-icon>
-                    </v-btn>
-                  </Tooltip>
-
                   <Tooltip text="Full Screen">
                     <v-btn class="answer-area-button" size="small" v-if="!fullScreen" id="fullScreenBtn"
                       @click="goFullScreen()">
@@ -171,33 +190,13 @@
                     </v-btn>
                   </Tooltip>
 
-                  <Tooltip text="Undo">
-                    <v-btn class="answer-area-button" size="small" id="undoBtn" @click="handleUndo()">
-                      <v-icon class="answer-area-icon" size="24">mdi-undo</v-icon>
-                    </v-btn>
-                  </Tooltip>
+                  <Tooltip
+                    :text="okToShowCorrectAnswer ? (showCorrectAnswer ? 'Hide Sample Answer' : 'Show Sample Answer') : 'This button allows you to view a Sample Answer to the question. To enable this button, you must first submit an answer of your own.'">
 
-                  <Tooltip text="Redo">
-                    <v-btn class="answer-area-button" size="small" id="redoBtn" @click="handleRedo()">
-                      <v-icon class="answer-area-icon" size="24">mdi-redo</v-icon>
-                    </v-btn>
-                  </Tooltip>
-
-                  <v-btn size="small" v-if="isFeedbackAvailable" @click="toggleAllFeedback">
-                    {{ showAllFeedback ? "Close Feedback" : "Show Feedback" }}
-                  </v-btn>
-
-                  <Tooltip :text="showMyAnswer ? 'Hide My Answer' : 'Show My Answer'">
-                    <v-btn class="answer-area-button" :color="showMyAnswerButtonColor" size="small"
-                      @click="toggleShowMyAnswer">
-                      <v-icon class="answer-area-icon" size="24">mdi-eye-outline</v-icon>
-                    </v-btn>
-                  </Tooltip>
-
-                  <Tooltip :text="showCorrectAnswer ? 'Hide Correct Answer' : 'Show Correct Answer'">
-                    <v-btn class="answer-area-button" :color="showCorrectAnswerButtonColor" size="small"
-                      v-if="isCorrectAnswerAllowed" :disabled="!okToShowCorrectAnswer" @click="toggleShowCorrectAnswer">
-                      <v-icon class="answer-area-icon" size="24">mdi-eye-check-outline</v-icon>
+                    <v-btn class="answer-area-button" :color="showCorrectAnswerButtonColor" size="medium"
+                      v-if="correctAnswerIsAvailable" :disabled="!okToShowCorrectAnswer"
+                      @click="toggleShowCorrectAnswer">
+                      <v-icon class="answer-area-icon" size="36">mdi-check-bold</v-icon>
                     </v-btn>
                   </Tooltip>
 
@@ -234,8 +233,8 @@
                 </div>
 
                 <div class="readout-area content-row" style="height:20%;">
-                  <!-- Get texts from AnswerArea -->
-                  <AnswerTextGeneratorArea :answerText="this.answerText" />
+
+                  <AnswerTextGeneratorArea :answerText="this.answerText" heading="MY ANSWER" />
                 </div>
 
 
@@ -246,9 +245,8 @@
                   <AnswerArea ref="correctAnswerAreaRef" :parentStatementElements="statementElementsEmpty"
                     :displayOnly="true" @update-answer-area-content="handleUpdateCorrectAnswerContent" />
                 </div>
-                <div class="readout-area">
-                  <h4>CORRECT ANSWER READOUT</h4>
-                  <AnswerTextGeneratorArea :answerText="this.correctAnswerText" />
+                <div class="readout-area content-row" style="height:20%;">
+                  <AnswerTextGeneratorArea :answerText="this.correctAnswerText" heading="SAMPLE ANSWER" />
                 </div>
               </v-col>
 
@@ -262,6 +260,40 @@
         </v-row>
 
       </v-container>
+
+      <v-dialog v-model="showSurveyDialog" max-width="500">
+        <v-card>
+          <v-card-title class="text-h5" style="color:var(--biologic-blue-color)">Please help us improve BioLogic</v-card-title>
+          <v-card-text>
+            <p>
+              Hi students, BioLogic is a work in progress. Your responses to these questions 
+              are a valuable resource in helping us improve the software.
+            
+              If you are potentially willing to let us use 
+              your answers in our analysis, clicking <strong>TELL ME MORE</strong> 
+              will take you to a consent page, where you can find out more information
+              about the project.   You can decide at that point whether to proceed.
+            </p>
+            <p style="color:var(--biologic-green-color)"><strong>Note that All responses will be DE-IDENTIFIED</strong> so nobody teaching in this subject will know which answers were yours.</p>
+            <p>
+              If you have time, there is also a survey where you can give us feedback on what you liked and didn't like about the software. 
+              If you don't want to do the survey you can still give consent to us analysing your answers.
+            </p>
+            <p>&nbsp;</p>
+            <p>
+              If you don't want to participate, just click <strong>NO THANKS.</strong></p>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="grey darken-1" text @click="declineSurvey">
+              NO THANKS.
+            </v-btn>
+            <v-btn color="blue darken-1" text @click="doSurvey">
+              TELL ME MORE!
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </div>
   </div>
 </template>
@@ -316,12 +348,12 @@ export default {
       jsonOutput: {},
       jsonData: [],
       dataObject: {},
-      isFeedbackAllowed: false, // flag used to restrict from backend, link to this flag from api response
-      isFeedbackAvailable: false, // flag used to check whether client_feedback is there
-      isCorrectAnswerAllowed: false, // flag used to check whether student can see the correct answer
+      feedbackIsAllowed: false, // flag used to restrict from backend, link to this flag from api response
+      feedbackIsAvailable: false, // flag used to check whether client_feedback is there
+      correctAnswerIsAvailable: false, // flag used to check whether there is a correct answer stored in the database
       feedback: null,
       showMyAnswer: true,
-      okToShowCorrectAnswer: true, // student needs to submit an answer before we let them see.
+      okToShowCorrectAnswer: false, // student needs to submit an answer before we let them see.
       showCorrectAnswer: false,   // toggle whether correct answer is visible
       showQuestion: true,
       showDataStructures: false, // just for debugging purposes
@@ -345,6 +377,8 @@ export default {
       snackbarText: " ",
 
       testProp: 0,
+
+      showSurveyDialog: false,
     };
   },
 
@@ -354,8 +388,8 @@ export default {
       feedbackRubricMap: computed(() => {
         return this.feedbackRubricMap.value;
       }),
-      isFeedbackAvailable: computed(
-        () => this.isFeedbackAvailable && this.isFeedbackAllowed
+      feedbackIsAvailable: computed(
+        () => this.feedbackIsAvailable && this.feedbackIsAllowed
       ),
       globalTooltipState: this.globalTooltipState,
       showDataStructures: computed(
@@ -391,7 +425,7 @@ export default {
         if (this.showMyAnswer && this.showCorrectAnswer)
           return 4; // split three ways
         else if (this.showMyAnswer || this.showCorrectAnswer)
-          return 6; // split two ways
+          return 4; // split 4 to 8 . i.e. give answer area twice as much space.
         else
           return 12; // just the question
       }
@@ -404,7 +438,7 @@ export default {
         if (this.showQuestion && this.showCorrectAnswer)
           return 4; // split three ways
         else if (this.showQuestion || this.showCorrectAnswer)
-          return 6; // split two ways
+          return 8; // split two ways
         else
           return 12; // just the question
       }
@@ -417,17 +451,20 @@ export default {
         if (this.showQuestion && this.showMyAnswer)
           return 4; // split three ways
         else if (this.showQuestion || this.showMyAnswer)
-          return 6; // split two ways
+          return 8; // split two ways
         else
           return 12; // just the question
       }
       return 4; // shouldn't happen    
     },
     showCorrectAnswerButtonColor() {
-      return this.showCorrectAnswer ? "white" : "#f4d4d4";
+      return this.showCorrectAnswer ? "#daebfe" : "#f4d4d4";
     },
     showMyAnswerButtonColor() {
-      return this.showMyAnswer ? "white" : "#f4d4d4";
+      return this.showMyAnswer ? "#daebfe" : "#f4d4d4";
+    },
+    showQuestionButtonColor() {
+      return this.showQuestion ? "#daebfe" : "#f4d4d4";
     },
 
   },
@@ -435,9 +472,10 @@ export default {
     // Sends login request and processes returned promise.
 
     // Function to toggle the editor display
-    toggleEditor() {
+    toggleShowQuestion() {
       this.showQuestion = !this.showQuestion;
     },
+
     toggleShowDataStructures() {
       this.showDataStructures = !this.showDataStructures;
     },
@@ -500,8 +538,11 @@ export default {
           this.selectedQuestion = urlParams.exnetName
             ? urlParams.exnetName
             : this.questions[0];
-          await this.getExnet(this.selectedQuestion, true);
+          //          await this.getExnet(this.selectedQuestion, true);
           await this.getLastWorkingAnswer();
+          this.showCorrectAnswer = false;
+          this.showQuestion = true;
+          this.showMyAnswer = true;
         }
         //window.alert("Successfully authorised!");
       } else {
@@ -531,13 +572,6 @@ export default {
       } catch (error) {
         globalConsoleLog("net", error);
       }
-    },
-
-    // handling log out functionality
-    handleLogout() {
-      sessionStorage.clear();
-      this.authorised = false;
-      //this.showSurveyPrompt();
     },
 
     async updateJsonOutput(dataObject) {
@@ -692,6 +726,7 @@ export default {
       if (typeof exNetData.activeExNetQuestionPack.promptText === "object") {
         let data = exNetData.activeExNetQuestionPack.promptText[1];
         globalConsoleLog("net", "prompt[1] answer available")
+        globalConsoleLog("net", " connectorCount = ", data.connectorCount, " but actually length = ", data.allConnectors.length)
         this.statementElements = data["statementElements"];
         this.testProp = this.testProp + 1;
         await this.$nextTick(); // make sure DOM updates are done
@@ -831,12 +866,12 @@ export default {
             response.exnet_working_answer_json
           );
 
-          this.isFeedbackAllowed = response.is_feedback_allowed;
-          this.isCorrectAnswerAllowed = response.is_correct_answer_allowed;
+          this.feedbackIsAllowed = response.is_feedback_allowed;
+          this.correctAnswerIsAvailable = response.is_correct_answer_allowed;
 
           //this.setCurrentExNet(exnetWorkingAnswerJson, clear);
           globalConsoleLog("net", "calling setExNetAnswer");
-          this.snackbarText = "Loading ExNet Starting Answer";
+          this.snackbarText = "Loaded ExNet Starting Answer";
           this.snackbar = true;
           this.setExNetAnswer(exnetWorkingAnswerJson);
 
@@ -845,8 +880,9 @@ export default {
           if (response["exnet_correct_answer_json"] != null &&
             response["exnet_correct_answer_json"] != "") {
             globalConsoleLog("net", "there is a correct answer available");
-            this.snackbarText = "Sample Correct Answer Available";
-            this.snackbar = true;
+            //this.snackbarText = "Sample Correct Answer Available";
+            //this.snackbar = true;
+            this.correctAnswerIsAvailable = true;
             // we just want to get the prompt[1] and pass it to the AnswerArea that is for showing the correct answer.
             this.correctAnswer = await JSON.parse(response["exnet_correct_answer_json"]);
             let activeExNetQuestionPack = this.correctAnswer["activeExNetQuestionPack"];
@@ -854,10 +890,10 @@ export default {
             if (typeof promptText === "object") {
               globalConsoleLog("net", "correct answer prompText[1] is available");
               this.correctAnswerData = promptText[1];
-              this.okToShowCorrectAnswer = true; // make sure the html object is there
+
               await this.$nextTick(); // make sure DOM updates are done
               if (this.$refs.correctAnswerAreaRef) {
-                globalConsoleLog("net", "loading Correct Answer");
+                globalConsoleLog("net", "loaded Sample Answer");
                 await this.$refs.correctAnswerAreaRef.loadPreviousAnswer(this.correctAnswerData);
               }
             }
@@ -1038,19 +1074,26 @@ export default {
     },
 
     async getLastWorkingAnswer() {
+
+      // the logic here is to first get the question, since that loads up the correctAnswer
+      // then if the student has previously saved an answer we load that in.
+
       globalConsoleLog("net", "\n\n************ getLastWorkingAnswer\n\n")
       this.updateFeedback(null);
 
-      // TODO: check if this call is required, as we all already getting exnet on changing question
+      //  get the starting ExNet question
+      globalConsoleLog("net", "load starting exnet question");
+      await this.getExnet(this.selectedQuestion, true);
+      this.showCorrectAnswer = false; // hide the correct answer initially
+      this.okToShowCorrectAnswer = false; // they need to save before we enable seeing correct
+
+      // now see if the student has saved an answer
+
       let response = await this.sendGetExnetLastWorkingAnswerRequest(this.selectedQuestion);
 
-      // disabling the show correct answer and show my answer buttons
-      // whenever there is a change in the exnet question from dropdown
-
-      // FIX ME: Success spell is wrong!
       if (response["success"]) {
         globalConsoleLog("net", " GOT IT! ");
-        this.snackbarText = "Loading previously saved answer"
+        this.snackbarText = "Loaded previously saved answer"
         this.snackbar = true;
         let lastWorkingAnswerData = await JSON.parse(
           response["last_working_answer_data"]
@@ -1089,10 +1132,6 @@ export default {
             globalConsoleLog("net", "ERROR ERRROR ref not set yet")
           }
         }
-      } else {
-        // no answer saved so just get the starting ExNet question
-        globalConsoleLog("net", "student has no previous answer so just load question");
-        await this.getExnet(this.selectedQuestion, true);
       }
       await this.resetStateChangeHistory(); // Since we've just loaded a question we don't want an undo/redo history
     },
@@ -1106,11 +1145,36 @@ export default {
     updateFeedback(feedback) {
       this.feedbackRubricMap.value = buildFeedbackRubricMap(feedback);
       this.feedback = feedback;
-      this.isFeedbackAvailable = feedback ? true : false;
+      this.feedbackIsAvailable = feedback ? true : false;
     },
 
-    showSurveyPrompt() {
+    doSurvey() {
+      window.open(
+        "https://q.surveys.unimelb.edu.au/jfe/form/SV_bBNUxtcRL0dSh3o",
+        "_blank"
+      );
+      this.handleLogout();
+    },
+
+    declineSurvey() {
+      this.handleLogout();
+    },
+
+    handleLogoutWithSurveyDialog() {
+      this.showSurveyDialog = true; // just display dialog. It then calls one of the above functions.
+    },
+
+    // handling log out functionality
+    handleLogout() {
+      sessionStorage.clear();
+      this.showSurveyDialog = false;
+      this.authorised = false;
+    },
+
+
+    OLD_showSurveyPrompt() {
       // Show confirmation dialog
+
       var response =
         confirm(`Hi students, We would love to use your answers for our BioLogic research project. All responses will be DE-IDENTIFIED so nobody teaching in this subject will know which answers were yours.
       Clicking OK will take you to a site where you can find out more, BEFORE giving your consent. We'd also love any feedback you might have so there is a survey you can do. And if you don't want to participate, no worries. Just click Cancel.`);
@@ -1191,6 +1255,7 @@ export default {
       await this.$refs.answerAreaRef.loadPreviousAnswer(this.currentState);
       this.displayUndoState("handleRedo FINISH");
     },
+
     async submitAnswer() {
       this.dataObject = this.$refs.answerAreaRef.getCurrentState();
       this.dataObject["statementElements"] = this.statementElements;
@@ -1329,12 +1394,13 @@ body {
 .displayQuery {
   background: rgb(255, 255, 255);
   padding: 5px;
-  height: 100%;
+  height: 800px;
   overflow-y: scroll;
 }
 
 .displayWorkspace {
   background: #ffffff;
+  /*border: 1px solid rgb(0, 250, 0);*/
   padding-left: 1px;
   padding-top: 5px;
   padding-bottom: 0px;
@@ -1421,7 +1487,7 @@ body {
 }
 
 .areaHeading {
-  color: #9f0000;
+  color: #daebfe;
 }
 
 .auto-col {

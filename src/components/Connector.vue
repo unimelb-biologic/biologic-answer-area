@@ -24,11 +24,11 @@
         </v-btn>
       </Tooltip>
 
-      <Tooltip :text="deleteButtonTooltipText">
+      <!--Tooltip :text="deleteButtonTooltipText">
         <v-btn v-if="!displayOnly" :disabled="!hasNoChildren" icon size="xx-small" @click="deleteConnector({ id: connectorID })" class="connectorButton">
           <v-icon>mdi-delete</v-icon>
         </v-btn>
-      </Tooltip>
+      </Tooltip-->
     </div>
 
     <div class="onlyText" v-if="clickCount % 2 === 1">
@@ -359,7 +359,7 @@ export default {
     },
     dropIsPermissible(connectorBeingDroppedOn,connectorBeingDropped) {
       globalConsoleLog("conn","checking if ",connectorBeingDropped," can be dropped on ",connectorBeingDroppedOn);
-      if (connectorBeingDroppedOn === connectorBeingDropped) {
+      if (Number(connectorBeingDroppedOn) === Number(connectorBeingDropped)) {
         globalConsoleLog("conn","theyre the same, so NO");
         return false;
       } else {
@@ -531,6 +531,8 @@ export default {
       this.$emit("linkWordChanged", info);
     },
     startDragConnector(e) {
+      globalConsoleLog("geom","Connector:startDragConnector left=",this.connleft," top=",this.conntop);
+      
       if (this.displayOnly) {
         globalConsoleLog("conn","can't drag connectors in a read only AnswerArea");
         return;
@@ -578,7 +580,7 @@ export default {
       const connectorIDTypeStr = "draggedConnectorID/"+this.connectorID;
       e.dataTransfer.setData(connectorIDTypeStr,0 /* i.e. the zero is a dummy value*/ );
 
-      globalConsoleLog("conn"," SET UP DATA TRANSFER:", widthTypeStr, heightTypeStr, typeTypeStr, connectorIDTypeStr);
+      globalConsoleLog("geom"," SET UP DATA TRANSFER:", widthTypeStr, heightTypeStr, typeTypeStr, connectorIDTypeStr);
 
     },
 
@@ -985,6 +987,7 @@ export default {
   flex-basis: auto;
   /* TODO: These will need to be modified to have dynamic sizes */
   width: fit-content;
+  height: fit-content;
   min-width: 160px;
   min-height: 40px;
   margin-bottom: 10px;

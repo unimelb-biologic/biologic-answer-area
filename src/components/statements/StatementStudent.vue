@@ -219,6 +219,9 @@ export default {
     },
   },
   watch: {
+    statementData(newValue,oldValue) {
+      this.initContent();
+    },
     userSelected: {
       handler: "handleSelectChange",
       deep: true,

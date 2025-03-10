@@ -1,7 +1,7 @@
 
 /* color variables for this project */
 :root {
-  --biologic-green-color: rgb(27, 160, 0);
+  --biologic-green-color: rgb(20, 120, 0);
   --biologic-blue-color: rgb(21, 8, 107);
   --biologic-hover-border-color: rgb(34, 0, 255);
   --biologic-midblue-color: rgb(178, 173, 214);
@@ -9,13 +9,28 @@
   --biologic-focus-color: rgb(181, 179, 214);
   --biologic-statement-font-size: 12px;
 }
+
 .biologic-medium-text {
   font-family: Arial, sans-serif;
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--biologic-green-color);
+}
+
+/* the next two are becuase the menu wasn't working*/
+.biologic-medium-text select {
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--biologic-green-color);
+}
+
+.biologic-medium-text option {
+  font-family: Arial, sans-serif;
+  font-size: 18px;
   font-weight: bold;
   color: #4caf50;
 }
-
 .dropdown-shadow {
   width: 100%;
   padding: 1px 1px;

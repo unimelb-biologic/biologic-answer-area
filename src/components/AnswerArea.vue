@@ -1023,8 +1023,8 @@ export default {
       const posWithinWorkspaceLeft = e.clientX - sRect.left;
       const posWithinWorkspaceTop = e.clientY - sRect.top;
       globalConsoleLog("geom", "poisiton within answerArea =", posWithinWorkspaceLeft, ",", posWithinWorkspaceTop, ")");
-      leftWithinAnswerArea = posWithinWorkspaceLeft - grabOffsetLeft + scrollLeft;
-      topWithinAnswerArea = posWithinWorkspaceTop - grabOffsetTop + scrollTop;
+      leftWithinAnswerArea = posWithinWorkspaceLeft - grabOffsetLeft ;
+      topWithinAnswerArea = posWithinWorkspaceTop - grabOffsetTop ;
 
 
 
@@ -1333,18 +1333,22 @@ export default {
     },
 
     deleteChildConnector(params) {
+      globalConsoleLog("conn","delete child connector.",params);
       // Remove the connector from allConnectors object
       const { id, parentId, position } = params;
       if (position && parentId !== undefined) {
         const parentId = this.allConnectors[id].parent;
-        delete this.allConnectors[parentId][`${position}ID`];
-        delete this.allConnectors[parentId][`${position}Type`];
+        //delete this.allConnectors[parentId][`${position}ID`];
+        //delete this.allConnectors[parentId][`${position}Type`];
+        this.allConnectors[parentId][`${position}ID`] = undefined;
+        this.allConnectors[parentId][`${position}Type`] = undefined;
       }
       this.deleteConnector({ id });
     },
 
     deleteConnector(params) {
       // Remove the connector from allConnectors object
+      globalConsoleLog("conn","delete connector.",params);
       const { id } = params;
       const { leftType, leftID, rightType, rightID } = this.allConnectors[id];
       if (leftType === "connector") {
@@ -1515,9 +1519,8 @@ export default {
 .answer_area_class {
   position: static;
   min-height: 100%;
-  height: auto;
   display: flex;
-  border: 1px solid rgb(180, 43, 43);
+  border: 1px solid var(--biologic-blue-color);
   flex-grow: 1;
   flex-direction: column;
 }

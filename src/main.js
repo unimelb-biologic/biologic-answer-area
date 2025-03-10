@@ -40,8 +40,8 @@ const vuetifyInstance = createVuetify({
 })
 
 window.globalConsoleLog = (category = "any", ...args) => {
-//  const allowedCategories = ["geom", "undo", "any","net"];
-  const allowedCategories = ["undo"];
+  const allowedCategories = ["geom", "undo", "any","net"];
+//  const allowedCategories = ["geom"];
 
   if (allowedCategories.includes(category)) {
     console.log(`[${category}]`, ...args); // Spread to preserve multiple arguments

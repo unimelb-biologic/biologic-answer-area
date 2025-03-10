@@ -3,23 +3,29 @@
   :x="position.x" 
   :y="position.y" 
   :w="200" 
-  :h="collapsed ? 35 : 600" 
+  :h="collapsed ? 35 : 400" 
   :min-width="200"
-  :min-height="600"
+  :min-height="400"
   @dragging="onDragging"
     class="draggable-box" drag-handle=".header" :resizable="true"
     :handles="['tl', 'tr', 'bl', 'br', 'tm', 'bm', 'ml', 'mr']">
-    <div class="header">
-      <span>CONNECTORS </span><!--{{ position.x }}, {{ position.y }}-->
-      <Tooltip :text=" collapsed ? 'Show Connector Palette' : 'Hide Connector Palette'">
+    <Tooltip :text=" collapsed ? 'This panel contains connector elements which you can drag into your answer area. Click the down-arrow to reveal them.' : 'This panel contains connector elements which you can drag into your answer area. Click the up-arrow to collapse the panel.'">
+    <div class="header" style="display:flex; justify-content: space-between;">
+      <span>CONNECTORS &nbsp;&nbsp;&nbsp; </span><!--{{ position.x }}, {{ position.y }}-->
+      <v-spacer></v-spacer>
       <v-btn  size="xx-small" @click="toggleCollapse">
         <v-icon >{{ collapsed?'mdi-chevron-down':'mdi-chevron-up' }}</v-icon>
       </v-btn>
-      </Tooltip>
     </div>
+    </Tooltip>
     <div v-show="!collapsed" class="content-container">
-      <Connector v-for="connector in this.connectors" :key="connector" :connector-i-d="undefined" :selected-phrase="0"
-        :connector-content-i-d="connector[0]" :connector-content="connector[1]" />
+      <Connector v-for="connector in this.connectors" 
+        :key="connector" 
+        :connector-i-d="undefined" 
+        :selected-phrase="0"
+        :connector-content-i-d="connector[0]" 
+        :connector-content="connector[1]" />
+
     </div>
   </vue-draggable-resizable>
 </template>
@@ -67,11 +73,9 @@ export default {
           [
             [undefined, " so ", undefined],
             [undefined, ". This implies that ", undefined],
-            [" since ", ", ", undefined],
             [undefined, " which implies that ", undefined],
             [undefined, " hence ", undefined],
             [undefined, ". Thus, ", undefined],
-            [". Since ", ", ", undefined],
             [undefined, " which suggests that ", undefined],
             [undefined, ". This suggests that ", undefined],
             [undefined, " indicating that ", undefined],
@@ -83,8 +87,6 @@ export default {
           2,
           [
             [undefined, " shows that ", undefined],
-            ["the figure ", " shows that ", undefined],
-            ["based on this figure ", " we can see that ", undefined],
           ],
         ],
 
@@ -93,8 +95,10 @@ export default {
           [
             [undefined, " and ", undefined],
             [undefined, ". In addition, ", undefined],
-            [undefined, " coupled with the fact that ", undefined],
             [undefined, " together with the fact that ", undefined],
+            [undefined, ". Furthermore, ", undefined],
+            [undefined, ". Moreover, ", undefined],
+            [undefined, ". Similarly, ", undefined],
           ],
         ],
 
@@ -109,18 +113,6 @@ export default {
           ],
         ],
 
-        [
-          5,
-          [
-            [undefined, ". Furthermore, ", undefined],
-            [undefined, " and not only that but ", undefined],
-            [undefined, ". Consider also the fact that ", undefined],
-            [undefined, ". Moreover, ", undefined],
-            [undefined, ". Similarly, ", undefined],
-          ],
-        ],
-
-        [6, [["if ", " then ", undefined]]],
         [7, 
           [
           [undefined, " e.g. ", undefined],
@@ -136,7 +128,7 @@ export default {
 
       ],
       position: { x:0, y:0}, // iniitial position
-      collapsed: true,
+      collapsed: false,
     };
   },
   mounted() {
@@ -160,9 +152,9 @@ export default {
 }
 
 .content-container {
-  display: grid;
+  /*display: grid;
   grid-template-columns: repeat(1,1fr);
-  gap: 0px;
+  gap: 0px;*/
   width: 100%;
   height: 100%;
   overflow: auto; /* Adds scrollbars if content overflows */
