@@ -94,7 +94,7 @@
               </Tooltip-->
 
               <Tooltip text="logout">
-                <v-btn class="biologic_logout_button" @click="handleLogoutWithSurveyDialog">
+                <v-btn class="biologic_logout_button" @click="handleLogout">
                   <v-icon>mdi-logout</v-icon>
                 </v-btn>
               </Tooltip>
