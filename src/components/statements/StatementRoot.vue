@@ -33,6 +33,12 @@
           </v-btn>
         </Tooltip>
 
+        <!--Tooltip :text="deleteButtonTooltipText">
+        <v-btn v-if="!displayOnly" icon size="xx-small" @click="deleteStatement" class="statementButton">
+          <v-icon>mdi-delete</v-icon>
+        </v-btn>
+      </Tooltip-->
+
         <button v-if="showToggle && isFeedbackAvailable" @click="showFeedback = !showFeedback" class="statementButton">
           <img src="../../assets/feedback-rubric.png" alt="FeedbackStatement" width="20" />
         </button>
@@ -118,7 +124,8 @@ export default {
     FeedbackRubric,
     Tooltip,
   },
-  emits: ["user-choice-changed", "duplicate-statement", "toggle-showPopup-fromstatementroot", "toggle-collapsed-statement-root"],
+  emits: ["user-choice-changed", "duplicate-statement",     "delete-statement",
+"toggle-showPopup-fromstatementroot", "toggle-collapsed-statement-root"],
   inject: [
     "displayOnly" // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
   ],
@@ -209,6 +216,10 @@ export default {
     },
     duplicateMe() {
       this.$emit("duplicate-statement", [this.id]);
+    },
+    deleteStatement() {
+      // Emit an event to the parent component indicating that this statement should be deleted
+      this.$emit("delete-statement", [this.id]);
     },
 
 

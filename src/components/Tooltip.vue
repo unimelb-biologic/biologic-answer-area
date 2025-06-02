@@ -81,7 +81,7 @@ export default {
 .mytooltip-wrapper:hover .mytooltip__text{
     visibility: visible;
     opacity: 1;
-    transition-delay: 0.5s;
+    transition-delay: 1.5s;
     pointer-events: auto;
 }
 </style>

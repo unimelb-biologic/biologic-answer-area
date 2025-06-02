@@ -2,7 +2,7 @@
   <div id="top-level" style="display:flex; flex: 1 1 auto; flex-direction: row;">
     <div v-if="!authorised" style="width: 100%;">
       <div style="display: flex; flex-direction: row; align-items: center">
-        <img src="/src/assets/BioLogic_BlueGreen_Icon.jpg" width="100" />
+        <img src="/src/assets/BioLogic_BlueGreen_Icon.jpg" width="50" />
         <h1><span style="color: var(--biologic-blue-color);">&nbsp;Bio</span><span
             style="color: var(--biologic-green-color);">Logic</span></h1>
         <h2 class="biologic-component">&nbsp;EDITOR</h2>
@@ -552,11 +552,18 @@ export default {
 
     // Sends the login HTTP request to the server.
     async sendLoginRequest(userID) {
+
+      const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+      userID = userID.toLowerCase(); // convert to lowercase
       this.userID = userID;
-      await this.digestMessage(userID).then((digestHex) => {
-        userID = digestHex;
-        // this.userID = userID//save userID
-      });
+
+      if (!isValidEmail(userID)) {
+        await this.digestMessage(userID).then((digestHex) => {
+          userID = digestHex;
+          // this.userID = userID//save userID
+        });
+      }
 
       this.clientID = userID;
       try {
@@ -613,41 +620,42 @@ export default {
 
     // Receive all content texts from AnswerArea
     handleUpdateAnswerContent(info) {
-      //console.log("*******\n*******\n*******\n handleUpdateAnswerContent ",info, "*******\n*******\n*******\n")
-      const rootIDs = Array.from(info[0]);
-      const statementIDs = Array.from(info[1]);
+      globalConsoleLog("undo", "*******\n*******\n*******\n handleUpdateAnswerContent ",info, "*******\n*******\n*******\n")
+      const rootConnectorIDs = Array.from(info[0]);
+      const rootStatementIDs = Array.from(info[1]);
       const newAnswerContentObject = info[2];
 
       this.answerText = [];
-      for (let i = 0; i < rootIDs.length; i++) {
+      for (let i = 0; i < rootConnectorIDs.length; i++) {
         this.answerText.push(
-          Object.values(newAnswerContentObject[rootIDs[i]]).join("")
+          Object.values(newAnswerContentObject[rootConnectorIDs[i]]).join("")
         );
       }
-      for (let i = 0; i < statementIDs.length; i++) {
+      for (let i = 0; i < rootStatementIDs.length; i++) {
         this.answerText.push(
-          Object.values(newAnswerContentObject[statementIDs[i]]).join("")
+          Object.values(newAnswerContentObject[rootStatementIDs[i]]).join("")
         );
       }
+      globalConsoleLog("undo", "this.answerText=",this.answerText, "*******\n*******\n*******\n")
       //this.handleAnswerAreaStateChange(); not sure if this is needed. MM.
     },
 
     // Receive all content texts from CorrectAnswerArea
     handleUpdateCorrectAnswerContent(info) {
       globalConsoleLog("undo", "*******\n*******\n*******\n handleUpdateCorrectAnswerContent ", info, "*******\n*******\n*******\n")
-      const rootIDs = Array.from(info[0]);
-      const statementIDs = Array.from(info[1]);
+      const rootConnectorIDs = Array.from(info[0]);
+      const rootStatementIDs = Array.from(info[1]);
       const newAnswerContentObject = info[2];
 
       this.correctAnswerText = [];
-      for (let i = 0; i < rootIDs.length; i++) {
+      for (let i = 0; i < rootConnectorIDs.length; i++) {
         this.correctAnswerText.push(
-          Object.values(newAnswerContentObject[rootIDs[i]]).join("")
+          Object.values(newAnswerContentObject[rootConnectorIDs[i]]).join("")
         );
       }
-      for (let i = 0; i < statementIDs.length; i++) {
+      for (let i = 0; i < rootStatementIDs.length; i++) {
         this.correctAnswerText.push(
-          Object.values(newAnswerContentObject[statementIDs[i]]).join("")
+          Object.values(newAnswerContentObject[rootStatementIDs[i]]).join("")
         );
       }
       //this.handleAnswerAreaStateChange(); not sure if this is needed. MM.

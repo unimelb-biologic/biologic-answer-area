@@ -14,7 +14,9 @@
   <div class="answer_area_class" @drop="onDrop" @dragover.prevent>
     <!--h4>{{ testProp }} and localTestProp = {{ localTestProp }} this.connectorCount={{ this.connectorCount }}</h4-->
     <RenderStatement v-for="item in rootStatementID_set" :key="item" :statement-data="allStatements[item]"
-      :showToggle="true" @duplicate-statement="duplicateStatement"
+      :showToggle="true" 
+      @duplicate-statement="duplicateStatement"
+      @delete-statement="deleteStatement"
       @update-statement-content="handleUpdateStatementContent"
       @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething"
       @statement-dropped-on-statement="handleStatementDroppedOnStatement"
@@ -40,7 +42,9 @@
       @toggle-orientation="handleToggleOrientation" @update-child-connector-content="handleUpdateChildConnector"
       @update-child-stat="handleUpdateChildStat"
       @new-connector-dropped-on-connector="handleNewConnectorDroppedOnSomething"
-      @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething" @duplicate-statement="duplicateStatement"
+      @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething" 
+      @duplicate-statement="duplicateStatement"
+      @delete-statement="deleteStatement"
       @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
       @toggle-showPopup-fromconnector="toggleShowPopupFromConnector" />
     <ConnectorArea v-if="!displayOnly" />
@@ -1056,8 +1060,7 @@ export default {
 
           //console.log("answer area dropped occurred");
 
-          this.allConnectors[this.connectorCount]["connectorID"] =
-            this.connectorCount;
+          this.allConnectors[this.connectorCount]["connectorID"] =  this.connectorCount;
           this.allConnectors[this.connectorCount]["parent"] = -1;
           this.allConnectors[this.connectorCount]["leftID"] = undefined;
           this.allConnectors[this.connectorCount]["leftType"] = undefined;
@@ -1308,14 +1311,14 @@ export default {
     },
 
     clearWorkspace() {
-      globalConsoleLog("any", "AnswerArea:clearWorkspace");
+      globalConsoleLog("conn", "AnswerArea:clearWorkspace");
       this.initialiseWithStatementElements();
     },
 
     async loadPreviousAnswer(parameter, newPropValue = -1) {
       //comment
       this.connectorCount = parseInt(parameter["connectorCount"]);
-      globalConsoleLog("any", "AnswerArea:loadPreviousAnswer parameter[connectorCount] = ", parameter["connectorCount"],
+      globalConsoleLog("conn", "AnswerArea:loadPreviousAnswer parameter[connectorCount] = ", parameter["connectorCount"],
         " this.connectorCount=", this.connectorCount);
       this.rootConnectorID_set = new Set(parameter.rootConnectorID_set);
       this.rootStatementID_set = new Set(parameter.rootStatementID_set);
@@ -1375,7 +1378,7 @@ export default {
     },
 
     duplicateStatement(id) {
-      globalConsoleLog("any", "AnswerArea:duplicateStatement");
+      globalConsoleLog("conn", "AnswerArea:duplicateStatement");
       const theStatement = this.allStatements[id];
       const duplicatedStatement = JSON.parse(JSON.stringify(theStatement)); // Create a copy of the last element
       duplicatedStatement.id = uniqueId(); //just need a new unique number
@@ -1391,9 +1394,22 @@ export default {
         baseTop = theStatement["top"];
         baseLeft = theStatement["left"];
       }
-      this.allStatements[duplicatedStatement.id]["top"] = 0;//baseTop + 25;
-      this.allStatements[duplicatedStatement.id]["left"] = 0;//baseLeft + 75;
+      this.allStatements[duplicatedStatement.id]["top"] = baseTop + 25;
+      this.allStatements[duplicatedStatement.id]["left"] = baseLeft + 75;
       this.rootStatementID_set.add(duplicatedStatement.id);
+      this.$emit("answerarea-state-change");
+    },
+
+    deleteStatement(id) {
+      globalConsoleLog("conn", "AnswerArea:deleteStatement");
+      
+      const theStatement = this.allStatements[id];
+      if (theStatement["parent"] == -1) { // so it is a top level statement
+        this.rootStatementID_set.delete(id);
+      } else {
+        // need to tell connector parent to forget it
+      }
+      delete this.allStatements[id];
       this.$emit("answerarea-state-change");
     },
 
@@ -1453,7 +1469,7 @@ export default {
      * This was a change so that we can dispense with the StatementArea.
      */
     initialiseWithStatementElements() {
-      globalConsoleLog("any", "AnswerArea:initialiseWithStatementElements");
+      globalConsoleLog("conn", "AnswerArea:initialiseWithStatementElements");
       this.connectorCount = 0;
       this.left = 0;
       this.top = 0;
@@ -1464,15 +1480,15 @@ export default {
       this.allStatements = {};
 
       if (this.parentStatementElements === undefined) {
-        globalConsoleLog("any", "AnswerArea:parentStatementElements undefined")
+        globalConsoleLog("conn", "AnswerArea:parentStatementElements undefined")
         return;
       } else if (this.parentStatementElements.length === 0) {
-        globalConsoleLog("any", "AnswerArea:parentStatementElements empty")
+        globalConsoleLog("conn", "AnswerArea:parentStatementElements empty")
         return;
       }
       const statementCount = this.parentStatementElements.length;
       if (statementCount > 50) {
-        globalConsoleLog("any", "statementCount error!");
+        globalConsoleLog("conn", "statementCount error!");
         return;
       }
       let i = 0;
@@ -1493,7 +1509,7 @@ export default {
   },
 
   mounted() {
-    globalConsoleLog("any", "AnswerArea:mounted");
+    globalConsoleLog("conn", "AnswerArea:mounted");
     this.initialiseWithStatementElements();
   },
 
@@ -1506,7 +1522,7 @@ export default {
     },
 
     parentStatementElements(newStatements) {
-      globalConsoleLog("any", "AnswerArea:parentStatementElements watch");
+      globalConsoleLog("conn", "AnswerArea:parentStatementElements watch");
       // newStatements should be the same as just referencing the original prop for the parentStatementElements
       this.initialiseWithStatementElements();
     },
@@ -1554,9 +1570,9 @@ export default {
   font-size: x-small;
   top: 150px;
   left: 100px;
-  width: 300px;
-  height: 400px;
-  background: rgb(251, 229, 229);
+  width: 500px;
+  height: 1000px;
+  background: rgb(242, 252, 238);
   border: 1px solid #ccc;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
   z-index: 9999;

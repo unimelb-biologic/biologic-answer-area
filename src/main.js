@@ -40,7 +40,7 @@ const vuetifyInstance = createVuetify({
 })
 
 window.globalConsoleLog = (category = "any", ...args) => {
-  const allowedCategories = ["geom", "undo", "any","net"];
+  const allowedCategories = [/*"geom", "undo", "any","net"*/"conn"];
 //  const allowedCategories = ["geom"];
 
   if (allowedCategories.includes(category)) {

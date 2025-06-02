@@ -24,6 +24,7 @@
       :statement-data="this.statementData"
       @user-choice-changed="handleUserChoiceChanged"
       @duplicate-statement="duplicateStatement"
+      @delete-statement="deleteStatement"
       @toggle-collapsed-statement-root="toggleCollapsedStatementRoot"
       @toggle-showPopup-fromstatementroot="toggleShowPopupStatementRoot"
     />
@@ -33,6 +34,7 @@
       :statement-data="this.statementData"
       @user-choice-changed="handleUserChoiceChanged"
       @duplicate-statement="duplicateStatement"
+      @delete-statement="deleteStatement"
       @toggle-collapsed-statement-truth="toggleCollapsedStatementTruth"
     />
     <StatementStudent ref="statementStudentRef"
@@ -41,15 +43,18 @@
       :statement-data="this.statementData"
       @user-choice-changed="handleUserChoiceChanged"
       @duplicate-statement="duplicateStatement"
+      @delete-statement="deleteStatement"
       @toggle-collapsed-statement-student="toggleCollapsedStatementStudent"
       @toggle-showPopup-fromstatementstudent="toggleShowPopupStatementStudent"
     />
     <StatementFreeText ref="statementFreeTextRef"
       v-bind="$attrs"
       v-if="this.statementData.statementType === 3"
-      :statement-statementData="this.statementData"
+      :statement-data="this.statementData"
       @user-input-changed="handleUserInputChanged"
       @duplicate-statement="duplicateStatement"
+      @delete-statement="deleteStatement"
+      @toggle-collapsed-statement-freetext="toggleCollapsedStatementFreeText"
     />
     <div v-if="renderedText">{{ renderedText }}</div>
   </div>
@@ -76,6 +81,7 @@ export default {
     "connector-dropped-on-statement",
     "statement-dropped-on-statement",
     "duplicate-statement",
+    "delete-statement",
     "toggle-collapsed-renderstatement",
     "toggle-showPopup-fromrenderstatement",
   ],
@@ -119,18 +125,18 @@ export default {
       this.renderedText = combinedText;
     },
     handleDragOveringRenderStatement(e) {
-      //console.log("render over event");
+      //globalConsoleLog("any", "render over event");
     },
     handleDragEnteringRenderStatement(e) {
-      //console.log("render enter event");
+      //globalConsoleLog("any", "render enter event");
     },
     handleDragLeavingRenderStatement(e) {
-      //console.log("render leave event");
+      //globalConsoleLog("any", "render leave event");
     },
 
     startDrag(e, data) {
       if (this.displayOnly) {
-        console.log("\n\nCANT DRAG RENDERSTATEMENT BECAUSE WERE IN DISPLAYONLY MODE\n\n");
+        globalConsoleLog("any", "\n\nCANT DRAG RENDERSTATEMENT BECAUSE WERE IN DISPLAYONLY MODE\n\n");
         return;
       }
 
@@ -148,9 +154,9 @@ export default {
       const grabOffsetLeft = e.clientX - rect.left;
       const grabOffsetTop = e.clientY - rect.top;
       /*
-      console.log("---START DRAG e.client (X,Y)---", e.clientX, e.clientY);
-      console.log("---START DRAG rect position=---", rect.left, rect.top);
-      console.log(
+      globalConsoleLog("geom", "---START DRAG e.client (X,Y)---", e.clientX, e.clientY);
+      globalConsoleLog("geom", "---START DRAG rect position=---", rect.left, rect.top);
+      globalConsoleLog("geom"
         "---START DRAG grabOffset is diff---",
         grabOffsetLeft,
         grabOffsetTop
@@ -173,29 +179,29 @@ export default {
         const connectorIDTypeStr = "draggedConnectorID/";
         e.dataTransfer.setData(connectorIDTypeStr,0 /* i.e. the zero is a dummy value*/ );
 
-        console.log(" SET UP DATA TRANSFER:",widthTypeStr,heightTypeStr,typeTypeStr,connectorIDTypeStr)
+        globalConsoleLog("geom", " SET UP DATA TRANSFER:",widthTypeStr,heightTypeStr,typeTypeStr,connectorIDTypeStr)
 
     },
 
     onDrop(e) {
       if (this.displayOnly) {
-        console.log("RenderStatement:onDrop but display only so return ");
+        globalConsoleLog("conn", "RenderStatement:onDrop but display only so return ");
         return;
       }
 
       e.stopImmediatePropagation();
       const type = e.dataTransfer.getData("type");
-      //console.log("RenderStatement:onDrop type=", type);
+      //globalConsoleLog("conn", "RenderStatement:onDrop type=", type);
       if (type == "connector") {
         // ignore if it was statement droopped on statement
-        //console.log(" emitting connector-dropped-on-statement");
+        //globalConsoleLog("conn", " emitting connector-dropped-on-statement");
         this.$emit("connector-dropped-on-statement", [
           this.statementData.id,
           undefined,
           e,
         ]); // let the Parent deal with it
       } else if (type == "statement") {
-        console.log(" emitting statement-dropped-on-statement");
+        globalConsoleLog("conn", " emitting statement-dropped-on-statement");
         this.$emit("statement-dropped-on-statement", [
           this.statementData.id,
           e,
@@ -207,7 +213,7 @@ export default {
       this.contentText = info[0];
       this.answeredStat = info[1];
       const statementID = info[1]["id"];
-      //console.log("RenderStatement::emitting update-statement-content ",this.contentText,this.answeredStat);
+      //globalConsoleLog("conn", "RenderStatement::emitting update-statement-content ",this.contentText,this.answeredStat);
       this.$emit(
         "update-statement-content",
         [this.contentText, this.answeredStat],
@@ -236,6 +242,16 @@ export default {
       this.$emit("duplicate-statement", id); // pass it on up the chain
     },
 
+    deleteStatement(id) {
+      if (this.displayOnly)
+        return;
+
+      console.log(
+        "RenderStatement:deleteStatement - calling emit delete-statement"
+      );
+      this.$emit("delete-statement", id); // pass it on up the chain
+    },
+
     toggleCollapsedStatementStudent(id) {
       console.log(
         "RenderStatement:toggleCollapsedStatementStudent - calling emit toggle-collapsed-renderstatement"
@@ -251,6 +267,12 @@ export default {
     toggleCollapsedStatementRoot(id) {
       console.log(
         "RenderStatement:toggleCollapsedStatementRoot - calling emit toggle-collapsed-renderstatement"
+      );
+      this.$emit("toggle-collapsed-renderstatement", id); // pass it on up the chain
+    },
+    toggleCollapsedStatementFreeText(id) {
+      console.log(
+        "RenderStatement:toggleCollapsedStatementFreeText - calling emit toggle-collapsed-renderstatement"
       );
       this.$emit("toggle-collapsed-renderstatement", id); // pass it on up the chain
     },
@@ -303,7 +325,7 @@ export default {
     this.initContent();
   },
   mounted() {
-    //console.log("RenderStatement mounted with injected displayOnly=",this.displayOnly);
+    //globalConsoleLog("conn", "RenderStatement mounted with injected displayOnly=",this.displayOnly);
   }
 
 };

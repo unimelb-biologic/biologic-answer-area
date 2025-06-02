@@ -1,30 +1,61 @@
 <template>
   <!-- record the statement position-->
   <div class="StatementFreeText">
-    <div class="iconContainer">
-      <button v-if="showToggle" @click="duplicateMe" class="statementButton">
-        <img
-          class="duplicate-statement-button"
-          src="../../assets/duplicate_icon.png"
-          alt="DuplicateStatement"
-          width="20"
-        />
-      </button>
-    </div>
+    <div class="content-wrapper">
 
-    <div class="text">Free text entry...</div>
-    <textarea v-model="userInputText" id="input" class="textarea"></textarea>
-    <!-- Display tooltips for this statement-->
-    <span v-if="statementData.visible" class="StatementFreeText_tooltip">
-      You can use this statement to answer the question.
-    </span>
+      <div class="iconContainer">
+
+        <Tooltip text=" expand this statement ">
+          <v-btn size="x-small" v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement"
+            class="statementButton">
+            <v-icon>mdi-arrow-expand</v-icon>
+          </v-btn>
+        </Tooltip>
+        <Tooltip text=" collapse this statement ">
+          <v-btn size="x-small" v-if="showToggle && !this.statementData.collapsed" @click="toggleCollapsedStatement"
+            class="statementButton">
+            <v-icon>mdi-arrow-collapse</v-icon>
+          </v-btn>
+        </Tooltip>
+
+        <button v-if="showToggle" @click="duplicateMe" class="statementButton">
+          <img class="duplicate-statement-button" src="../../assets/duplicate_icon.png" alt="DuplicateStatement"
+            width="20" />
+        </button>
+
+        <!--Tooltip :text="deleteButtonTooltipText">
+        <v-btn v-if="!displayOnly" icon size="xx-small" @click="deleteStatement" class="statementButton">
+          <v-icon>mdi-delete</v-icon>
+        </v-btn>
+      </Tooltip-->
+
+      </div>
+
+      <Tooltip text="White statements are FREE statements. Type in your own statement.">
+        <div class="main-content">
+          <div v-if="this.statementData.collapsed" class="concatenated-statement">
+            {{ concatenatedStatement }}
+          </div>
+          <div v-else>
+            <textarea v-model="userInputText" id="input" class="textarea"></textarea>
+          </div>
+        </div>
+      </Tooltip>
+    </div>
   </div>
 </template>
 
 <script>
+
+import Tooltip from '../Tooltip.vue';
+
 export default {
   name: "StatementFreeText",
-  emits: ["user-input-changed", "duplicate-statement"],
+  components: {
+    Tooltip
+  },
+  emits: ["user-input-changed", "duplicate-statement",    "delete-statement",
+"toggle-collapsed-statement-freetext"],
   props: {
     statementData: Object,
     position: String,
@@ -45,6 +76,11 @@ export default {
       answeredData: null,
     };
   },
+  computed:{
+    concatenatedStatement() {
+      return this.userInputText;
+    },
+  },
   methods: {
     initContent() {
       this.statementType = this.statementData.statementType;
@@ -56,6 +92,15 @@ export default {
     },
     duplicateMe() {
       this.$emit("duplicate-statement", [this.id]);
+    },
+    deleteStatement() {
+      // Emit an event to the parent component indicating that this statement should be deleted
+      this.$emit("delete-statement", [this.id]);
+    },
+    toggleCollapsedStatement() {
+      //this.collapsed = !this.collapsed;
+      console.log("StatementFreeText:toggleCollapsedStatement")
+      this.$emit("toggle-collapsed-statement-freetext", this.id );
     },
   },
   watch: {
@@ -79,20 +124,39 @@ export default {
 
 <style scoped>
 @import "@/assets/tooltips.css";
+
 .StatementFreeText {
   background-color: White;
-  border: 1px solid black;
-  font-size: 14px;
+  font-size: var(--biologic-statement-font-size);
+  padding: 2px;
+  margin: 2px;
   width: fit-content;
   height: fit-content;
   text-align: center;
-  margin: 10px;
   position: relative;
   display: inline-block;
 }
+
+.content-wrapper {
+  display: flex;
+  align-items: flex-start;
+}
+
 .text {
   margin-top: 10px;
   margin-bottom: 10px;
+}
+.StatementFreeText:hover .iconContainer {
+  opacity:1;
+}
+
+.iconContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px;
+  opacity: 0.05;
+  transition: opacity 0.3s ease;
 }
 
 .statementButton {
@@ -102,6 +166,11 @@ export default {
   margin: 2px;
   padding: 1px;
   align-items: center;
+}
+
+.concatenated-statement {
+  white-space: pre-wrap;
+  max-width: 100px;
 }
 
 .textarea {

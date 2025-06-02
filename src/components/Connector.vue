@@ -24,11 +24,11 @@
         </v-btn>
       </Tooltip>
 
-      <!--Tooltip :text="deleteButtonTooltipText">
+      <Tooltip :text="deleteButtonTooltipText">
         <v-btn v-if="!displayOnly" :disabled="!hasNoChildren" icon size="xx-small" @click="deleteConnector({ id: connectorID })" class="connectorButton">
           <v-icon>mdi-delete</v-icon>
         </v-btn>
-      </Tooltip-->
+      </Tooltip>
     </div>
 
     <div class="onlyText" v-if="clickCount % 2 === 1">
@@ -79,9 +79,15 @@
 
         <!-- TODO: implement delete -->
         <div class="connector-sections" v-if="this.leftType === 'statement'">
-          <RenderStatement ref="leftChildRenderStatement"  :statement-data="this.allStatements[this.leftID]" :showToggle="true"
-            @update-statement-content="handleUpdateStatContentA" @mousedown="onMousedown('leftType')"
-            @duplicate-statement="duplicateStatement" @connector-dropped-on-statement="connectorDroppedOnStatement"
+          <RenderStatement 
+            ref="leftChildRenderStatement"  
+            :statement-data="this.allStatements[this.leftID]" 
+            :showToggle="true"
+            @update-statement-content="handleUpdateStatContentA" 
+            @mousedown="onMousedown('leftType')"
+            @duplicate-statement="duplicateStatement" 
+            @delete-statement="deleteStatement" 
+            @connector-dropped-on-statement="connectorDroppedOnStatement"
             @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
             @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement" />
         </div>
@@ -104,13 +110,20 @@
                 position: 'left',
               })
             " @delete-child-connector="deleteChildConnector" 
-            @dropped-aconn="handleAConnectorDrop" @dropped-bconn="handleBConnectorDrop"
-            @dropped-astat="handleAStatementDrop" @dropped-bstat="handleBStatementDrop"
-            @link-word-changed="handleChildLinkWordChange" @update-connector-content="handleUpdateConnectorContentA"
-            @toggle-orientation="handleToggleOrientation" @update-click-count="handleUpdateChildClickCount"
-            @update-child-connector-content="handleUpdateChildConnector" @update-child-stat="handleUpdateChildStat"
+            @dropped-aconn="handleAConnectorDrop" 
+            @dropped-bconn="handleBConnectorDrop"
+            @dropped-astat="handleAStatementDrop" 
+            @dropped-bstat="handleBStatementDrop"
+            @link-word-changed="handleChildLinkWordChange" 
+            @update-connector-content="handleUpdateConnectorContentA"
+            @toggle-orientation="handleToggleOrientation" 
+            @update-click-count="handleUpdateChildClickCount"
+            @update-child-connector-content="handleUpdateChildConnector" 
+            @update-child-stat="handleUpdateChildStat"
             @new-connector-dropped-on-connector="handleNewConnectorDroppedOnConnector"
-            @connector-dropped-on-statement="connectorDroppedOnStatement" @duplicate-statement="duplicateStatement"
+            @connector-dropped-on-statement="connectorDroppedOnStatement" 
+            @duplicate-statement="duplicateStatement"
+            @delete-statement="deleteStatement"
             @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
             @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector" />
 
@@ -161,9 +174,15 @@
 
         <!-- TODO: implement delete -->
         <div class="connector-sections" v-if="this.rightType === 'statement'">
-          <RenderStatement ref="rightChildRenderStatement"  :statement-data="this.allStatements[this.rightID]" :showToggle="true"
-            @update-statement-content="handleUpdateStatContentB" @mousedown="onMousedown('rightType')"
-            @connector-dropped-on-statement="connectorDroppedOnStatement" @duplicate-statement="duplicateStatement"
+          <RenderStatement 
+            ref="rightChildRenderStatement"  
+            :statement-data="this.allStatements[this.rightID]" 
+            :showToggle="true"
+            @update-statement-content="handleUpdateStatContentB" 
+            @mousedown="onMousedown('rightType')"
+            @connector-dropped-on-statement="connectorDroppedOnStatement" 
+            @duplicate-statement="duplicateStatement"
+            @delete-statement="deleteStatement"
             @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
             @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement" />
         </div>
@@ -187,13 +206,20 @@
                 position: 'right',
               })
             " @delete-child-connector="deleteChildConnector"
-            @dropped-aconn="handleAConnectorDrop" @dropped-bconn="handleBConnectorDrop"
-            @dropped-astat="handleAStatementDrop" @dropped-bstat="handleBStatementDrop"
-            @link-word-changed="handleChildLinkWordChange" @update-connector-content="handleUpdateConnectorContentB"
-            @update-click-count="handleUpdateChildClickCount" @toggle-orientation="handleToggleOrientation"
-            @update-child-connector-content="handleUpdateChildConnector" @update-child-stat="handleUpdateChildStat"
+            @dropped-aconn="handleAConnectorDrop" 
+            @dropped-bconn="handleBConnectorDrop"
+            @dropped-astat="handleAStatementDrop" 
+            @dropped-bstat="handleBStatementDrop"
+            @link-word-changed="handleChildLinkWordChange" 
+            @update-connector-content="handleUpdateConnectorContentB"
+            @update-click-count="handleUpdateChildClickCount" 
+            @toggle-orientation="handleToggleOrientation"
+            @update-child-connector-content="handleUpdateChildConnector" 
+            @update-child-stat="handleUpdateChildStat"
             @new-connector-dropped-on-connector="handleNewConnectorDroppedOnConnector"
-            @connector-dropped-on-statement="connectorDroppedOnStatement" @duplicate-statement="duplicateStatement"
+            @connector-dropped-on-statement="connectorDroppedOnStatement" 
+            @duplicate-statement="duplicateStatement"
+            @delete-statement="deleteStatement"
             @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
             @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector" />
         </div>
@@ -238,6 +264,7 @@ export default {
     "toggle-orientation",
     "new-connector-dropped-on-connector",
     "duplicate-statement",
+    "delete-statement",
     "toggle-collapsed-renderstatement-from-connector",
     "toggle-showPopup-fromconnector",
     "connector-dropped-on-statement",
@@ -307,6 +334,13 @@ export default {
         // just pass this on up the tree for the AnswerArea to deal with
         globalConsoleLog("conn","Connector:duplicateStatement")
         this.$emit("duplicate-statement", id);
+    },
+    deleteStatement(id)
+    {
+        // emission from either a child RenderStatement or a Connector.
+        // just pass this on up the tree for the AnswerArea to deal with
+        globalConsoleLog("conn","Connector:deleteStatement")
+        this.$emit("delete-statement", id);
     },
     toggleCollapsedRenderStatement(id){
         // emission from  a child RenderStatement.
