@@ -3,7 +3,7 @@ import App from './App.vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Home from './Home/Home.vue'
 
-import './assets/biologic.css'; // import global styles
+import '@/assets/biologic.css'; // import global styles
 
 // Vuetify
 import 'vuetify/styles'
@@ -17,9 +17,9 @@ import '@mdi/font/css/materialdesignicons.css'
 // Define route map
 const routes = [
   /* more router */
-    { path: '/', redirect: '/home' },
-    { path: '/home', component: Home },
-    // { path: '/feedback', component: Feedback },
+  { path: '/', redirect: '/home' },
+  { path: '/home', component: Home },
+  // { path: '/feedback', component: Feedback },
 ]
 
 // Create a routing instance and pass the corresponding configuration
@@ -35,13 +35,13 @@ const vuetifyInstance = createVuetify({
   components,
   directives,
   icons: {
-      defaultSet: 'mdi', // This is already the default value - only for display purposes
+    defaultSet: 'mdi', // This is already the default value - only for display purposes
   },
 })
 
 window.globalConsoleLog = (category = "any", ...args) => {
   const allowedCategories = [/*"geom", "undo", "any","net"*/"conn"];
-//  const allowedCategories = ["geom"];
+  //  const allowedCategories = ["geom"];
 
   if (allowedCategories.includes(category)) {
     console.log(`[${category}]`, ...args); // Spread to preserve multiple arguments

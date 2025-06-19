@@ -307,7 +307,7 @@ import AnswerArea from "@/components/AnswerArea/AnswerArea.vue";
 import AnswerTextGeneratorArea from "@/components/AnswerTextGeneratorArea.vue";
 import FileReader from "@/components/FileReader.vue";
 import MenuBar from "@/components/MenuBar.vue";
-import Tooltip from "@/components/Tooltip.vue";
+import Tooltip from "@/components/AnswerArea/Tooltip.vue";
 
 import download from "downloadjs";
 import {
