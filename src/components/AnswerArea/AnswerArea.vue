@@ -14,9 +14,7 @@
   <div class="answer_area_class" @drop="onDrop" @dragover.prevent>
     <!--h4>{{ testProp }} and localTestProp = {{ localTestProp }} this.connectorCount={{ this.connectorCount }}</h4-->
     <RenderStatement v-for="item in rootStatementID_set" :key="item" :statement-data="allStatements[item]"
-      :showToggle="true" 
-      @duplicate-statement="duplicateStatement"
-      @delete-statement="deleteStatement"
+      :showToggle="true" @duplicate-statement="duplicateStatement" @delete-statement="deleteStatement"
       @update-statement-content="handleUpdateStatementContent"
       @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething"
       @statement-dropped-on-statement="handleStatementDroppedOnStatement"
@@ -42,8 +40,7 @@
       @toggle-orientation="handleToggleOrientation" @update-child-connector-content="handleUpdateChildConnector"
       @update-child-stat="handleUpdateChildStat"
       @new-connector-dropped-on-connector="handleNewConnectorDroppedOnSomething"
-      @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething" 
-      @duplicate-statement="duplicateStatement"
+      @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething" @duplicate-statement="duplicateStatement"
       @delete-statement="deleteStatement"
       @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
       @toggle-showPopup-fromconnector="toggleShowPopupFromConnector" />
@@ -53,13 +50,13 @@
 
 <script>
 import Connector from "@/components/Connector.vue";
-import RenderStatement from "../components/RenderStatement.vue";
+import RenderStatement from "@/components/RenderStatement.vue";
 import ConnectorArea from "@/components/ConnectorArea.vue";
 import uniqueId from "lodash.uniqueid";
 import { computed } from "vue";
 import stringify from "json-stringify-pretty-compact";
 
-import { STATEMENT_PROPORTION_REQUIRED } from '../config/constants';
+import { STATEMENT_PROPORTION_REQUIRED } from '../../config/constants';
 
 export default {
   name: "AnswerArea",
@@ -1027,8 +1024,8 @@ export default {
       const posWithinWorkspaceLeft = e.clientX - sRect.left;
       const posWithinWorkspaceTop = e.clientY - sRect.top;
       globalConsoleLog("geom", "poisiton within answerArea =", posWithinWorkspaceLeft, ",", posWithinWorkspaceTop, ")");
-      leftWithinAnswerArea = posWithinWorkspaceLeft - grabOffsetLeft ;
-      topWithinAnswerArea = posWithinWorkspaceTop - grabOffsetTop ;
+      leftWithinAnswerArea = posWithinWorkspaceLeft - grabOffsetLeft;
+      topWithinAnswerArea = posWithinWorkspaceTop - grabOffsetTop;
 
 
 
@@ -1060,7 +1057,7 @@ export default {
 
           //console.log("answer area dropped occurred");
 
-          this.allConnectors[this.connectorCount]["connectorID"] =  this.connectorCount;
+          this.allConnectors[this.connectorCount]["connectorID"] = this.connectorCount;
           this.allConnectors[this.connectorCount]["parent"] = -1;
           this.allConnectors[this.connectorCount]["leftID"] = undefined;
           this.allConnectors[this.connectorCount]["leftType"] = undefined;
@@ -1336,7 +1333,7 @@ export default {
     },
 
     deleteChildConnector(params) {
-      globalConsoleLog("conn","delete child connector.",params);
+      globalConsoleLog("conn", "delete child connector.", params);
       // Remove the connector from allConnectors object
       const { id, parentId, position } = params;
       if (position && parentId !== undefined) {
@@ -1351,7 +1348,7 @@ export default {
 
     deleteConnector(params) {
       // Remove the connector from allConnectors object
-      globalConsoleLog("conn","delete connector.",params);
+      globalConsoleLog("conn", "delete connector.", params);
       const { id } = params;
       const { leftType, leftID, rightType, rightID } = this.allConnectors[id];
       if (leftType === "connector") {
@@ -1402,7 +1399,7 @@ export default {
 
     deleteStatement(id) {
       globalConsoleLog("conn", "AnswerArea:deleteStatement");
-      
+
       const theStatement = this.allStatements[id];
       if (theStatement["parent"] == -1) { // so it is a top level statement
         this.rootStatementID_set.delete(id);

@@ -99,7 +99,7 @@ This sprint focuses on developing the fundamental features of this project, incl
 For this sprint, we have focused on further developing the Redback application and expanding its features. Below is a list of components that have been changed or added in each branch:
 
 Main Branch: Updated Components: 
-* AnswerArea (https://github.com/COMP90082-2023-SM1/BI-RedBack/blob/main/src/components/AnswerArea.vue) 
+* AnswerArea (https://github.com/COMP90082-2023-SM1/BI-RedBack/blob/main/src/components/AnswerArea/AnswerArea.vue) 
 * AnswerTextGeneratorArea (https://github.com/COMP90082-2023-SM1/BI-RedBack/blob/main/src/components/AnswerTextGeneratorArea.vue) 
 * AppDesign (https://github.com/COMP90082-2023-SM1/BI-RedBack/blob/main/src/components/AppDesign.vue) 
 * Connector (https://github.com/COMP90082-2023-SM1/BI-RedBack/blob/main/src/components/Connector.vue) 

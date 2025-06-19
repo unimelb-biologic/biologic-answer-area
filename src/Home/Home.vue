@@ -263,20 +263,23 @@
 
       <v-dialog v-model="showSurveyDialog" max-width="500">
         <v-card>
-          <v-card-title class="text-h5" style="color:var(--biologic-blue-color)">Please help us improve BioLogic</v-card-title>
+          <v-card-title class="text-h5" style="color:var(--biologic-blue-color)">Please help us improve
+            BioLogic</v-card-title>
           <v-card-text>
             <p>
-              Hi students, BioLogic is a work in progress. Your responses to these questions 
+              Hi students, BioLogic is a work in progress. Your responses to these questions
               are a valuable resource in helping us improve the software.
-            
-              If you are potentially willing to let us use 
-              your answers in our analysis, clicking <strong>TELL ME MORE</strong> 
+
+              If you are potentially willing to let us use
+              your answers in our analysis, clicking <strong>TELL ME MORE</strong>
               will take you to a consent page, where you can find out more information
-              about the project.   You can decide at that point whether to proceed.
+              about the project. You can decide at that point whether to proceed.
             </p>
-            <p style="color:var(--biologic-green-color)"><strong>Note that All responses will be DE-IDENTIFIED</strong> so nobody teaching in this subject will know which answers were yours.</p>
+            <p style="color:var(--biologic-green-color)"><strong>Note that All responses will be DE-IDENTIFIED</strong>
+              so nobody teaching in this subject will know which answers were yours.</p>
             <p>
-              If you have time, there is also a survey where you can give us feedback on what you liked and didn't like about the software. 
+              If you have time, there is also a survey where you can give us feedback on what you liked and didn't like
+              about the software.
               If you don't want to do the survey you can still give consent to us analysing your answers.
             </p>
             <p>&nbsp;</p>
@@ -300,7 +303,7 @@
 <script>
 import QuestionArea from "@/components/QuestionArea.vue";
 import StatementArea from "@/components/StatementArea.vue";
-import AnswerArea from "@/components/AnswerArea.vue";
+import AnswerArea from "@/components/AnswerArea/AnswerArea.vue";
 import AnswerTextGeneratorArea from "@/components/AnswerTextGeneratorArea.vue";
 import FileReader from "@/components/FileReader.vue";
 import MenuBar from "@/components/MenuBar.vue";
@@ -620,7 +623,7 @@ export default {
 
     // Receive all content texts from AnswerArea
     handleUpdateAnswerContent(info) {
-      globalConsoleLog("undo", "*******\n*******\n*******\n handleUpdateAnswerContent ",info, "*******\n*******\n*******\n")
+      globalConsoleLog("undo", "*******\n*******\n*******\n handleUpdateAnswerContent ", info, "*******\n*******\n*******\n")
       const rootConnectorIDs = Array.from(info[0]);
       const rootStatementIDs = Array.from(info[1]);
       const newAnswerContentObject = info[2];
@@ -636,7 +639,7 @@ export default {
           Object.values(newAnswerContentObject[rootStatementIDs[i]]).join("")
         );
       }
-      globalConsoleLog("undo", "this.answerText=",this.answerText, "*******\n*******\n*******\n")
+      globalConsoleLog("undo", "this.answerText=", this.answerText, "*******\n*******\n*******\n")
       //this.handleAnswerAreaStateChange(); not sure if this is needed. MM.
     },
 
