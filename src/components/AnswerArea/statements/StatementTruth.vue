@@ -23,7 +23,7 @@
 
         <Tooltip text="duplicate this statement">
           <v-btn size="x-small" v-if="showToggle && !displayOnly" @click="duplicateMe" class="statementButton">
-            <!--img class="statementButtonImage" src="../../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
+            <!--img class="statementButtonImage" src="../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
             <v-icon>mdi-content-duplicate</v-icon>
           </v-btn>
         </Tooltip>
@@ -36,7 +36,7 @@
 
 
         <button v-if="showToggle && isFeedbackAvailable" @click="showFeedback = !showFeedback" class="statementButton">
-          <img src="../../assets/feedback-rubric.png" alt="FeedbackStatement" width="20" />
+          <img src="../assets/feedback-rubric.png" alt="FeedbackStatement" width="20" />
         </button>
 
 
@@ -127,8 +127,8 @@ export default {
     },
     getCollapseExpandIcon() {
       return this.collapsed
-        ? "src/assets/expand_icon.png"
-        : "src/assets/collapse_icon.png";
+        ? "../assets/expand_icon.png"
+        : "../assets/collapse_icon.png";
     },
   },
 

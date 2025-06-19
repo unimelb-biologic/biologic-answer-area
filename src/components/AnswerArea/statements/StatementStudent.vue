@@ -25,13 +25,13 @@
         <Tooltip text="switch between menus and radio-buttons">
           <v-btn size="x-small" v-if="showToggle && !this.statementData.collapsed" @click="toggleShowPopup"
             class="statementButton">
-            <img class="statementButtonImage" src="../../assets/popup_radio_icon.png" alt="RadioPopupToggle" />
+            <img class="statementButtonImage" src="../assets/popup_radio_icon.png" alt="RadioPopupToggle" />
           </v-btn>
         </Tooltip>
 
         <Tooltip text="duplicate this statement">
           <v-btn size="x-small" v-if="showToggle && !displayOnly" @click="duplicateMe" class="statementButton">
-            <!--img class="statementButtonImage" src="../../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
+            <!--img class="statementButtonImage" src="../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
             <v-icon>mdi-content-duplicate</v-icon>
           </v-btn>
         </Tooltip>
@@ -43,7 +43,7 @@
       </Tooltip-->
 
         <button v-if="showToggle && isFeedbackAvailable" @click="showFeedback = !showFeedback" class="statementButton">
-          <img src="../../assets/feedback-rubric.png" alt="FeedbackStatement" width="20" />
+          <img src="../assets/feedback-rubric.png" alt="FeedbackStatement" width="20" />
         </button>
 
       </div>
@@ -156,7 +156,7 @@ export default {
       ).join(" ");
     },
     getCollapseExpandIcon() {
-      return this.collapsed ? "src/assets/expand_icon.png" : "src/assets/collapse_icon.png";
+      return this.collapsed ? "../assets/expand_icon.png" : "../assets/collapse_icon.png";
     }
   },
   methods: {
