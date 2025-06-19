@@ -49,14 +49,12 @@
 </template>
 
 <script>
-import Connector from "@/components/Connector.vue";
-import RenderStatement from "@/components/RenderStatement.vue";
-import ConnectorArea from "@/components/ConnectorArea.vue";
+import Connector from "./Connector.vue";
+import RenderStatement from "./RenderStatement.vue";
+import ConnectorArea from "./ConnectorArea.vue";
 import uniqueId from "lodash.uniqueid";
 import { computed } from "vue";
 import stringify from "json-stringify-pretty-compact";
-
-import { STATEMENT_PROPORTION_REQUIRED } from '../../config/constants';
 
 export default {
   name: "AnswerArea",
@@ -1450,12 +1448,6 @@ export default {
     },
 
     toggleAllFeedback() {
-
-
-      if (this.checkSufficientAnswerSize()) {
-        alert(STATEMENT_PROPORTION_REQUIRED + "% of statements must be used in the answer in order to show the feedback");
-        return false;
-      }
 
       this.showAllFeedback = !this.showAllFeedback;
     },

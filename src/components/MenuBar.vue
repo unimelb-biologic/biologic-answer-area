@@ -58,7 +58,7 @@
 
 <script>
 import FileReader from "@/components/FileReader.vue";
-import Tooltip from "@/components/Tooltip.vue";
+import Tooltip from "@/components/AnswerArea/Tooltip.vue";
 import "@/assets/biologic.css";
 
 export default {

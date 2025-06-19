@@ -1,41 +1,40 @@
 <template>
 
-    <div>
+  <div>
 
-      <div v-if="isVisible" class="tooltips active feedback-info" :class="getGradeColor">
-          <img v-if = "gradingInfo" class="feedback-icon" :src="getFeedbackIcon"/>
+    <div v-if="isVisible" class="tooltips active feedback-info" :class="getGradeColor">
+      <img v-if="gradingInfo" class="feedback-icon" :src="getFeedbackIcon" />
 
-          <span v-if="gradingInfo">
-              {{ gradingInfo.feedback ? gradingInfo.feedback + " - " + getScore : "No Feedback" }}
-          </span>
+      <span v-if="gradingInfo">
+        {{ gradingInfo.feedback ? gradingInfo.feedback + " - " + getScore : "No Feedback" }}
+      </span>
 
-          <span v-if="!gradingInfo">
-            No feedback provided
-          </span>
-          
-        </div>
+      <span v-if="!gradingInfo">
+        No feedback provided
+      </span>
 
-      </div>
+    </div>
+
+  </div>
 
 
 </template>
 
 <script>
-import { RUBRIC_STATUS } from '../config/constants';
 
 
 export default {
   name: "FeedbackRubric",
   data() {
     return {
-        gradingInfo: null,
+      gradingInfo: null,
     }
   },
   props: {
     isVisible: {
-        type: Boolean,
-        default: false
-    }, 
+      type: Boolean,
+      default: false
+    },
     exnetID: {
       type: Number
     },
@@ -46,7 +45,7 @@ export default {
   },
   inject: ['feedbackRubricMap'],
   methods: {
-    
+
   },
 
   mounted() {
@@ -65,7 +64,7 @@ export default {
         case 'GIC':
           return 'wrong'
         case 'GPC':
-          return 'partial-correct'  
+          return 'partial-correct'
         default:
           break
       }
@@ -87,24 +86,24 @@ export default {
 
       switch (this.gradingInfo.rubricStatus) {
         case 'GC':
-          return 'src/assets/correct_icon.png'
+          return './assets/correct_icon.png'
         case 'GIC':
-          return 'src/assets/wrong_icon.png'
+          return './assets/wrong_icon.png'
         case 'GPC':
-          return ''  
+          return ''
         default:
           break
       }
 
       return '';
     }
-  
+
   },
 
   watch: {
     isVisible() {
       if (this.isVisible && this.feedbackRubricMap && this.feedbackRubricMap[this.exnetID] != undefined) {
-        this.gradingInfo = this.feedbackRubricMap[this.exnetID] 
+        this.gradingInfo = this.feedbackRubricMap[this.exnetID]
       }
     }
   }
@@ -113,7 +112,6 @@ export default {
 </script>
 
 <style scoped>
-
 .feedback-info {
   position: absolute;
   /* background-color: lightskyblue; */
@@ -146,5 +144,4 @@ export default {
 .default {
   background-color: lightskyblue;
 }
-
 </style>

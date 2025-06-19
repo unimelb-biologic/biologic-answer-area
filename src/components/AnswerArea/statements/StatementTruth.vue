@@ -232,7 +232,7 @@ export default {
 </script>
 
 <style scoped>
-@import "@/assets/tooltips.css";
+@import "../assets/tooltips.css";
 
 .StatementTruth {
   background-color: rgb(233, 255, 212);

@@ -19,7 +19,7 @@
         </Tooltip>
 
         <button v-if="showToggle" @click="duplicateMe" class="statementButton">
-          <img class="duplicate-statement-button" src="../../assets/duplicate_icon.png" alt="DuplicateStatement"
+          <img class="duplicate-statement-button" src="../assets/duplicate_icon.png" alt="DuplicateStatement"
             width="20" />
         </button>
 
@@ -54,8 +54,8 @@ export default {
   components: {
     Tooltip
   },
-  emits: ["user-input-changed", "duplicate-statement",    "delete-statement",
-"toggle-collapsed-statement-freetext"],
+  emits: ["user-input-changed", "duplicate-statement", "delete-statement",
+    "toggle-collapsed-statement-freetext"],
   props: {
     statementData: Object,
     position: String,
@@ -76,7 +76,7 @@ export default {
       answeredData: null,
     };
   },
-  computed:{
+  computed: {
     concatenatedStatement() {
       return this.userInputText;
     },
@@ -100,7 +100,7 @@ export default {
     toggleCollapsedStatement() {
       //this.collapsed = !this.collapsed;
       console.log("StatementFreeText:toggleCollapsedStatement")
-      this.$emit("toggle-collapsed-statement-freetext", this.id );
+      this.$emit("toggle-collapsed-statement-freetext", this.id);
     },
   },
   watch: {
@@ -123,7 +123,7 @@ export default {
 </script>
 
 <style scoped>
-@import "@/assets/tooltips.css";
+@import "../assets/tooltips.css";
 
 .StatementFreeText {
   background-color: White;
@@ -146,8 +146,9 @@ export default {
   margin-top: 10px;
   margin-bottom: 10px;
 }
+
 .StatementFreeText:hover .iconContainer {
-  opacity:1;
+  opacity: 1;
 }
 
 .iconContainer {

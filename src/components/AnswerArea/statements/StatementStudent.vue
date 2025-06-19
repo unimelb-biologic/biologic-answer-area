@@ -1,8 +1,11 @@
 <template>
-  <div class="StatementRoot">
+  <div class="StatementStudent">
+
     <FeedbackRubric :isVisible=showFeedback :exnetID=id />
 
     <div class="content-wrapper">
+
+
 
       <div class="iconContainer">
 
@@ -45,67 +48,66 @@
 
       </div>
 
-      <Tooltip
-        text="Blue statements are called ROOT statements. They will usually form the first or last statement of your answer.">
-        <div class="main-content">
 
+      <Tooltip
+        text="Yellow statements are called STUDENT statements. Choose the menu/radiobutton options to modify the statement.">
+        <div class="main-content">
           <div v-if="this.statementData.collapsed" class="concatenated-statement">
             {{ concatenatedStatement }}
           </div>
 
           <div v-else-if="!this.statementData.showPopup" class="radio-statement">
             <!-- radio button format -->
-            
-              <div v-for="(segment, index) in this.statementData.content.originalFacts" :key="index"
-                style="float: left; ">
-                <div v-if="typeof segment === 'string'" class="segmentString">
+            <div v-for="(segment, index) in this.statementData.content.originalFacts" :key="index">
+              <div v-if="typeof segment === 'string'">
 
-
-                  <div v-if="isImage(segment)">
-                    <img :src="segment" class="biologicImage">
-                  </div>
-                  <div v-else class="segmentString">
-                    {{ segment }}
-                  </div>
-
+                <div v-if="isImage(segment)">
+                  <img :src="segment" class="biologicImage">
                 </div>
-                <div v-else class="statementRadioButtons">
-                  <div v-for="item in segment">
-                    <div v-if="item.indexOf('--')">
-                      <input :disabled="displayOnly" type="radio" :id="item" :value="item"
-                        v-model="userSelected[index]">
-                      <label :for="item in segment">{{ item }}</label><br>
-                    </div>
-                  </div>
+                <div v-else class="segmentString">
+                  {{ segment }}
                 </div>
               </div>
-            
+              <div v-else class="statementRadioButtons">
+
+                <div v-for="item in segment">
+                  <div v-if="item.indexOf('--')">
+                    <input :disabled="displayOnly" type="radio" :id="item" :value="item" v-model="userSelected[index]">
+                    <label :for="item in segment">{{ item }}</label><br>
+                  </div>
+                </div>
+
+              </div>
+            </div>
           </div>
+
           <div v-else>
             <!-- dropdown format -->
-            
-              <div v-for="(segment, index) in this.statementData.content.originalFacts" :key="index">
-                <!-- render the text from selection -->
-                <div v-if="typeof segment === 'string'">
 
-                  <div v-if="isImage(segment)">
-                    <img :src="segment" class="biologicImage">
-                  </div>
-                  <div v-else>
-                    {{ segment }}
-                  </div>
+            <div v-for="(segment, index) in this.statementData.content.originalFacts" :key="index">
+              <!-- render the text from selection -->
+              <div v-if="typeof segment === 'string'">
 
+                <div v-if="isImage(segment)">
+                  <img :src="segment" class="biologicImage">
                 </div>
-                <!-- render the options -->
                 <div v-else>
-                  <select :disabled="displayOnly" v-model="userSelected[index]" class="dropdown-shadow">
-                    <option v-for="item in segment" :value="item" :key="item">
-                      {{ item }}
-                    </option>
-                  </select>
+                  {{ segment }}
                 </div>
+
               </div>
-            
+              <!-- render the options -->
+              <div v-else>
+                <select :disabled="displayOnly" v-model="userSelected[index]" class="dropdown-shadow">
+                  <option v-for="item in segment" :value="item" :key="item">
+                    {{ item }}
+                  </option>
+                </select>
+
+
+              </div>
+            </div>
+
           </div>
         </div>
       </Tooltip>
@@ -116,25 +118,21 @@
 <script>
 import FeedbackRubric from '../FeedbackRubric.vue';
 import Tooltip from '../Tooltip.vue';
-import "@/assets/biologic.css";
 
 export default {
-  name: "StatementRoot",
+  name: "StatementStudent",
   components: {
     FeedbackRubric,
-    Tooltip,
+    Tooltip
   },
-  emits: ["user-choice-changed", "duplicate-statement",     "delete-statement",
-"toggle-showPopup-fromstatementroot", "toggle-collapsed-statement-root"],
-  inject: [
-    "displayOnly" // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
-  ],
+  emits: ["user-choice-changed", "duplicate-statement", "delete-statement",
+    "toggle-showPopup-fromstatementstudent", "toggle-collapsed-statement-student"],
   props: {
     statementData: Object,
     position: String,
     showToggle: {
       type: Boolean,
-      default: true
+      default: false
     }
   },
   inject: ['isFeedbackAvailable', 'showAllFeedback', 'displayOnly'],
@@ -160,19 +158,8 @@ export default {
     getCollapseExpandIcon() {
       return this.collapsed ? "src/assets/expand_icon.png" : "src/assets/collapse_icon.png";
     }
-
   },
   methods: {
-    handleDragEnteringStatementRoot(e) {
-      console.log("statementRoot enter event");
-      //      e.preventDefault();
-      // Prevent child events from reaching the parent
-      e.stopPropagation();
-    },
-    handleDragLeavingStatementRoot(e) {
-      console.log("statementRoot leave event");
-      //      e.preventDefault();
-    },
     isImage(fact) {
       const isImg = fact.endsWith(".jpg") || fact.endsWith(".png") || fact.endsWith(".jpeg");
       //console.log("testing if fact<",fact," is an image - result is ",isImg);
@@ -180,13 +167,13 @@ export default {
     },
     toggleCollapsedStatement() {
       //this.collapsed = !this.collapsed;
-      console.log("StatementRoot:toggleCollapsedStatement")
-      this.$emit("toggle-collapsed-statement-root", this.id);
+      console.log("StatementStudent:toggleCollapsedStatement")
+      this.$emit("toggle-collapsed-statement-student", this.id);
     },
     toggleShowPopup() {
       //this.showPopup = !this.showPopup;
-      console.log("StatementRoot:toggleShowPopup emitting toggle-showPopup-fromstatementroot")
-      this.$emit("toggle-showPopup-fromstatementroot", [this.id]);
+      console.log("StatementStudent:toggleShowPopup emitting toggle-showPopup-fromstatementstudent")
+      this.$emit("toggle-showPopup-fromstatementstudent", [this.id]);
     },
     handleSelectChange() {
       let studentContentText = "";
@@ -208,7 +195,7 @@ export default {
         }
       }
       this.answeredData.content.userInput = newUserInput;
-      //console.log("StatementRoot::emitting user-choice-changed ",studentContentText,this.answeredData);
+
       this.$emit("user-choice-changed", [
         studentContentText,
         this.answeredData,
@@ -221,7 +208,6 @@ export default {
       // Emit an event to the parent component indicating that this statement should be deleted
       this.$emit("delete-statement", [this.id]);
     },
-
 
     initContent() {
       this.statementType = this.statementData.statementType;
@@ -239,15 +225,12 @@ export default {
           userInputID += 1;
         }
       }
+
       this.answeredData = this.statementData;
     },
   },
-  mounted() {
-    //console.log("StatementRoot mounted",this);
-  },
-
   watch: {
-    statementData(newValue,oldValue) {
+    statementData(newValue, oldValue) {
       this.initContent();
     },
     userSelected: {
@@ -264,56 +247,70 @@ export default {
   created() {
     this.initContent();
   },
+  mounted() {
+    //console.log("StatementStudent mounted");
+  }
 };
 </script>
 
 <style scoped>
-@import "@/assets/tooltips.css";
+@import "../assets/tooltips.css";
 
-.StatementRoot {
-  background-color: rgb(213, 239, 255);
+.StatementStudent {
+  background-color: rgb(254, 250, 211);
+  font-size: var(--biologic-statement-font-size);
   padding: 2px;
   margin: 2px;
-  font-size: var(--biologic-statement-font-size);
   position: relative;
 }
 
-.StatementRoot:hover .iconContainer {
+.StatementStudent:hover .iconContainer {
   opacity: 1;
+}
+
+.segmentString {
+  min-height: inherit;
+  padding-top: 40%;
+  padding: 30% 10px 15%;
 }
 
 .content-wrapper {
   display: flex;
-  height: 100%;
+  align-items: flex-start;
 }
 
 .main-content {
+  flex: 1;
   padding-left: 2px;
-  height: 100%;
-  font-size: var(--biologic-statement-font-size);
 }
 
 button {
   margin-right: 2px;
 }
 
-.segmentString {
-  min-height: inherit;
-  padding: 10% 2px;
+.iconContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px;
+  opacity: 0.05;
+  transition: opacity 0.3s ease;
+}
+
+.radio-statement {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.statementRadioButtons {
+  border: 1px solid rgb(138, 138, 138);
+  align-items: middle;
 }
 
 .concatenated-statement {
   white-space: pre-wrap;
   max-width: 100px;
-}
-
-.iconContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: top;
-  padding: 2px;
-  opacity: 0.05;
-  transition: opacity 0.3s ease;
 }
 
 .statementButton {
@@ -328,19 +325,6 @@ button {
 .statementButtonImage {
   width: 20px;
 }
-
-.radio-statement {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-.statementRadioButtons {
-  border: 1px solid rgb(138, 138, 138);
-  align-items: middle;
-  font-size: var(--biologic-statement-font-size);
-}
-
 
 .biologicImage {
   max-width: 100%;
