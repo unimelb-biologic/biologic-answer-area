@@ -4,4 +4,4 @@ export function globalConsoleLog(category = "any", ...args) {
     if (allowedCategories.includes(category)) {
         console.log(`[${category}]`, ...args); // Spread to preserve multiple arguments
     }
-};
+}
