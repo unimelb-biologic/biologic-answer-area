@@ -36,6 +36,7 @@ import StatementRoot from "./statements/StatementRoot.vue";
 import StatementTruth from "./statements/StatementTruth.vue";
 import StatementStudent from "./statements/StatementStudent.vue";
 import StatementFreeText from "./statements/StatementFreeText.vue";
+import { globalConsoleLog } from './util';
 
 export default {
   name: "RenderStatement",
