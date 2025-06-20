@@ -797,9 +797,7 @@ export default {
       const droppedOn_is_Statement = (droppedOnConnectorID == undefined); // if this is undefined then the droppedOnStatementID will be defined
 
       const e = info[2];
-      const type = e.dataTransfer.getData("type");
       const data = JSON.parse(e.dataTransfer.getData("data"));
-      const transContent = e.dataTransfer.getData("content");
 
       let droppedConnectorID = data.connectorID;
 
@@ -1202,7 +1200,7 @@ export default {
 
       if (data.connectorID === undefined) {
         // connector is new so need to add it to the list
-        const oldStatementParent = thi.allStatements[statementID]["parent"];
+        const oldStatementParent = this.allStatements[statementID]["parent"];
         this.allConnectors[this.connectorCount] = data;
         this.allConnectors[this.connectorCount]["connectorID"] =
           this.connectorCount;
@@ -1365,7 +1363,7 @@ export default {
       this.rootConnectorID_set.delete(id);
 
       // deleting the connector text from string area upon deletion
-      if (this.answerContent.hasOwnProperty(id)) {
+      if (Object.prototype.hasOwnProperty.call(this.answerContent, id)) {
         delete this.answerContent[id];
       }
       this.$emit("connector-deleted", id);
