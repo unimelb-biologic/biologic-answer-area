@@ -474,13 +474,7 @@ export default {
       targetRef.style.height = 20 + 'px';
       targetRef.style.border = '';
     },
-    onMousedown(type) {
-      // let item = null;
-      // if (type === "rightType") {
-      //   item = this.allStatements[this.rightID];
-      // } else if (type === "leftType") {
-      //   item = this.allStatements[this.leftID];
-      // }
+    onMousedown() {
       let parent = this.$parent;
       while (parent.$options.name !== "AnswerArea") {
         parent = parent.$parent;
