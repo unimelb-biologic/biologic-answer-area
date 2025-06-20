@@ -1568,4 +1568,15 @@ export default {
 
   overflow: auto;
 }
+
+.displayWorkspace {
+  background: #ffffff;
+  /*border: 1px solid rgb(0, 250, 0);*/
+  padding-left: 1px;
+  padding-top: 5px;
+  padding-bottom: 0px;
+  height: 80%;
+  overflow-y: scroll;
+  position: relative;
+}
 </style>
