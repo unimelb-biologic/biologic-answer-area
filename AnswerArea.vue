@@ -55,7 +55,7 @@ import ConnectorArea from "./ConnectorArea.vue";
 import uniqueId from "lodash.uniqueid";
 import { computed } from "vue";
 import stringify from "json-stringify-pretty-compact";
-import { globalConsoleLog } from './utils';
+import { globalConsoleLog } from './util';
 
 export default {
   name: "AnswerArea",
