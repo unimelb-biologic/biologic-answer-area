@@ -1502,13 +1502,13 @@ export default {
 
   watch: {
     answerContent: {
-      handler(newAnswerContentObject, oldAnswerContentObject) {
+      handler(newAnswerContentObject) {
         this.emitUpdateContent(newAnswerContentObject);
       },
       deep: true,
     },
 
-    parentStatementElements(newStatements) {
+    parentStatementElements() {
       globalConsoleLog("conn", "AnswerArea:parentStatementElements watch");
       // newStatements should be the same as just referencing the original prop for the parentStatementElements
       this.initialiseWithStatementElements();

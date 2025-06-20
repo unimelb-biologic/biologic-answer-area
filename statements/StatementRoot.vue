@@ -125,7 +125,8 @@ export default {
   emits: ["user-choice-changed", "duplicate-statement", "delete-statement",
     "toggle-showPopup-fromstatementroot", "toggle-collapsed-statement-root"],
   inject: [
-    "displayOnly" // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
+    "displayOnly", // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
+    'isFeedbackAvailable', 'showAllFeedback', 'displayOnly'
   ],
   props: {
     statementData: Object,
@@ -135,7 +136,6 @@ export default {
       default: true
     }
   },
-  inject: ['isFeedbackAvailable', 'showAllFeedback', 'displayOnly'],
   data() {
     return {
       statementType: this.statementData.statementType,
@@ -167,7 +167,7 @@ export default {
       // Prevent child events from reaching the parent
       e.stopPropagation();
     },
-    handleDragLeavingStatementRoot(e) {
+    handleDragLeavingStatementRoot() {
       console.log("statementRoot leave event");
       //      e.preventDefault();
     },
@@ -245,7 +245,7 @@ export default {
   },
 
   watch: {
-    statementData(newValue, oldValue) {
+    statementData() {
       this.initContent();
     },
     userSelected: {

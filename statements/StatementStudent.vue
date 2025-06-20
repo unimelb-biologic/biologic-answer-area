@@ -230,7 +230,7 @@ export default {
     },
   },
   watch: {
-    statementData(newValue, oldValue) {
+    statementData() {
       this.initContent();
     },
     userSelected: {

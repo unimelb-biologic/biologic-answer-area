@@ -418,7 +418,6 @@ export default {
       }
       //      globalConsoleLog("conn","EVENT=",event);
       event.preventDefault();
-      var draggedElement = event.currentTarget;
       const targetRef = this.$refs.targetBoxRefLeft;
       // Set the size of the dragged element
       const widthStr = dragInformation.draggedWidth + 'px';
@@ -456,7 +455,6 @@ export default {
 
       //      globalConsoleLog("conn","EVENT=",event);
       event.preventDefault();
-      var draggedElement = event.currentTarget;
 
       const targetRef = this.$refs.targetBoxRefRight;
       // Set the size of the dragged element
@@ -477,12 +475,12 @@ export default {
       targetRef.style.border = '';
     },
     onMousedown(type) {
-      let item = null;
-      if (type === "rightType") {
-        item = this.allStatements[this.rightID];
-      } else if (type === "leftType") {
-        item = this.allStatements[this.leftID];
-      }
+      // let item = null;
+      // if (type === "rightType") {
+      //   item = this.allStatements[this.rightID];
+      // } else if (type === "leftType") {
+      //   item = this.allStatements[this.leftID];
+      // }
       let parent = this.$parent;
       while (parent.$options.name !== "AnswerArea") {
         parent = parent.$parent;
@@ -898,13 +896,11 @@ export default {
     //     globalConsoleLog("conn","New RHS data: ", newID)
     // },
 
-    connectorID(newValue, oldValue) {
-      //globalConsoleLog("conn","connectorID changed!", oldValue, "to", newValue);
+    connectorID() {
       this.initContent();
     },
 
-    leftContent(newValue, oldValue) {
-      //globalConsoleLog("conn","leftContent changed!", oldValue, "to", newValue);
+    leftContent() {
 
       this.acontent =
         this.allConnectors[this.connectorID].leftContent === undefined
@@ -924,8 +920,7 @@ export default {
           : this.currConnectorContent[2]);
     },
 
-    rightContent(newValue, oldValue) {
-      //globalConsoleLog("conn","rightContent changed!", oldValue, "to", newValue);
+    rightContent() {
       this.bcontent =
         this.allConnectors[this.connectorID].rightContent === undefined
           ? "[B]"

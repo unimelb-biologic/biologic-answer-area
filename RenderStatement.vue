@@ -94,13 +94,13 @@ export default {
     handleDoubleClick(combinedText) {
       this.renderedText = combinedText;
     },
-    handleDragOveringRenderStatement(e) {
+    handleDragOveringRenderStatement() {
       //globalConsoleLog("any", "render over event");
     },
-    handleDragEnteringRenderStatement(e) {
+    handleDragEnteringRenderStatement() {
       //globalConsoleLog("any", "render enter event");
     },
-    handleDragLeavingRenderStatement(e) {
+    handleDragLeavingRenderStatement() {
       //globalConsoleLog("any", "render leave event");
     },
 

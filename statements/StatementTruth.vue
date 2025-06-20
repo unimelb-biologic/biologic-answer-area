@@ -83,7 +83,8 @@ export default {
     Tooltip,
   },
   inject: [
-    "displayOnly" // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
+    "displayOnly", // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
+    "isFeedbackAvailable", "showAllFeedback", "displayOnly"
   ],
   emits: [
     "user-choice-changed",
@@ -99,7 +100,6 @@ export default {
       default: true,
     },
   },
-  inject: ["isFeedbackAvailable", "showAllFeedback", "displayOnly"],
   data() {
     return {
       //TODO: confirm that the first entry is text, 2nd entry is image.
