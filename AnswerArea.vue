@@ -1,16 +1,3 @@
-<script>
-// inject consolelog function for AnswerArea
-window.globalConsoleLog = (category = "any", ...args) => {
-  const allowedCategories = [/*"geom", "undo", "any","net"*/"conn"];
-  //  const allowedCategories = ["geom"];
-
-  if (allowedCategories.includes(category)) {
-    console.log(`[${category}]`, ...args); // Spread to preserve multiple arguments
-  }
-};
-
-</script>
-
 <template>
 
 
