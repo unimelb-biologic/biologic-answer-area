@@ -1585,4 +1585,14 @@ export default {
   max-height: 10px;
   border: 1px solid var(--biologic-midblue-color);
 }
+
+:root {
+  --biologic-green-color: rgb(20, 120, 0);
+  --biologic-blue-color: rgb(21, 8, 107);
+  --biologic-hover-border-color: rgb(34, 0, 255);
+  --biologic-midblue-color: rgb(178, 173, 214);
+  --biologic-grey-color: rgb(238, 238, 238);
+  --biologic-focus-color: rgb(181, 179, 214);
+  --biologic-statement-font-size: 12px;
+}
 </style>
