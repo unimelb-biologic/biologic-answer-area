@@ -1579,4 +1579,10 @@ export default {
   overflow-y: scroll;
   position: relative;
 }
+
+.drag-handle {
+  background-color: var(--biologic-grey-color);
+  max-height: 10px;
+  border: 1px solid var(--biologic-midblue-color);
+}
 </style>
