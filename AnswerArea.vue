@@ -1623,4 +1623,35 @@ export default {
   box-shadow: 0px 0px 4px 2px var(--biologic-focus-color);
   /* Adds focus effect */
 }
+
+* {
+  box-sizing: border-box;
+}
+
+.entireBody {
+  max-height: 100vh;
+  max-width: 100vw;
+}
+
+body {
+  font-family: Arial, serif;
+  background: #ffffff;
+}
+
+/* Clear floats after the columns */
+.main_workspace:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+@media screen and (max-width: 1024px) {
+
+  .centre_column,
+  .left_column,
+  .right_column {
+    width: 100%;
+    padding: 0;
+  }
+}
 </style>
