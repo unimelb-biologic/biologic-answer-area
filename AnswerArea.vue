@@ -1595,4 +1595,32 @@ export default {
   --biologic-focus-color: rgb(181, 179, 214);
   --biologic-statement-font-size: 12px;
 }
+
+.dropdown-shadow {
+  width: 100%;
+  padding: 1px 1px;
+  font-size: var(--biologic-statement-font-size);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  /* Rounded corners */
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.4);
+  /* Drop shadow */
+  appearance: none;
+  /* Hides default arrow styling in some browsers */
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+  /* Smooth hover effect */
+}
+
+.dropdown-shadow:hover {
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.8);
+  /* More shadow on hover */
+}
+
+.dropdown-shadow:focus {
+  outline: none;
+  /* Removes blue border */
+  box-shadow: 0px 0px 4px 2px var(--biologic-focus-color);
+  /* Adds focus effect */
+}
 </style>
