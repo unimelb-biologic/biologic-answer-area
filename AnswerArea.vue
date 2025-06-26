@@ -162,7 +162,7 @@ export default {
         allConnectors: this.allConnectors,
         allStatements: this.allStatements,
         left: String(this.left),
-        top: String(this.top),
+        top: String(this.top)
         moveItem: this.moveItem,
         moveX: String(this.moveX),
         moveY: String(this.moveY),
