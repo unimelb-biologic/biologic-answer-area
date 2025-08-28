@@ -6,18 +6,12 @@
     <FeedbackRubric :isVisible=showFeedback :exnetID=connectorID :isConnector=true />
     <div v-if="this.parent !== undefined" class="buttons-container">
 
-
-
       <Tooltip :text="this.clickCount % 2 === 1 ? 'expand' : 'collapse'">
           <v-btn icon size="xx-small" @click="displayFormChanged" class="connectorButton"
             :aria-label="this.clickCount % 2 === 1 ? 'Expand' : 'Collapse'">
             <v-icon>{{ this.clickCount % 2 === 1 ? 'mdi-arrow-expand' : 'mdi-arrow-collapse' }}</v-icon>
           </v-btn>
         </Tooltip>
-
-
-
-
 
       <Tooltip text="Show Feedback">
         <v-btn icon size="xx-small" v-if="isFeedbackAvailable" @click="showFeedback = !showFeedback"
@@ -210,7 +204,7 @@
 import RenderStatement from "./RenderStatement.vue";
 import ConnectorContextMenu from "./ConnectorContextMenu.vue";
 import FeedbackRubric from "./FeedbackRubric.vue";
-import Tooltip from "../Tooltip.vue";
+import Tooltip from "./Tooltip.vue";
 import { globalConsoleLog } from './util';
 
 export default {
