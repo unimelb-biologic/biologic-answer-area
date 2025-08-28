@@ -9,16 +9,10 @@
 
       <div class="iconContainer">
 
-        <Tooltip text=" expand this statement ">
-          <v-btn size="x-small" v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement"
-            class="statementButton">
-            <v-icon>mdi-arrow-expand</v-icon>
-          </v-btn>
-        </Tooltip>
-        <Tooltip text=" collapse this statement ">
-          <v-btn size="x-small" v-if="showToggle && !this.statementData.collapsed" @click="toggleCollapsedStatement"
-            class="statementButton">
-            <v-icon>mdi-arrow-collapse</v-icon>
+        <Tooltip :text="statementData.collapsed ? 'expand this statement' : 'collapse this statement'">
+          <v-btn size="x-small" v-show="showToggle" @click="toggleCollapsedStatement" class="statementButton"
+            :aria-label="statementData.collapsed ? 'Expand' : 'Collapse'">
+            <v-icon>{{ statementData.collapsed ? 'mdi-arrow-expand' : 'mdi-arrow-collapse' }}</v-icon>
           </v-btn>
         </Tooltip>
 
@@ -257,7 +251,7 @@ export default {
 @import "../assets/tooltips.css";
 
 .StatementStudent {
-  background-color: rgb(254, 250, 211);
+  background-color: var(--biologic-student-statement-color);
   font-size: var(--biologic-statement-font-size);
   padding: 2px;
   margin: 2px;

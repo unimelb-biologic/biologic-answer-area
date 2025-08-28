@@ -6,19 +6,18 @@
     <FeedbackRubric :isVisible=showFeedback :exnetID=connectorID :isConnector=true />
     <div v-if="this.parent !== undefined" class="buttons-container">
 
-      <Tooltip text="Collapse">
-        <v-btn icon size="xx-small" v-if="this.clickCount % 2 === 0" @click="displayFormChanged"
-          class="connectorButton">
-          <v-icon>mdi-arrow-collapse</v-icon>
-        </v-btn>
-      </Tooltip>
 
-      <Tooltip text="Expand">
-        <v-btn icon size="xx-small" v-if="this.clickCount % 2 === 1" @click="displayFormChanged"
-          class="connectorButton">
-          <v-icon>mdi-arrow-expand</v-icon>
-        </v-btn>
-      </Tooltip>
+
+      <Tooltip :text="this.clickCount % 2 === 1 ? 'expand' : 'collapse'">
+          <v-btn icon size="xx-small" @click="displayFormChanged" class="connectorButton"
+            :aria-label="this.clickCount % 2 === 1 ? 'Expand' : 'Collapse'">
+            <v-icon>{{ this.clickCount % 2 === 1 ? 'mdi-arrow-expand' : 'mdi-arrow-collapse' }}</v-icon>
+          </v-btn>
+        </Tooltip>
+
+
+
+
 
       <Tooltip text="Show Feedback">
         <v-btn icon size="xx-small" v-if="isFeedbackAvailable" @click="showFeedback = !showFeedback"
@@ -125,13 +124,12 @@
             <img class="rotate-button" src="./assets/rotate_icon.png" alt="Rotate" width="20" />
           </v-btn>
         </Tooltip>
-        <p class="connectorText">{{ connectorContent[selectedPhrase][1] }}</p>
-        <Tooltip :text="`Change phrase used. CLICK TO SEE OPTION.`">
-          <div class="connectorMenu" v-if="connectorContent[selectedPhrase][1]">
-            <ConnectorContextMenu v-if="!displayOnly" :choice="selectedPhrase" :options="connectorContent"
-              :connector-i-d="connectorID" :parent-i-d="parent" :index="1" @change-link-word="handleLinkWordChange" />
-          </div>
-        </Tooltip>
+        <!--p class="connectorText">{{ connectorContent[selectedPhrase][1] }}</p-->
+        <div class="connectorMenu" v-if="connectorContent[selectedPhrase][1]">
+          <ConnectorContextMenu v-if="!displayOnly" :choice="selectedPhrase" :options="connectorContent"
+            :connector-i-d="connectorID" :parent-i-d="parent" :index="1" @change-link-word="handleLinkWordChange" />
+        </div>
+
       </div>
 
 
@@ -212,7 +210,7 @@
 import RenderStatement from "./RenderStatement.vue";
 import ConnectorContextMenu from "./ConnectorContextMenu.vue";
 import FeedbackRubric from "./FeedbackRubric.vue";
-import Tooltip from "./Tooltip.vue";
+import Tooltip from "../Tooltip.vue";
 import { globalConsoleLog } from './util';
 
 export default {

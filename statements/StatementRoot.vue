@@ -6,18 +6,13 @@
 
       <div class="iconContainer">
 
-        <Tooltip text=" expand this statement ">
-          <v-btn size="x-small" v-if="showToggle && this.statementData.collapsed" @click="toggleCollapsedStatement"
-            class="statementButton">
-            <v-icon>mdi-arrow-expand</v-icon>
+        <Tooltip :text="statementData.collapsed ? 'expand this statement' : 'collapse this statement'">
+          <v-btn size="x-small" v-show="showToggle" @click="toggleCollapsedStatement" class="statementButton"
+            :aria-label="statementData.collapsed ? 'Expand' : 'Collapse'">
+            <v-icon>{{ statementData.collapsed ? 'mdi-arrow-expand' : 'mdi-arrow-collapse' }}</v-icon>
           </v-btn>
         </Tooltip>
-        <Tooltip text=" collapse this statement ">
-          <v-btn size="x-small" v-if="showToggle && !this.statementData.collapsed" @click="toggleCollapsedStatement"
-            class="statementButton">
-            <v-icon>mdi-arrow-collapse</v-icon>
-          </v-btn>
-        </Tooltip>
+
 
         <Tooltip text="switch between menus and radio-buttons">
           <v-btn size="x-small" v-if="showToggle && !this.statementData.collapsed" @click="toggleShowPopup"
@@ -269,7 +264,7 @@ export default {
 @import "../assets/tooltips.css";
 
 .StatementRoot {
-  background-color: rgb(213, 239, 255);
+  background-color: var(--biologic-root-statement-color);
   padding: 2px;
   margin: 2px;
   font-size: var(--biologic-statement-font-size);
@@ -296,8 +291,8 @@ button {
 }
 
 .segmentString {
-  min-height: inherit;
-  padding: 10% 2px;
+  /*min-height: inherit;*/
+  /*padding: 10% 2px;*/
 }
 
 .concatenated-statement {

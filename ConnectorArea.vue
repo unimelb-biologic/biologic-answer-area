@@ -1,13 +1,12 @@
 <template>
-  <vue-draggable-resizable :x="position.x" :y="position.y" :w="200" :h="collapsed ? 35 : 400" :min-width="200"
-    :min-height="400" @dragging="onDragging" class="draggable-box" drag-handle=".header" :resizable="true"
+  <vue-draggable-resizable :x="position.x" :y="position.y" :w="collapsed ? 35 : 200" :h="collapsed ? 35 : 400"  @dragging="onDragging" class="draggable-box" drag-handle=".header" :resizable="true"
     :handles="['tl', 'tr', 'bl', 'br', 'tm', 'bm', 'ml', 'mr']">
     <Tooltip
       :text="collapsed ? 'This panel contains connector elements which you can drag into your answer area. Click the down-arrow to reveal them.' : 'This panel contains connector elements which you can drag into your answer area. Click the up-arrow to collapse the panel.'">
       <div class="header" style="display:flex; justify-content: space-between;">
-        <span>CONNECTORS &nbsp;&nbsp;&nbsp; </span><!--{{ position.x }}, {{ position.y }}-->
-        <v-spacer></v-spacer>
-        <v-btn size="xx-small" @click="toggleCollapse">
+        <span v-if="!collapsed">CONNECTORS &nbsp;&nbsp;&nbsp; </span>
+        <v-spacer v-if="!collapsed"></v-spacer>
+        <v-btn size="xx-small" @click="toggleCollapse" title="click to open Connector Panel">
           <v-icon>{{ collapsed ? 'mdi-chevron-down' : 'mdi-chevron-up' }}</v-icon>
         </v-btn>
       </div>
@@ -24,7 +23,7 @@
 import Connector from "./Connector.vue";
 import VueDraggableResizable from "vue-draggable-resizable";
 import "./assets/VueDraggableResizable_Style.css";
-import Tooltip from "./Tooltip.vue";
+import Tooltip from "../Tooltip.vue";
 
 export default {
   name: "ConnectorArea",
@@ -117,15 +116,16 @@ export default {
 
       ],
       position: { x: 0, y: 0 }, // iniitial position
-      collapsed: false,
+      collapsed: true,
     };
   },
   mounted() {
     this.$nextTick(() => {
       const parent = this.$el.parentElement;
       if (parent) {
-        this.position.x = parent.clientWidth - 200 - 20; // Adjust based on component width
-        this.position.y = 20; // Top position
+        //this.position.x = parent.clientWidth - 200 - 20; // Adjust based on component width
+        this.position.x = 5;
+        this.position.y = 5; // Top position
       }
     });
   }

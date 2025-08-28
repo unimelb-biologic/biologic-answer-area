@@ -11,7 +11,7 @@
     {{ prettifiedRootStatementIDs_Dump }}
     </pre>
   </div>
-  <div class="answer_area_class" @drop="onDrop" @dragover.prevent>
+  <div ref="answer_area_ref" class="answer_area_class" @drop="onDrop" @dragover.prevent>
     <!--h4>{{ testProp }} and localTestProp = {{ localTestProp }} this.connectorCount={{ this.connectorCount }}</h4-->
     <RenderStatement v-for="item in rootStatementID_set" :key="item" :statement-data="allStatements[item]"
       :showToggle="true" @duplicate-statement="duplicateStatement" @delete-statement="deleteStatement"
@@ -71,16 +71,18 @@ export default {
     "answerarea-state-change",
   ],
   props: {
-    parentStatementElements: Object, // this is a reference to the statementElements in Home.vue MM
+    //parentStatementElements: Object, // this is a reference to the statementElements in Home.vue 
+    // July 2025 - realised we can do without this coupling with the parent by just passing the list in when calling initialise.
+    // So commented it out throughout. Remove all these commented bits out later if no issues found.
     displayOnly: Boolean,
     testProp: Number,
   },
   data() {
     return {
       connectorCount: 0,
-      rootConnectorID_set: new Set(), //not sure if these are used MM
-      rootStatementID_set: new Set(), //not sure if these are used MM
-      rootConnectorID: null, //not sure if these are used MM
+      rootConnectorID_set: new Set(),
+      rootStatementID_set: new Set(),
+      rootConnectorID: null,
 
       allConnectors: {},
       allStatements: {}, // this mirrors the parentStatementElements, but is keyed on the ID
@@ -116,12 +118,14 @@ export default {
         stringify(this.answerContent)
       );
     },
+    /*
     prettifiedStatementsDump() {
       return (
         "-----------this.parentStatementElements--------------\n" +
         stringify(this.parentStatementElements)
       );
     },
+    */
     prettifiedAllStatementsDump() {
       return (
         "-----------this.allstatements--------------\n" +
@@ -1312,8 +1316,8 @@ export default {
     async loadPreviousAnswer(parameter, newPropValue = -1) {
       //comment
       this.connectorCount = parseInt(parameter["connectorCount"]);
-      globalConsoleLog("conn", "AnswerArea:loadPreviousAnswer parameter[connectorCount] = ", parameter["connectorCount"],
-        " this.connectorCount=", this.connectorCount);
+      //globalConsoleLog("conn", "AnswerArea:loadPreviousAnswer parameter[connectorCount] = ", parameter["connectorCount"],  " this.connectorCount=", this.connectorCount);
+      console.log("loadpreviousanswer parameter:",parameter);
       this.rootConnectorID_set = new Set(parameter.rootConnectorID_set);
       this.rootStatementID_set = new Set(parameter.rootStatementID_set);
       this.rootConnectorID = parameter["rootConnectorID"];
@@ -1456,7 +1460,7 @@ export default {
      * Makes a deep copy of the statementElements rather than referring back to the parent.
      * This was a change so that we can dispense with the StatementArea.
      */
-    initialiseWithStatementElements() {
+    initialiseWithStatementElements(parentStatementElements) {
       globalConsoleLog("conn", "AnswerArea:initialiseWithStatementElements");
       this.connectorCount = 0;
       this.left = 0;
@@ -1467,14 +1471,14 @@ export default {
       this.allConnectors = {};
       this.allStatements = {};
 
-      if (this.parentStatementElements === undefined) {
-        globalConsoleLog("conn", "AnswerArea:parentStatementElements undefined")
+      if (parentStatementElements === undefined) {
+        globalConsoleLog("conn", "parentStatementElements undefined")
         return;
-      } else if (this.parentStatementElements.length === 0) {
-        globalConsoleLog("conn", "AnswerArea:parentStatementElements empty")
+      } else if (parentStatementElements.length === 0) {
+        globalConsoleLog("conn", "parentStatementElements empty")
         return;
       }
-      const statementCount = this.parentStatementElements.length;
+      const statementCount = parentStatementElements.length;
       if (statementCount > 50) {
         globalConsoleLog("conn", "statementCount error!");
         return;
@@ -1482,7 +1486,7 @@ export default {
       let i = 0;
       this.answerContent = {};
       while (i < statementCount) {
-        const item = JSON.parse(JSON.stringify(this.parentStatementElements[i]));
+        const item = JSON.parse(JSON.stringify(parentStatementElements[i]));
         this.allStatements[item.id] = item;
         this.rootStatementID_set.add(item.id);
         this.allStatements[item.id]["parent"] = -1;
@@ -1493,12 +1497,33 @@ export default {
         this.answerContent[item.id] = "dummy" + i;
         i++;
       }
+      //now we need to wait for the DOM to be rendered and then reposition things based on size.
+      this.$nextTick(() => {
+        //console.log("next Tick has happened so we can reposition things");
+        const boxes = this.$refs.answer_area_ref.querySelectorAll(".statement-box");
+        //console.log("found these RenderStatements",boxes);
+        let heights = [];
+        boxes.forEach((box, i) => {
+          const rect = box.getBoundingClientRect();
+          //console.log(`Box ${i}: ${rect.width} x ${rect.height}`);
+          // For example, set positions dynamically:
+          heights[i]=rect.height;
+        });
+        let lastTop = 20;
+        let i = 0;
+        for (const key in this.allStatements) {
+          //console.log("trying to iterate through the statements ",key," lasttop=",lastTop);
+          this.allStatements[key]["top"] = lastTop;
+          lastTop += heights[i];
+          i++;
+        }
+      });
     }
   },
 
   mounted() {
     globalConsoleLog("conn", "AnswerArea:mounted");
-    this.initialiseWithStatementElements();
+    //this.initialiseWithStatementElements();
   },
 
   watch: {
@@ -1508,12 +1533,13 @@ export default {
       },
       deep: true,
     },
-
+/*
     parentStatementElements() {
       globalConsoleLog("conn", "AnswerArea:parentStatementElements watch");
       // newStatements should be the same as just referencing the original prop for the parentStatementElements
-      this.initialiseWithStatementElements();
+      //this.initialiseWithStatementElements();
     },
+    */
   }
 
 };
@@ -1523,6 +1549,8 @@ export default {
 .answer_area_class {
   position: static;
   min-height: 100%;
+  height: 2000px;   /* these hard-coded sizes are a rough fix for now to make sure there is enough workspace - since the auto scaling was problematic */
+  width: 2000px;
   display: flex;
   border: 1px solid var(--biologic-blue-color);
   flex-grow: 1;
@@ -1575,7 +1603,7 @@ export default {
   padding-left: 1px;
   padding-top: 5px;
   padding-bottom: 0px;
-  height: 80%;
+  height: 90%;
   overflow-y: scroll;
   position: relative;
 }

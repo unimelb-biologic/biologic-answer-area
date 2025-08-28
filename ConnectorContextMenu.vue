@@ -1,7 +1,7 @@
 <template>
   <div id="demo" >
     <div class="connectorTextContainer">
-      <button class="popupButton" @click="openMenu($event)"><span>&#8942;</span></button>
+      <button class="popupButton biologic-dropdown-shadow" @click="openMenu($event)"><span>{{ options?.[choice]?.[1] ?? '⋮' }}</span></button>
     </div>
 
     <ul
@@ -18,8 +18,8 @@
         @click="handleContentSelect(index)"
         :key="index"
       >
-        {{ item[0] === undefined ? "" : item[0] }} [A]
-        {{ item[1] === undefined ? "" : item[1] }} [B]
+        {{ item[0] === undefined ? "" : item[0] }} ...
+        {{ item[1] === undefined ? "" : item[1] }} ...
         {{ item[2] === undefined ? "" : item[2] }}
       </li>
     </ul>
@@ -108,6 +108,7 @@ h1 {
   align-items: center;
   height: 100%;
   width: 100%;
+  padding: 20px;
 }
 
 .connectorTextContainer p {
@@ -173,13 +174,13 @@ h1 {
 }
 
 .popupButton{
-  color:#a60000;
-  background-color:rgb(219, 189, 189);
+  color:var(--biologic-blue-color);
+  background-color:rgb(255, 255, 255);
   margin: 0px 15px 0px 0px;
   font-weight:bolder;
   padding:0px 2px 0px 2px;
-  opacity: 0.05;
-  transition: opacity 0.3s ease;
+  /*opacity: 0.05;
+  transition: opacity 0.3s ease;*/
 }
 
 </style>
