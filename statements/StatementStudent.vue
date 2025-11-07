@@ -83,7 +83,7 @@
               <div v-if="typeof segment === 'string'">
 
                 <div v-if="isImage(segment)">
-                  <img :src="segment" class="biologicImage">
+                  <img :src="segment" class="biologicImage" v-hover-preview="500">
                 </div>
                 <div v-else>
                   {{ segment }}
