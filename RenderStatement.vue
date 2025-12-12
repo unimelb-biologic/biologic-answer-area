@@ -1,32 +1,64 @@
 <template>
-  <div class="statement-box" id="renderStatementElement" :draggable="true" @dragstart.stop="startDrag($event, data)"
-    @dragover.prevent @dragenter.prevent="handleDragEnteringRenderStatement"
-    @dragleave.prevent="handleDragLeavingRenderStatement" @drop="onDrop($event)" ref="mmStatementBox" :style="{
+  <div
+    class="statement-box"
+    id="renderStatementElement"
+    :draggable="true"
+    @dragstart.stop="startDrag($event, data)"
+    @dragover.prevent
+    @dragenter.prevent="handleDragEnteringRenderStatement"
+    @dragleave.prevent="handleDragLeavingRenderStatement"
+    @drop="onDrop($event)"
+    ref="mmStatementBox"
+    :style="{
       position: this.statementData.position,
       left: this.statementData.left + 'px',
       top: this.statementData.top + 'px',
-    }">
+    }"
+  >
+    <div class="drag-handle">&nbsp;</div>
 
-    <div class="drag-handle"> &nbsp;</div>
-
-    <StatementRoot ref="statementRootRef" v-bind="$attrs" v-if="this.statementData.statementType === 0"
-      :statement-data="this.statementData" @user-choice-changed="handleUserChoiceChanged"
-      @duplicate-statement="duplicateStatement" @delete-statement="deleteStatement"
+    <StatementRoot
+      ref="statementRootRef"
+      v-bind="$attrs"
+      v-if="this.statementData.statementType === 0"
+      :statement-data="this.statementData"
+      @user-choice-changed="handleUserChoiceChanged"
+      @duplicate-statement="duplicateStatement"
+      @delete-statement="deleteStatement"
       @toggle-collapsed-statement-root="toggleCollapsedStatementRoot"
-      @toggle-showPopup-fromstatementroot="toggleShowPopupStatementRoot" />
-    <StatementTruth ref="statementTruthRef" v-bind="$attrs" v-if="this.statementData.statementType === 1"
-      :statement-data="this.statementData" @user-choice-changed="handleUserChoiceChanged"
-      @duplicate-statement="duplicateStatement" @delete-statement="deleteStatement"
-      @toggle-collapsed-statement-truth="toggleCollapsedStatementTruth" />
-    <StatementStudent ref="statementStudentRef" v-bind="$attrs" v-if="this.statementData.statementType === 2"
-      :statement-data="this.statementData" @user-choice-changed="handleUserChoiceChanged"
-      @duplicate-statement="duplicateStatement" @delete-statement="deleteStatement"
+      @toggle-showPopup-fromstatementroot="toggleShowPopupStatementRoot"
+    />
+    <StatementTruth
+      ref="statementTruthRef"
+      v-bind="$attrs"
+      v-if="this.statementData.statementType === 1"
+      :statement-data="this.statementData"
+      @user-choice-changed="handleUserChoiceChanged"
+      @duplicate-statement="duplicateStatement"
+      @delete-statement="deleteStatement"
+      @toggle-collapsed-statement-truth="toggleCollapsedStatementTruth"
+    />
+    <StatementStudent
+      ref="statementStudentRef"
+      v-bind="$attrs"
+      v-if="this.statementData.statementType === 2"
+      :statement-data="this.statementData"
+      @user-choice-changed="handleUserChoiceChanged"
+      @duplicate-statement="duplicateStatement"
+      @delete-statement="deleteStatement"
       @toggle-collapsed-statement-student="toggleCollapsedStatementStudent"
-      @toggle-showPopup-fromstatementstudent="toggleShowPopupStatementStudent" />
-    <StatementFreeText ref="statementFreeTextRef" v-bind="$attrs" v-if="this.statementData.statementType === 3"
-      :statement-data="this.statementData" @user-input-changed="handleUserInputChanged"
-      @duplicate-statement="duplicateStatement" @delete-statement="deleteStatement"
-      @toggle-collapsed-statement-freetext="toggleCollapsedStatementFreeText" />
+      @toggle-showPopup-fromstatementstudent="toggleShowPopupStatementStudent"
+    />
+    <StatementFreeText
+      ref="statementFreeTextRef"
+      v-bind="$attrs"
+      v-if="this.statementData.statementType === 3"
+      :statement-data="this.statementData"
+      @user-input-changed="handleUserInputChanged"
+      @duplicate-statement="duplicateStatement"
+      @delete-statement="deleteStatement"
+      @toggle-collapsed-statement-freetext="toggleCollapsedStatementFreeText"
+    />
     <div v-if="renderedText">{{ renderedText }}</div>
   </div>
 </template>
@@ -36,7 +68,7 @@ import StatementRoot from "./statements/StatementRoot.vue";
 import StatementTruth from "./statements/StatementTruth.vue";
 import StatementStudent from "./statements/StatementStudent.vue";
 import StatementFreeText from "./statements/StatementFreeText.vue";
-import { globalConsoleLog } from './util';
+import { globalConsoleLog } from "./util";
 
 export default {
   name: "RenderStatement",
@@ -61,7 +93,7 @@ export default {
     statementData: Object,
   },
   inject: [
-    "displayOnly" // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
+    "displayOnly", // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
   ],
   data() {
     return {
@@ -85,11 +117,14 @@ export default {
         if (typeof ref.concatenatedStatement === "function")
           return ref.concatenatedStatement();
         else
-          return "Error: concatenatedStatement is not a function. The type is " + typeof ref.concatenatedStatement;
+          return (
+            "Error: concatenatedStatement is not a function. The type is " +
+            typeof ref.concatenatedStatement
+          );
       } else {
         return `Reference for statementType ${this.statementData.statementType} is not available`;
       }
-    }
+    },
   },
   methods: {
     handleDoubleClick(combinedText) {
@@ -107,7 +142,10 @@ export default {
 
     startDrag(e, data) {
       if (this.displayOnly) {
-        globalConsoleLog("any", "\n\nCANT DRAG RENDERSTATEMENT BECAUSE WERE IN DISPLAYONLY MODE\n\n");
+        globalConsoleLog(
+          "any",
+          "\n\nCANT DRAG RENDERSTATEMENT BECAUSE WERE IN DISPLAYONLY MODE\n\n",
+        );
         return;
       }
 
@@ -142,21 +180,42 @@ export default {
       // However the spec for the drag, dragenter, dragleave, dragover and dragend events the drag data store mode is protected mode.
       // this means you can see the types but not the values. So the workaround is to encode the values into the type names.
       const widthTypeStr = "draggedWidth/" + e.currentTarget.offsetWidth;
-      e.dataTransfer.setData(widthTypeStr, 0 /* i.e. the zero is a dummy value*/);
+      e.dataTransfer.setData(
+        widthTypeStr,
+        0 /* i.e. the zero is a dummy value*/,
+      );
       const heightTypeStr = "draggedHeight/" + e.currentTarget.offsetHeight;
-      e.dataTransfer.setData(heightTypeStr, 0 /* i.e. the zero is a dummy value*/);
+      e.dataTransfer.setData(
+        heightTypeStr,
+        0 /* i.e. the zero is a dummy value*/,
+      );
       const typeTypeStr = "draggedType/" + "render_statement";
-      e.dataTransfer.setData(typeTypeStr, 0 /* i.e. the zero is a dummy value*/);
+      e.dataTransfer.setData(
+        typeTypeStr,
+        0 /* i.e. the zero is a dummy value*/,
+      );
       const connectorIDTypeStr = "draggedConnectorID/";
-      e.dataTransfer.setData(connectorIDTypeStr, 0 /* i.e. the zero is a dummy value*/);
+      e.dataTransfer.setData(
+        connectorIDTypeStr,
+        0 /* i.e. the zero is a dummy value*/,
+      );
 
-      globalConsoleLog("geom", " SET UP DATA TRANSFER:", widthTypeStr, heightTypeStr, typeTypeStr, connectorIDTypeStr)
-
+      globalConsoleLog(
+        "geom",
+        " SET UP DATA TRANSFER:",
+        widthTypeStr,
+        heightTypeStr,
+        typeTypeStr,
+        connectorIDTypeStr,
+      );
     },
 
     onDrop(e) {
       if (this.displayOnly) {
-        globalConsoleLog("conn", "RenderStatement:onDrop but display only so return ");
+        globalConsoleLog(
+          "conn",
+          "RenderStatement:onDrop but display only so return ",
+        );
         return;
       }
 
@@ -188,7 +247,7 @@ export default {
       this.$emit(
         "update-statement-content",
         [this.contentText, this.answeredStat],
-        statementID
+        statementID,
       );
     },
 
@@ -199,65 +258,63 @@ export default {
       this.$emit(
         "update-statement-content",
         [this.contentText, this.answeredStat],
-        statementID
+        statementID,
       );
     },
 
     duplicateStatement(id) {
-      if (this.displayOnly)
-        return;
+      if (this.displayOnly) return;
 
       console.log(
-        "RenderStatement:duplicateStatement - calling emit duplicate-statement"
+        "RenderStatement:duplicateStatement - calling emit duplicate-statement",
       );
       this.$emit("duplicate-statement", id); // pass it on up the chain
     },
 
     deleteStatement(id) {
-      if (this.displayOnly)
-        return;
+      if (this.displayOnly) return;
 
       console.log(
-        "RenderStatement:deleteStatement - calling emit delete-statement"
+        "RenderStatement:deleteStatement - calling emit delete-statement",
       );
       this.$emit("delete-statement", id); // pass it on up the chain
     },
 
     toggleCollapsedStatementStudent(id) {
       console.log(
-        "RenderStatement:toggleCollapsedStatementStudent - calling emit toggle-collapsed-renderstatement"
+        "RenderStatement:toggleCollapsedStatementStudent - calling emit toggle-collapsed-renderstatement",
       );
       this.$emit("toggle-collapsed-renderstatement", id); // pass it on up the chain
     },
     toggleCollapsedStatementTruth(id) {
       console.log(
-        "RenderStatement:toggleCollapsedStatementTruth - calling emit toggle-collapsed-renderstatement"
+        "RenderStatement:toggleCollapsedStatementTruth - calling emit toggle-collapsed-renderstatement",
       );
       this.$emit("toggle-collapsed-renderstatement", id); // pass it on up the chain
     },
     toggleCollapsedStatementRoot(id) {
       console.log(
-        "RenderStatement:toggleCollapsedStatementRoot - calling emit toggle-collapsed-renderstatement"
+        "RenderStatement:toggleCollapsedStatementRoot - calling emit toggle-collapsed-renderstatement",
       );
       this.$emit("toggle-collapsed-renderstatement", id); // pass it on up the chain
     },
     toggleCollapsedStatementFreeText(id) {
       console.log(
-        "RenderStatement:toggleCollapsedStatementFreeText - calling emit toggle-collapsed-renderstatement"
+        "RenderStatement:toggleCollapsedStatementFreeText - calling emit toggle-collapsed-renderstatement",
       );
       this.$emit("toggle-collapsed-renderstatement", id); // pass it on up the chain
     },
 
     toggleShowPopupStatementStudent(id) {
       console.log(
-        "RenderStatement:toggleShowPopupStatementStudent - calling emit toggle-showPopup-fromrenderstatement"
+        "RenderStatement:toggleShowPopupStatementStudent - calling emit toggle-showPopup-fromrenderstatement",
       );
       this.$emit("toggle-showPopup-fromrenderstatement", id); // pass it on up the chain
     },
 
     toggleShowPopupStatementRoot(id) {
       console.log(
-        "RenderStatement:toggleShowPopupStatementRoot - calling emit toggle-showPopup-fromrenderstatement"
+        "RenderStatement:toggleShowPopupStatementRoot - calling emit toggle-showPopup-fromrenderstatement",
       );
       this.$emit("toggle-showPopup-fromrenderstatement", id); // pass it on up the chain
     },
@@ -271,14 +328,12 @@ export default {
         this.contentText = this.statementData.content.originalFacts
           .filter(
             (fact) =>
-              !this.remove_formats.some((format) => fact.includes(format))
+              !this.remove_formats.some((format) => fact.includes(format)),
           )
           .join(" ");
       }
       this.answeredStat = this.statementData;
     },
-
-
   },
   watch: {
     data() {
@@ -297,8 +352,7 @@ export default {
   },
   mounted() {
     //globalConsoleLog("conn", "RenderStatement mounted with injected displayOnly=",this.displayOnly);
-  }
-
+  },
 };
 </script>
 

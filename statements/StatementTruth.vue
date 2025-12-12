@@ -4,19 +4,36 @@
     <FeedbackRubric :isVisible="showFeedback" :exnetID="id" />
 
     <div class="content-wrapper">
-
       <div class="iconContainer">
-
-        <Tooltip :text="statementData.collapsed ? 'expand this statement' : 'collapse this statement'">
-          <v-btn size="x-small" v-show="showToggle" @click="toggleCollapsedStatement" class="statementButton"
-            :aria-label="statementData.collapsed ? 'Expand' : 'Collapse'">
-            <v-icon>{{ statementData.collapsed ? 'mdi-arrow-expand' : 'mdi-arrow-collapse' }}</v-icon>
+        <Tooltip
+          :text="
+            statementData.collapsed
+              ? 'expand this statement'
+              : 'collapse this statement'
+          "
+        >
+          <v-btn
+            size="x-small"
+            v-show="showToggle"
+            @click="toggleCollapsedStatement"
+            class="statementButton"
+            :aria-label="statementData.collapsed ? 'Expand' : 'Collapse'"
+          >
+            <v-icon>{{
+              statementData.collapsed
+                ? "mdi-arrow-expand"
+                : "mdi-arrow-collapse"
+            }}</v-icon>
           </v-btn>
         </Tooltip>
 
-
         <Tooltip text="duplicate this statement">
-          <v-btn size="x-small" v-if="showToggle && !displayOnly" @click="duplicateMe" class="statementButton">
+          <v-btn
+            size="x-small"
+            v-if="showToggle && !displayOnly"
+            @click="duplicateMe"
+            class="statementButton"
+          >
             <!--img class="statementButtonImage" src="../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
             <v-icon>mdi-content-duplicate</v-icon>
           </v-btn>
@@ -28,24 +45,42 @@
         </v-btn>
       </Tooltip-->
 
-
-        <button v-if="showToggle && isFeedbackAvailable" @click="showFeedback = !showFeedback" class="statementButton">
-          <img src="../assets/feedback-rubric.png" alt="FeedbackStatement" width="20" />
+        <button
+          v-if="showToggle && isFeedbackAvailable"
+          @click="showFeedback = !showFeedback"
+          class="statementButton"
+        >
+          <img
+            src="../assets/feedback-rubric.png"
+            alt="FeedbackStatement"
+            width="20"
+          />
         </button>
-
-
       </div>
-      <Tooltip text="Green statements are TRUTHs. i.e. a provided fact that you can use in your answer">
+      <Tooltip
+        text="Green statements are TRUTHs. i.e. a provided fact that you can use in your answer"
+      >
         <div class="main-content">
-          <div v-if="this.statementData.collapsed" class="concatenated-statement">
+          <div
+            v-if="this.statementData.collapsed"
+            class="concatenated-statement"
+          >
             {{ concatenatedStatement }}
           </div>
           <div v-else>
-            <div v-for="(segment, index) in this.statementData.content.originalFacts" :key="index">
+            <div
+              v-for="(segment, index) in this.statementData.content
+                .originalFacts"
+              :key="index"
+            >
               <!-- render the text from selection -->
               <div v-if="typeof segment === 'string'">
                 <div v-if="isImage(segment)">
-                  <img :src="segment" class="biologicImage" v-hover-preview="500"/>
+                  <img
+                    :src="segment"
+                    class="biologicImage"
+                    v-hover-preview="500"
+                  />
                 </div>
                 <div v-else>
                   {{ segment }}
@@ -68,7 +103,7 @@
 
 <script>
 import FeedbackRubric from "../FeedbackRubric.vue";
-import Tooltip from '../Tooltip.vue';
+import Tooltip from "../Tooltip.vue";
 
 export default {
   name: "StatementTruth",
@@ -78,7 +113,9 @@ export default {
   },
   inject: [
     "displayOnly", // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
-    "isFeedbackAvailable", "showAllFeedback", "displayOnly"
+    "isFeedbackAvailable",
+    "showAllFeedback",
+    "displayOnly",
   ],
   emits: [
     "user-choice-changed",
@@ -115,7 +152,7 @@ export default {
             ? this.isImage(segment)
               ? ""
               : segment
-            : this.userSelected[index] || segment[0]
+            : this.userSelected[index] || segment[0],
         )
         .join(" ");
     },
@@ -173,7 +210,7 @@ export default {
           // formatting original fact to remove https links and images
           const formattedFact = this.originalFacts[i].replace(
             /(https?:\/\/[^\s]+)|(\.png$)|(\.jpg$)|(\.jpeg$)/gi,
-            ""
+            "",
           );
           studentContentText += formattedFact;
           studentContentText += " ";
@@ -221,7 +258,6 @@ export default {
   mounted() {
     //console.log("StatementTruth mounted");
   },
-
 };
 </script>
 

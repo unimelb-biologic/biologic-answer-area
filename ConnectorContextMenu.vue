@@ -1,7 +1,12 @@
 <template>
-  <div id="demo" >
+  <div id="demo">
     <div class="connectorTextContainer">
-      <button class="popupButton biologic-dropdown-shadow" @click="openMenu($event)"><span>{{ options?.[choice]?.[1] ?? '⋮' }}</span></button>
+      <button
+        class="popupButton biologic-dropdown-shadow"
+        @click="openMenu($event)"
+      >
+        <span>{{ options?.[choice]?.[1] ?? "⋮" }}</span>
+      </button>
     </div>
 
     <ul
@@ -11,7 +16,7 @@
       v-if="viewMenu && parentID"
       @blur="closeMenu"
       :style="{ top: top, left: left }"
-      class = "connectorMenuUnorderedList"
+      class="connectorMenuUnorderedList"
     >
       <li
         v-for="(item, index) in options"
@@ -83,7 +88,7 @@ export default {
           this.$refs.right.focus();
 
           this.setMenu(e.clientY, e.clientX);
-        }.bind(this)
+        }.bind(this),
       );
       e.preventDefault();
     },
@@ -123,8 +128,8 @@ h1 {
 }
 
 .connectorTextContainer:hover .popupButton {
-  opacity:1;
-  background-color:rgb(252, 191, 191);
+  opacity: 1;
+  background-color: rgb(252, 191, 191);
 }
 
 .connectorText {
@@ -132,7 +137,7 @@ h1 {
   font-size: 30px;
   max-width: 80px;
   margin: 0px 5px 0px 5px;
-  color:#d50000;
+  color: #d50000;
 }
 
 #demo {
@@ -143,7 +148,9 @@ h1 {
 #right-click-menu {
   background: #f9f0f0;
   border: 1px solid #ffd0d0;
-  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2),
+  box-shadow:
+    0 2px 2px 0 rgba(0, 0, 0, 0.14),
+    0 3px 1px -2px rgba(0, 0, 0, 0.2),
     0 1px 5px 0 rgba(0, 0, 0, 0.12);
   display: block;
   list-style: none;
@@ -169,18 +176,17 @@ h1 {
   color: #fafafa;
 }
 
-.connectorMenuUnorderedList{
+.connectorMenuUnorderedList {
   font-size: 12px;
 }
 
-.popupButton{
-  color:var(--biologic-blue-color);
-  background-color:rgb(255, 255, 255);
+.popupButton {
+  color: var(--biologic-blue-color);
+  background-color: rgb(255, 255, 255);
   margin: 0px 15px 0px 0px;
-  font-weight:bolder;
-  padding:0px 2px 0px 2px;
+  font-weight: bolder;
+  padding: 0px 2px 0px 2px;
   /*opacity: 0.05;
   transition: opacity 0.3s ease;*/
 }
-
 </style>

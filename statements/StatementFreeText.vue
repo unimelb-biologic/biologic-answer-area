@@ -2,19 +2,36 @@
   <!-- record the statement position-->
   <div class="StatementFreeText">
     <div class="content-wrapper">
-
       <div class="iconContainer">
-
-        <Tooltip :text="statementData.collapsed ? 'expand this statement' : 'collapse this statement'">
-          <v-btn size="x-small" v-show="showToggle" @click="toggleCollapsedStatement" class="statementButton"
-            :aria-label="statementData.collapsed ? 'Expand' : 'Collapse'">
-            <v-icon>{{ statementData.collapsed ? 'mdi-arrow-expand' : 'mdi-arrow-collapse' }}</v-icon>
+        <Tooltip
+          :text="
+            statementData.collapsed
+              ? 'expand this statement'
+              : 'collapse this statement'
+          "
+        >
+          <v-btn
+            size="x-small"
+            v-show="showToggle"
+            @click="toggleCollapsedStatement"
+            class="statementButton"
+            :aria-label="statementData.collapsed ? 'Expand' : 'Collapse'"
+          >
+            <v-icon>{{
+              statementData.collapsed
+                ? "mdi-arrow-expand"
+                : "mdi-arrow-collapse"
+            }}</v-icon>
           </v-btn>
         </Tooltip>
 
         <button v-if="showToggle" @click="duplicateMe" class="statementButton">
-          <img class="duplicate-statement-button" src="../assets/duplicate_icon.png" alt="DuplicateStatement"
-            width="20" />
+          <img
+            class="duplicate-statement-button"
+            src="../assets/duplicate_icon.png"
+            alt="DuplicateStatement"
+            width="20"
+          />
         </button>
 
         <!--Tooltip :text="deleteButtonTooltipText">
@@ -22,16 +39,24 @@
           <v-icon>mdi-delete</v-icon>
         </v-btn>
       </Tooltip-->
-
       </div>
 
-      <Tooltip text="White statements are FREE statements. Type in your own statement.">
+      <Tooltip
+        text="White statements are FREE statements. Type in your own statement."
+      >
         <div class="main-content">
-          <div v-if="this.statementData.collapsed" class="concatenated-statement">
+          <div
+            v-if="this.statementData.collapsed"
+            class="concatenated-statement"
+          >
             {{ concatenatedStatement }}
           </div>
           <div v-else>
-            <textarea v-model="userInputText" id="input" class="textarea"></textarea>
+            <textarea
+              v-model="userInputText"
+              id="input"
+              class="textarea"
+            ></textarea>
           </div>
         </div>
       </Tooltip>
@@ -40,16 +65,19 @@
 </template>
 
 <script>
-
-import Tooltip from '../Tooltip.vue';
+import Tooltip from "../Tooltip.vue";
 
 export default {
   name: "StatementFreeText",
   components: {
-    Tooltip
+    Tooltip,
   },
-  emits: ["user-input-changed", "duplicate-statement", "delete-statement",
-    "toggle-collapsed-statement-freetext"],
+  emits: [
+    "user-input-changed",
+    "duplicate-statement",
+    "delete-statement",
+    "toggle-collapsed-statement-freetext",
+  ],
   props: {
     statementData: Object,
     position: String,
@@ -93,7 +121,7 @@ export default {
     },
     toggleCollapsedStatement() {
       //this.collapsed = !this.collapsed;
-      console.log("StatementFreeText:toggleCollapsedStatement")
+      console.log("StatementFreeText:toggleCollapsedStatement");
       this.$emit("toggle-collapsed-statement-freetext", this.id);
     },
   },
@@ -112,7 +140,7 @@ export default {
   },
   mounted() {
     //console.log("StatementFreeText mounted");
-  }
+  },
 };
 </script>
 
