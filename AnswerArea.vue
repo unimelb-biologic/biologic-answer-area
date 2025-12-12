@@ -1558,13 +1558,23 @@ export default {
 
     deleteStatement(id) {
       globalConsoleLog('conn', 'AnswerArea:deleteStatement');
-
       const theStatement = this.allStatements[id];
-      if (theStatement['parent'] == -1) {
+      const parent = theStatement['parent'];
+      if (parent === -1) {
         // so it is a top level statement
         this.rootStatementID_set.delete(id);
       } else {
         // need to tell connector parent to forget it
+        const side = theStatement.side;
+        if (side !== 'right' && side !== 'left') {
+          console.error('ERROR - INVALID SIDE');
+          return;
+        }
+        const parentConnector = this.allConnectors[parent];
+        parentConnector[`${side}Content`] = undefined;
+        parentConnector[`${side}ID`] = undefined;
+        parentConnector[`${side}StatementIdentifier`] = undefined;
+        parentConnector[`${side}Type`] = undefined;
       }
       delete this.allStatements[id];
       this.$emit('answerarea-state-change');
