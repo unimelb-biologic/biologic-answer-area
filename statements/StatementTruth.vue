@@ -39,11 +39,16 @@
           </v-btn>
         </Tooltip>
 
-        <!--Tooltip :text="deleteButtonTooltipText">
-        <v-btn v-if="!displayOnly" icon size="xx-small" @click="deleteStatement" class="statementButton">
-          <v-icon>mdi-delete</v-icon>
-        </v-btn>
-      </Tooltip-->
+        <Tooltip text="Delete statement">
+          <v-btn
+            size="x-small"
+            v-if="!displayOnly"
+            @click="deleteStatement"
+            class="statementButton"
+          >
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
+        </Tooltip>
 
         <button
           v-if="showToggle && isFeedbackAvailable"
@@ -194,7 +199,7 @@ export default {
     },
     deleteStatement() {
       // Emit an event to the parent component indicating that this statement should be deleted
-      this.$emit('delete-statement', [this.id]);
+      this.$emit('delete-statement', this.id);
     },
     toggleCollapsedStatement() {
       //this.collapsed = !this.collapsed;
