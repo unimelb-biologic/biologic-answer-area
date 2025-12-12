@@ -1559,8 +1559,8 @@ export default {
     deleteStatement(id) {
       globalConsoleLog('conn', 'AnswerArea:deleteStatement');
       const theStatement = this.allStatements[id];
-      const parent = theStatement['parent'];
-      if (parent === -1) {
+      const parentID = theStatement['parent'];
+      if (parentID === -1) {
         // so it is a top level statement
         this.rootStatementID_set.delete(id);
       } else {
@@ -1570,11 +1570,11 @@ export default {
           console.error('ERROR - INVALID SIDE');
           return;
         }
-        const parentConnector = this.allConnectors[parent];
-        parentConnector[`${side}Content`] = undefined;
-        parentConnector[`${side}ID`] = undefined;
-        parentConnector[`${side}StatementIdentifier`] = undefined;
-        parentConnector[`${side}Type`] = undefined;
+        const parent = this.allConnectors[parentID];
+        parent[`${side}Content`] = undefined;
+        parent[`${side}ID`] = undefined;
+        parent[`${side}StatementIdentifier`] = undefined;
+        parent[`${side}Type`] = undefined;
       }
       delete this.allStatements[id];
       this.$emit('answerarea-state-change');
