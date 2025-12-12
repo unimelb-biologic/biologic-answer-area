@@ -21,8 +21,8 @@
           >
             <v-icon>{{
               statementData.collapsed
-                ? "mdi-arrow-expand"
-                : "mdi-arrow-collapse"
+                ? 'mdi-arrow-expand'
+                : 'mdi-arrow-collapse'
             }}</v-icon>
           </v-btn>
         </Tooltip>
@@ -102,26 +102,26 @@
 </template>
 
 <script>
-import FeedbackRubric from "../FeedbackRubric.vue";
-import Tooltip from "../Tooltip.vue";
+import FeedbackRubric from '../FeedbackRubric.vue';
+import Tooltip from '../Tooltip.vue';
 
 export default {
-  name: "StatementTruth",
+  name: 'StatementTruth',
   components: {
     FeedbackRubric,
     Tooltip,
   },
   inject: [
-    "displayOnly", // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
-    "isFeedbackAvailable",
-    "showAllFeedback",
-    "displayOnly",
+    'displayOnly', // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
+    'isFeedbackAvailable',
+    'showAllFeedback',
+    'displayOnly',
   ],
   emits: [
-    "user-choice-changed",
-    "duplicate-statement",
-    "delete-statement",
-    "toggle-collapsed-statement-truth",
+    'user-choice-changed',
+    'duplicate-statement',
+    'delete-statement',
+    'toggle-collapsed-statement-truth',
   ],
   props: {
     statementData: Object,
@@ -148,24 +148,24 @@ export default {
     concatenatedStatement() {
       return this.statementData.content.originalFacts
         .map((segment, index) =>
-          typeof segment === "string"
+          typeof segment === 'string'
             ? this.isImage(segment)
-              ? ""
+              ? ''
               : segment
             : this.userSelected[index] || segment[0],
         )
-        .join(" ");
+        .join(' ');
     },
     getCollapseExpandIcon() {
       return this.collapsed
-        ? "../assets/expand_icon.png"
-        : "../assets/collapse_icon.png";
+        ? '../assets/expand_icon.png'
+        : '../assets/collapse_icon.png';
     },
   },
 
   watch: {
     userSelected: {
-      handler: "handleSelectChange",
+      handler: 'handleSelectChange',
       deep: true,
     },
     data() {
@@ -183,52 +183,52 @@ export default {
     // Verify the image format to display
     isImage(fact) {
       const isImg =
-        fact.endsWith(".jpg") ||
-        fact.endsWith(".png") ||
-        fact.endsWith(".jpeg");
+        fact.endsWith('.jpg') ||
+        fact.endsWith('.png') ||
+        fact.endsWith('.jpeg');
       //console.log("testing if fact<",fact," is an image - result is ",isImg);
       return isImg;
     },
     duplicateMe() {
-      this.$emit("duplicate-statement", [this.id]);
+      this.$emit('duplicate-statement', [this.id]);
     },
     deleteStatement() {
       // Emit an event to the parent component indicating that this statement should be deleted
-      this.$emit("delete-statement", [this.id]);
+      this.$emit('delete-statement', [this.id]);
     },
     toggleCollapsedStatement() {
       //this.collapsed = !this.collapsed;
-      console.log("StatementTruth:toggleCollapsedStatement");
-      this.$emit("toggle-collapsed-statement-truth", this.id);
+      console.log('StatementTruth:toggleCollapsedStatement');
+      this.$emit('toggle-collapsed-statement-truth', this.id);
     },
 
     handleSelectChange() {
-      let studentContentText = "";
+      let studentContentText = '';
       // Concat all the texts
       for (let i = 0; i < this.originalFacts.length; i++) {
-        if (typeof this.originalFacts[i] === "string") {
+        if (typeof this.originalFacts[i] === 'string') {
           // formatting original fact to remove https links and images
           const formattedFact = this.originalFacts[i].replace(
             /(https?:\/\/[^\s]+)|(\.png$)|(\.jpg$)|(\.jpeg$)/gi,
-            "",
+            '',
           );
           studentContentText += formattedFact;
-          studentContentText += " ";
+          studentContentText += ' ';
         } else {
           studentContentText += this.userSelected[i];
-          studentContentText += " ";
+          studentContentText += ' ';
         }
       }
 
       let newUserInput = [];
       for (let i = 0; i < this.userSelected.length; i++) {
-        if (this.userSelected[i] != "") {
+        if (this.userSelected[i] != '') {
           newUserInput.push(this.userSelected[i]);
         }
       }
       this.answeredData.content.userInput = newUserInput;
 
-      this.$emit("user-choice-changed", [
+      this.$emit('user-choice-changed', [
         studentContentText,
         this.answeredData,
       ]);
@@ -243,8 +243,8 @@ export default {
       let userInputID = 0;
       this.userSelected = [];
       for (let i = 0; i < this.originalFacts.length; i++) {
-        if (typeof this.originalFacts[i] === "string") {
-          this.userSelected.push("");
+        if (typeof this.originalFacts[i] === 'string') {
+          this.userSelected.push('');
         } else {
           this.userSelected.push(this.previousUserInput[userInputID]);
           userInputID += 1;
@@ -262,7 +262,7 @@ export default {
 </script>
 
 <style scoped>
-@import "../assets/tooltips.css";
+@import '../assets/tooltips.css';
 
 .StatementTruth {
   background-color: var(--biologic-truth-statement-color);

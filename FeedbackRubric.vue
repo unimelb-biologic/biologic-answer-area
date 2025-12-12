@@ -10,8 +10,8 @@
       <span v-if="gradingInfo">
         {{
           gradingInfo.feedback
-            ? gradingInfo.feedback + " - " + getScore
-            : "No Feedback"
+            ? gradingInfo.feedback + ' - ' + getScore
+            : 'No Feedback'
         }}
       </span>
 
@@ -22,7 +22,7 @@
 
 <script>
 export default {
-  name: "FeedbackRubric",
+  name: 'FeedbackRubric',
   data() {
     return {
       gradingInfo: null,
@@ -41,52 +41,52 @@ export default {
       default: false,
     },
   },
-  inject: ["feedbackRubricMap"],
+  inject: ['feedbackRubricMap'],
   methods: {},
 
   mounted() {},
 
   computed: {
     getGradeColor() {
-      if (!this.gradingInfo) return "default";
+      if (!this.gradingInfo) return 'default';
 
       switch (this.gradingInfo.rubricStatus) {
-        case "GC":
-          return "correct";
-        case "GIC":
-          return "wrong";
-        case "GPC":
-          return "partial-correct";
+        case 'GC':
+          return 'correct';
+        case 'GIC':
+          return 'wrong';
+        case 'GPC':
+          return 'partial-correct';
         default:
           break;
       }
 
-      return "default";
+      return 'default';
     },
 
     getScore() {
-      if (!this.gradingInfo) return "0/0";
+      if (!this.gradingInfo) return '0/0';
 
       return (
-        this.gradingInfo.rubricScore + "/" + this.gradingInfo.maxRubricScore
+        this.gradingInfo.rubricScore + '/' + this.gradingInfo.maxRubricScore
       );
     },
 
     getFeedbackIcon() {
-      if (!this.gradingInfo) return "";
+      if (!this.gradingInfo) return '';
 
       switch (this.gradingInfo.rubricStatus) {
-        case "GC":
-          return "./assets/correct_icon.png";
-        case "GIC":
-          return "./assets/wrong_icon.png";
-        case "GPC":
-          return "";
+        case 'GC':
+          return './assets/correct_icon.png';
+        case 'GIC':
+          return './assets/wrong_icon.png';
+        case 'GPC':
+          return '';
         default:
           break;
       }
 
-      return "";
+      return '';
     },
   },
 

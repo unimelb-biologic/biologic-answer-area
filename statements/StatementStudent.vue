@@ -20,8 +20,8 @@
           >
             <v-icon>{{
               statementData.collapsed
-                ? "mdi-arrow-expand"
-                : "mdi-arrow-collapse"
+                ? 'mdi-arrow-expand'
+                : 'mdi-arrow-collapse'
             }}</v-icon>
           </v-btn>
         </Tooltip>
@@ -161,21 +161,21 @@
 </template>
 
 <script>
-import FeedbackRubric from "../FeedbackRubric.vue";
-import Tooltip from "../Tooltip.vue";
+import FeedbackRubric from '../FeedbackRubric.vue';
+import Tooltip from '../Tooltip.vue';
 
 export default {
-  name: "StatementStudent",
+  name: 'StatementStudent',
   components: {
     FeedbackRubric,
     Tooltip,
   },
   emits: [
-    "user-choice-changed",
-    "duplicate-statement",
-    "delete-statement",
-    "toggle-showPopup-fromstatementstudent",
-    "toggle-collapsed-statement-student",
+    'user-choice-changed',
+    'duplicate-statement',
+    'delete-statement',
+    'toggle-showPopup-fromstatementstudent',
+    'toggle-collapsed-statement-student',
   ],
   props: {
     statementData: Object,
@@ -185,7 +185,7 @@ export default {
       default: false,
     },
   },
-  inject: ["isFeedbackAvailable", "showAllFeedback", "displayOnly"],
+  inject: ['isFeedbackAvailable', 'showAllFeedback', 'displayOnly'],
   data() {
     return {
       statementType: this.statementData.statementType,
@@ -203,73 +203,73 @@ export default {
     concatenatedStatement() {
       return this.statementData.content.originalFacts
         .map((segment, index) =>
-          typeof segment === "string"
+          typeof segment === 'string'
             ? this.isImage(segment)
-              ? ""
+              ? ''
               : segment
             : this.userSelected[index] || segment[0],
         )
-        .join(" ");
+        .join(' ');
     },
     getCollapseExpandIcon() {
       return this.collapsed
-        ? "../assets/expand_icon.png"
-        : "../assets/collapse_icon.png";
+        ? '../assets/expand_icon.png'
+        : '../assets/collapse_icon.png';
     },
   },
   methods: {
     isImage(fact) {
       const isImg =
-        fact.endsWith(".jpg") ||
-        fact.endsWith(".png") ||
-        fact.endsWith(".jpeg");
+        fact.endsWith('.jpg') ||
+        fact.endsWith('.png') ||
+        fact.endsWith('.jpeg');
       //console.log("testing if fact<",fact," is an image - result is ",isImg);
       return isImg;
     },
     toggleCollapsedStatement() {
       //this.collapsed = !this.collapsed;
-      console.log("StatementStudent:toggleCollapsedStatement");
-      this.$emit("toggle-collapsed-statement-student", this.id);
+      console.log('StatementStudent:toggleCollapsedStatement');
+      this.$emit('toggle-collapsed-statement-student', this.id);
     },
     toggleShowPopup() {
       //this.showPopup = !this.showPopup;
       console.log(
-        "StatementStudent:toggleShowPopup emitting toggle-showPopup-fromstatementstudent",
+        'StatementStudent:toggleShowPopup emitting toggle-showPopup-fromstatementstudent',
       );
-      this.$emit("toggle-showPopup-fromstatementstudent", [this.id]);
+      this.$emit('toggle-showPopup-fromstatementstudent', [this.id]);
     },
     handleSelectChange() {
-      let studentContentText = "";
+      let studentContentText = '';
       // Concat all the texts
       for (let i = 0; i < this.originalFacts.length; i++) {
-        if (typeof this.originalFacts[i] === "string") {
+        if (typeof this.originalFacts[i] === 'string') {
           studentContentText += this.originalFacts[i];
-          studentContentText += " ";
+          studentContentText += ' ';
         } else {
           studentContentText += this.userSelected[i];
-          studentContentText += " ";
+          studentContentText += ' ';
         }
       }
 
       let newUserInput = [];
       for (let i = 0; i < this.userSelected.length; i++) {
-        if (this.userSelected[i] != "") {
+        if (this.userSelected[i] != '') {
           newUserInput.push(this.userSelected[i]);
         }
       }
       this.answeredData.content.userInput = newUserInput;
 
-      this.$emit("user-choice-changed", [
+      this.$emit('user-choice-changed', [
         studentContentText,
         this.answeredData,
       ]);
     },
     duplicateMe() {
-      this.$emit("duplicate-statement", [this.id]);
+      this.$emit('duplicate-statement', [this.id]);
     },
     deleteStatement() {
       // Emit an event to the parent component indicating that this statement should be deleted
-      this.$emit("delete-statement", [this.id]);
+      this.$emit('delete-statement', [this.id]);
     },
 
     initContent() {
@@ -281,8 +281,8 @@ export default {
       let userInputID = 0;
       this.userSelected = [];
       for (let i = 0; i < this.originalFacts.length; i++) {
-        if (typeof this.originalFacts[i] === "string") {
-          this.userSelected.push("");
+        if (typeof this.originalFacts[i] === 'string') {
+          this.userSelected.push('');
         } else {
           this.userSelected.push(this.previousUserInput[userInputID]);
           userInputID += 1;
@@ -297,7 +297,7 @@ export default {
       this.initContent();
     },
     userSelected: {
-      handler: "handleSelectChange",
+      handler: 'handleSelectChange',
       deep: true,
     },
     data() {
@@ -317,7 +317,7 @@ export default {
 </script>
 
 <style scoped>
-@import "../assets/tooltips.css";
+@import '../assets/tooltips.css';
 
 .StatementStudent {
   background-color: var(--biologic-student-statement-color);

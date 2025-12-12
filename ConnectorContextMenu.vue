@@ -5,7 +5,7 @@
         class="popupButton biologic-dropdown-shadow"
         @click="openMenu($event)"
       >
-        <span>{{ options?.[choice]?.[1] ?? "⋮" }}</span>
+        <span>{{ options?.[choice]?.[1] ?? '⋮' }}</span>
       </button>
     </div>
 
@@ -23,21 +23,21 @@
         @click="handleContentSelect(index)"
         :key="index"
       >
-        {{ item[0] === undefined ? "" : item[0] }} ...
-        {{ item[1] === undefined ? "" : item[1] }} ...
-        {{ item[2] === undefined ? "" : item[2] }}
+        {{ item[0] === undefined ? '' : item[0] }} ...
+        {{ item[1] === undefined ? '' : item[1] }} ...
+        {{ item[2] === undefined ? '' : item[2] }}
       </li>
     </ul>
   </div>
 </template>
 
 <script>
-import { nextTick } from "vue";
+import { nextTick } from 'vue';
 
 export default {
-  name: "ConnectorContextMenu",
+  name: 'ConnectorContextMenu',
 
-  emits: ["changeLinkWord"],
+  emits: ['changeLinkWord'],
 
   props: {
     index: Number,
@@ -50,15 +50,15 @@ export default {
   data() {
     return {
       viewMenu: false,
-      top: "0px",
-      left: "0px",
+      top: '0px',
+      left: '0px',
     };
   },
 
   methods: {
     handleContentSelect(choice) {
       console.log(choice);
-      this.$emit("changeLinkWord", [this.connectorID, choice]);
+      this.$emit('changeLinkWord', [this.connectorID, choice]);
       this.viewMenu = false;
     },
 
@@ -72,8 +72,8 @@ export default {
 
       if (left > largestWidth) left = largestWidth;
 
-      this.top = top + "px" - 100;
-      this.left = left + "px" - 200;
+      this.top = top + 'px' - 100;
+      this.left = left + 'px' - 200;
     },
 
     closeMenu: function () {

@@ -26,7 +26,7 @@
           title="click to open Connector Panel"
         >
           <v-icon>{{
-            collapsed ? "mdi-chevron-down" : "mdi-chevron-up"
+            collapsed ? 'mdi-chevron-down' : 'mdi-chevron-up'
           }}</v-icon>
         </v-btn>
       </div>
@@ -45,13 +45,13 @@
 </template>
 
 <script>
-import Connector from "./Connector.vue";
-import VueDraggableResizable from "vue-draggable-resizable";
-import "./assets/VueDraggableResizable_Style.css";
-import Tooltip from "./Tooltip.vue";
+import Connector from './Connector.vue';
+import VueDraggableResizable from 'vue-draggable-resizable';
+import './assets/VueDraggableResizable_Style.css';
+import Tooltip from './Tooltip.vue';
 
 export default {
-  name: "ConnectorArea",
+  name: 'ConnectorArea',
   props: {},
   emits: [],
   components: {
@@ -74,64 +74,64 @@ export default {
         [
           0,
           [
-            [undefined, " because ", undefined],
-            [undefined, ". The reason for this is that ", undefined],
-            [undefined, " due to the fact that ", undefined],
+            [undefined, ' because ', undefined],
+            [undefined, '. The reason for this is that ', undefined],
+            [undefined, ' due to the fact that ', undefined],
           ],
         ],
 
         [
           1,
           [
-            [undefined, " so ", undefined],
-            [undefined, ". This implies that ", undefined],
-            [undefined, " which implies that ", undefined],
-            [undefined, " hence ", undefined],
-            [undefined, ". Thus, ", undefined],
-            [undefined, " which suggests that ", undefined],
-            [undefined, ". This suggests that ", undefined],
-            [undefined, " indicating that ", undefined],
-            [undefined, " suggesting the possibility that ", undefined],
+            [undefined, ' so ', undefined],
+            [undefined, '. This implies that ', undefined],
+            [undefined, ' which implies that ', undefined],
+            [undefined, ' hence ', undefined],
+            [undefined, '. Thus, ', undefined],
+            [undefined, ' which suggests that ', undefined],
+            [undefined, '. This suggests that ', undefined],
+            [undefined, ' indicating that ', undefined],
+            [undefined, ' suggesting the possibility that ', undefined],
           ],
         ],
 
-        [2, [[undefined, " shows that ", undefined]]],
+        [2, [[undefined, ' shows that ', undefined]]],
 
         [
           3,
           [
-            [undefined, " and ", undefined],
-            [undefined, ". In addition, ", undefined],
-            [undefined, " together with the fact that ", undefined],
-            [undefined, ". Furthermore, ", undefined],
-            [undefined, ". Moreover, ", undefined],
-            [undefined, ". Similarly, ", undefined],
+            [undefined, ' and ', undefined],
+            [undefined, '. In addition, ', undefined],
+            [undefined, ' together with the fact that ', undefined],
+            [undefined, '. Furthermore, ', undefined],
+            [undefined, '. Moreover, ', undefined],
+            [undefined, '. Similarly, ', undefined],
           ],
         ],
 
         [
           4,
           [
-            [undefined, " whereas ", undefined],
-            [undefined, ". On the other hand ", undefined],
-            [undefined, " but ", undefined],
-            [undefined, " however ", undefined],
-            [undefined, ". In contrast, ", undefined],
+            [undefined, ' whereas ', undefined],
+            [undefined, '. On the other hand ', undefined],
+            [undefined, ' but ', undefined],
+            [undefined, ' however ', undefined],
+            [undefined, '. In contrast, ', undefined],
           ],
         ],
 
         [
           7,
           [
-            [undefined, " e.g. ", undefined],
-            [undefined, ". For example, ", undefined],
+            [undefined, ' e.g. ', undefined],
+            [undefined, '. For example, ', undefined],
           ],
         ],
         [
           8,
           [
-            [undefined, " i.e. ", undefined],
-            [undefined, ". In other words, ", undefined],
+            [undefined, ' i.e. ', undefined],
+            [undefined, '. In other words, ', undefined],
           ],
         ],
       ],

@@ -19,8 +19,8 @@
           >
             <v-icon>{{
               statementData.collapsed
-                ? "mdi-arrow-expand"
-                : "mdi-arrow-collapse"
+                ? 'mdi-arrow-expand'
+                : 'mdi-arrow-collapse'
             }}</v-icon>
           </v-btn>
         </Tooltip>
@@ -65,18 +65,18 @@
 </template>
 
 <script>
-import Tooltip from "../Tooltip.vue";
+import Tooltip from '../Tooltip.vue';
 
 export default {
-  name: "StatementFreeText",
+  name: 'StatementFreeText',
   components: {
     Tooltip,
   },
   emits: [
-    "user-input-changed",
-    "duplicate-statement",
-    "delete-statement",
-    "toggle-collapsed-statement-freetext",
+    'user-input-changed',
+    'duplicate-statement',
+    'delete-statement',
+    'toggle-collapsed-statement-freetext',
   ],
   props: {
     statementData: Object,
@@ -93,7 +93,7 @@ export default {
       id: this.statementData.id,
       originalFacts: this.statementData.content.originalFacts,
       previousUserInput: this.statementData.content.userInput,
-      userInputText: "",
+      userInputText: '',
 
       answeredData: null,
     };
@@ -113,23 +113,23 @@ export default {
       this.answeredData = this.statementData;
     },
     duplicateMe() {
-      this.$emit("duplicate-statement", [this.id]);
+      this.$emit('duplicate-statement', [this.id]);
     },
     deleteStatement() {
       // Emit an event to the parent component indicating that this statement should be deleted
-      this.$emit("delete-statement", [this.id]);
+      this.$emit('delete-statement', [this.id]);
     },
     toggleCollapsedStatement() {
       //this.collapsed = !this.collapsed;
-      console.log("StatementFreeText:toggleCollapsedStatement");
-      this.$emit("toggle-collapsed-statement-freetext", this.id);
+      console.log('StatementFreeText:toggleCollapsedStatement');
+      this.$emit('toggle-collapsed-statement-freetext', this.id);
     },
   },
   watch: {
     // Pass the new input to other component
     userInputText(newUserInput) {
       this.answeredData.content.userInput = newUserInput;
-      this.$emit("user-input-changed", [newUserInput, this.answeredData]);
+      this.$emit('user-input-changed', [newUserInput, this.answeredData]);
     },
     data() {
       this.initContent();
@@ -145,7 +145,7 @@ export default {
 </script>
 
 <style scoped>
-@import "../assets/tooltips.css";
+@import '../assets/tooltips.css';
 
 .StatementFreeText {
   background-color: var(--biologic-freetext-statement-color);

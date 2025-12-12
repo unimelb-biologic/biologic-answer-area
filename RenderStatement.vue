@@ -64,14 +64,14 @@
 </template>
 
 <script>
-import StatementRoot from "./statements/StatementRoot.vue";
-import StatementTruth from "./statements/StatementTruth.vue";
-import StatementStudent from "./statements/StatementStudent.vue";
-import StatementFreeText from "./statements/StatementFreeText.vue";
-import { globalConsoleLog } from "./util";
+import StatementRoot from './statements/StatementRoot.vue';
+import StatementTruth from './statements/StatementTruth.vue';
+import StatementStudent from './statements/StatementStudent.vue';
+import StatementFreeText from './statements/StatementFreeText.vue';
+import { globalConsoleLog } from './util';
 
 export default {
-  name: "RenderStatement",
+  name: 'RenderStatement',
   components: {
     StatementFreeText,
     StatementStudent,
@@ -79,29 +79,29 @@ export default {
     StatementRoot,
   },
   emits: [
-    "update-statement-content",
-    "onDragStart",
-    "connector-dropped-on-statement",
-    "statement-dropped-on-statement",
-    "duplicate-statement",
-    "delete-statement",
-    "toggle-collapsed-renderstatement",
-    "toggle-showPopup-fromrenderstatement",
+    'update-statement-content',
+    'onDragStart',
+    'connector-dropped-on-statement',
+    'statement-dropped-on-statement',
+    'duplicate-statement',
+    'delete-statement',
+    'toggle-collapsed-renderstatement',
+    'toggle-showPopup-fromrenderstatement',
   ],
   inheritAttrs: false,
   props: {
     statementData: Object,
   },
   inject: [
-    "displayOnly", // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
+    'displayOnly', // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
   ],
   data() {
     return {
-      contentText: "",
+      contentText: '',
       answeredStat: null,
       hide_renderCollapsed: false,
       hide_renderShowPopups: true,
-      remove_formats: [".png", ".jpg", ".jpeg"], // array of formats to exclude from the answer string
+      remove_formats: ['.png', '.jpg', '.jpeg'], // array of formats to exclude from the answer string
     };
   },
   computed: {
@@ -114,11 +114,11 @@ export default {
       };
       const ref = refMap[this.statementData.statementType];
       if (ref) {
-        if (typeof ref.concatenatedStatement === "function")
+        if (typeof ref.concatenatedStatement === 'function')
           return ref.concatenatedStatement();
         else
           return (
-            "Error: concatenatedStatement is not a function. The type is " +
+            'Error: concatenatedStatement is not a function. The type is ' +
             typeof ref.concatenatedStatement
           );
       } else {
@@ -143,19 +143,19 @@ export default {
     startDrag(e, data) {
       if (this.displayOnly) {
         globalConsoleLog(
-          "any",
-          "\n\nCANT DRAG RENDERSTATEMENT BECAUSE WERE IN DISPLAYONLY MODE\n\n",
+          'any',
+          '\n\nCANT DRAG RENDERSTATEMENT BECAUSE WERE IN DISPLAYONLY MODE\n\n',
         );
         return;
       }
 
       // e.target.className = 'dragEffect';
-      e.dataTransfer.dropEffect = "move";
-      e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("data", JSON.stringify(this.statementData));
-      e.dataTransfer.setData("type", "statement");
+      e.dataTransfer.dropEffect = 'move';
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('data', JSON.stringify(this.statementData));
+      e.dataTransfer.setData('type', 'statement');
       // Pass the statement content through drag event
-      e.dataTransfer.setData("content", this.contentText);
+      e.dataTransfer.setData('content', this.contentText);
 
       // Pass the click offset
       const mmBox = this.$refs.mmStatementBox;
@@ -171,38 +171,38 @@ export default {
         grabOffsetTop
       );
       */
-      e.dataTransfer.setData("grabOffsetLeft", grabOffsetLeft.toString());
-      e.dataTransfer.setData("grabOffsetTop", grabOffsetTop.toString());
+      e.dataTransfer.setData('grabOffsetLeft', grabOffsetLeft.toString());
+      e.dataTransfer.setData('grabOffsetTop', grabOffsetTop.toString());
 
-      this.$emit("onDragStart", data);
+      this.$emit('onDragStart', data);
 
       // the following geometry information is used by the Target boxes in the connectors to change size dynamically.
       // However the spec for the drag, dragenter, dragleave, dragover and dragend events the drag data store mode is protected mode.
       // this means you can see the types but not the values. So the workaround is to encode the values into the type names.
-      const widthTypeStr = "draggedWidth/" + e.currentTarget.offsetWidth;
+      const widthTypeStr = 'draggedWidth/' + e.currentTarget.offsetWidth;
       e.dataTransfer.setData(
         widthTypeStr,
         0 /* i.e. the zero is a dummy value*/,
       );
-      const heightTypeStr = "draggedHeight/" + e.currentTarget.offsetHeight;
+      const heightTypeStr = 'draggedHeight/' + e.currentTarget.offsetHeight;
       e.dataTransfer.setData(
         heightTypeStr,
         0 /* i.e. the zero is a dummy value*/,
       );
-      const typeTypeStr = "draggedType/" + "render_statement";
+      const typeTypeStr = 'draggedType/' + 'render_statement';
       e.dataTransfer.setData(
         typeTypeStr,
         0 /* i.e. the zero is a dummy value*/,
       );
-      const connectorIDTypeStr = "draggedConnectorID/";
+      const connectorIDTypeStr = 'draggedConnectorID/';
       e.dataTransfer.setData(
         connectorIDTypeStr,
         0 /* i.e. the zero is a dummy value*/,
       );
 
       globalConsoleLog(
-        "geom",
-        " SET UP DATA TRANSFER:",
+        'geom',
+        ' SET UP DATA TRANSFER:',
         widthTypeStr,
         heightTypeStr,
         typeTypeStr,
@@ -213,26 +213,26 @@ export default {
     onDrop(e) {
       if (this.displayOnly) {
         globalConsoleLog(
-          "conn",
-          "RenderStatement:onDrop but display only so return ",
+          'conn',
+          'RenderStatement:onDrop but display only so return ',
         );
         return;
       }
 
       e.stopImmediatePropagation();
-      const type = e.dataTransfer.getData("type");
+      const type = e.dataTransfer.getData('type');
       //globalConsoleLog("conn", "RenderStatement:onDrop type=", type);
-      if (type == "connector") {
+      if (type == 'connector') {
         // ignore if it was statement droopped on statement
         //globalConsoleLog("conn", " emitting connector-dropped-on-statement");
-        this.$emit("connector-dropped-on-statement", [
+        this.$emit('connector-dropped-on-statement', [
           this.statementData.id,
           undefined,
           e,
         ]); // let the Parent deal with it
-      } else if (type == "statement") {
-        globalConsoleLog("conn", " emitting statement-dropped-on-statement");
-        this.$emit("statement-dropped-on-statement", [
+      } else if (type == 'statement') {
+        globalConsoleLog('conn', ' emitting statement-dropped-on-statement');
+        this.$emit('statement-dropped-on-statement', [
           this.statementData.id,
           e,
         ]); // let the Parent deal with it
@@ -242,10 +242,10 @@ export default {
     handleUserChoiceChanged(info) {
       this.contentText = info[0];
       this.answeredStat = info[1];
-      const statementID = info[1]["id"];
+      const statementID = info[1]['id'];
       //globalConsoleLog("conn", "RenderStatement::emitting update-statement-content ",this.contentText,this.answeredStat);
       this.$emit(
-        "update-statement-content",
+        'update-statement-content',
         [this.contentText, this.answeredStat],
         statementID,
       );
@@ -254,9 +254,9 @@ export default {
     handleUserInputChanged(info) {
       this.contentText = info[0];
       this.answeredStat = info[1];
-      const statementID = info[1]["id"];
+      const statementID = info[1]['id'];
       this.$emit(
-        "update-statement-content",
+        'update-statement-content',
         [this.contentText, this.answeredStat],
         statementID,
       );
@@ -266,57 +266,57 @@ export default {
       if (this.displayOnly) return;
 
       console.log(
-        "RenderStatement:duplicateStatement - calling emit duplicate-statement",
+        'RenderStatement:duplicateStatement - calling emit duplicate-statement',
       );
-      this.$emit("duplicate-statement", id); // pass it on up the chain
+      this.$emit('duplicate-statement', id); // pass it on up the chain
     },
 
     deleteStatement(id) {
       if (this.displayOnly) return;
 
       console.log(
-        "RenderStatement:deleteStatement - calling emit delete-statement",
+        'RenderStatement:deleteStatement - calling emit delete-statement',
       );
-      this.$emit("delete-statement", id); // pass it on up the chain
+      this.$emit('delete-statement', id); // pass it on up the chain
     },
 
     toggleCollapsedStatementStudent(id) {
       console.log(
-        "RenderStatement:toggleCollapsedStatementStudent - calling emit toggle-collapsed-renderstatement",
+        'RenderStatement:toggleCollapsedStatementStudent - calling emit toggle-collapsed-renderstatement',
       );
-      this.$emit("toggle-collapsed-renderstatement", id); // pass it on up the chain
+      this.$emit('toggle-collapsed-renderstatement', id); // pass it on up the chain
     },
     toggleCollapsedStatementTruth(id) {
       console.log(
-        "RenderStatement:toggleCollapsedStatementTruth - calling emit toggle-collapsed-renderstatement",
+        'RenderStatement:toggleCollapsedStatementTruth - calling emit toggle-collapsed-renderstatement',
       );
-      this.$emit("toggle-collapsed-renderstatement", id); // pass it on up the chain
+      this.$emit('toggle-collapsed-renderstatement', id); // pass it on up the chain
     },
     toggleCollapsedStatementRoot(id) {
       console.log(
-        "RenderStatement:toggleCollapsedStatementRoot - calling emit toggle-collapsed-renderstatement",
+        'RenderStatement:toggleCollapsedStatementRoot - calling emit toggle-collapsed-renderstatement',
       );
-      this.$emit("toggle-collapsed-renderstatement", id); // pass it on up the chain
+      this.$emit('toggle-collapsed-renderstatement', id); // pass it on up the chain
     },
     toggleCollapsedStatementFreeText(id) {
       console.log(
-        "RenderStatement:toggleCollapsedStatementFreeText - calling emit toggle-collapsed-renderstatement",
+        'RenderStatement:toggleCollapsedStatementFreeText - calling emit toggle-collapsed-renderstatement',
       );
-      this.$emit("toggle-collapsed-renderstatement", id); // pass it on up the chain
+      this.$emit('toggle-collapsed-renderstatement', id); // pass it on up the chain
     },
 
     toggleShowPopupStatementStudent(id) {
       console.log(
-        "RenderStatement:toggleShowPopupStatementStudent - calling emit toggle-showPopup-fromrenderstatement",
+        'RenderStatement:toggleShowPopupStatementStudent - calling emit toggle-showPopup-fromrenderstatement',
       );
-      this.$emit("toggle-showPopup-fromrenderstatement", id); // pass it on up the chain
+      this.$emit('toggle-showPopup-fromrenderstatement', id); // pass it on up the chain
     },
 
     toggleShowPopupStatementRoot(id) {
       console.log(
-        "RenderStatement:toggleShowPopupStatementRoot - calling emit toggle-showPopup-fromrenderstatement",
+        'RenderStatement:toggleShowPopupStatementRoot - calling emit toggle-showPopup-fromrenderstatement',
       );
-      this.$emit("toggle-showPopup-fromrenderstatement", id); // pass it on up the chain
+      this.$emit('toggle-showPopup-fromrenderstatement', id); // pass it on up the chain
     },
 
     initContent() {
@@ -330,7 +330,7 @@ export default {
             (fact) =>
               !this.remove_formats.some((format) => fact.includes(format)),
           )
-          .join(" ");
+          .join(' ');
       }
       this.answeredStat = this.statementData;
     },
