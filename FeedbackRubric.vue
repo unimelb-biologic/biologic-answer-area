@@ -1,113 +1,106 @@
 <template>
-
   <div>
-
-    <div v-if="isVisible" class="tooltips active feedback-info" :class="getGradeColor">
+    <div
+      v-if="isVisible"
+      class="tooltips active feedback-info"
+      :class="getGradeColor"
+    >
       <img v-if="gradingInfo" class="feedback-icon" :src="getFeedbackIcon" />
 
       <span v-if="gradingInfo">
-        {{ gradingInfo.feedback ? gradingInfo.feedback + " - " + getScore : "No Feedback" }}
+        {{
+          gradingInfo.feedback
+            ? gradingInfo.feedback + ' - ' + getScore
+            : 'No Feedback'
+        }}
       </span>
 
-      <span v-if="!gradingInfo">
-        No feedback provided
-      </span>
-
+      <span v-if="!gradingInfo"> No feedback provided </span>
     </div>
-
   </div>
-
-
 </template>
 
 <script>
-
-
 export default {
-  name: "FeedbackRubric",
+  name: 'FeedbackRubric',
   data() {
     return {
       gradingInfo: null,
-    }
+    };
   },
   props: {
     isVisible: {
       type: Boolean,
-      default: false
+      default: false,
     },
     exnetID: {
-      type: Number
+      type: Number,
     },
     isConnector: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   inject: ['feedbackRubricMap'],
-  methods: {
+  methods: {},
 
-  },
-
-  mounted() {
-
-  },
+  mounted() {},
 
   computed: {
     getGradeColor() {
-
-      if (!this.gradingInfo)
-        return 'default';
+      if (!this.gradingInfo) return 'default';
 
       switch (this.gradingInfo.rubricStatus) {
         case 'GC':
-          return 'correct'
+          return 'correct';
         case 'GIC':
-          return 'wrong'
+          return 'wrong';
         case 'GPC':
-          return 'partial-correct'
+          return 'partial-correct';
         default:
-          break
+          break;
       }
 
       return 'default';
     },
 
     getScore() {
-      if (!this.gradingInfo)
-        return '0/0';
+      if (!this.gradingInfo) return '0/0';
 
-      return this.gradingInfo.rubricScore + "/" + this.gradingInfo.maxRubricScore;
+      return (
+        this.gradingInfo.rubricScore + '/' + this.gradingInfo.maxRubricScore
+      );
     },
 
     getFeedbackIcon() {
-
-      if (!this.gradingInfo)
-        return '';
+      if (!this.gradingInfo) return '';
 
       switch (this.gradingInfo.rubricStatus) {
         case 'GC':
-          return './assets/correct_icon.png'
+          return './assets/correct_icon.png';
         case 'GIC':
-          return './assets/wrong_icon.png'
+          return './assets/wrong_icon.png';
         case 'GPC':
-          return ''
+          return '';
         default:
-          break
+          break;
       }
 
       return '';
-    }
-
+    },
   },
 
   watch: {
     isVisible() {
-      if (this.isVisible && this.feedbackRubricMap && this.feedbackRubricMap[this.exnetID] != undefined) {
-        this.gradingInfo = this.feedbackRubricMap[this.exnetID]
+      if (
+        this.isVisible &&
+        this.feedbackRubricMap &&
+        this.feedbackRubricMap[this.exnetID] != undefined
+      ) {
+        this.gradingInfo = this.feedbackRubricMap[this.exnetID];
       }
-    }
-  }
-
+    },
+  },
 };
 </script>
 

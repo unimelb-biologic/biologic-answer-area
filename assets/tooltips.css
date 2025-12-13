@@ -2,7 +2,7 @@
 .tooltips {
   position: relative;
   display: inline;
-  color:grey;
+  color: grey;
   height: 15px;
   line-height: 15px;
   /*border-bottom: 1px dotted black;  If you want dots under the hoverable text */
@@ -18,7 +18,6 @@
   border-radius: 3px;
   top: -5px;
   left: 105%;
-  
 }
 
 .tooltips:hover .tooltip_info {
@@ -31,74 +30,72 @@
   /* change visible to hidden for opposite effect */
 }
 
-
 /* statementFreeText tooltips css style */
 .StatementFreeText .StatementFreeText_tooltip {
-visibility: hidden;
-width: fit-content;
-background-color: black;
-color: white;
-text-align: left;
-padding: 5px;
-border-radius: 6px;
-top: 100%;
-left: 0;
-position:absolute;
-z-index: 1;
-margin-top: 5px;
-
+  visibility: hidden;
+  width: fit-content;
+  background-color: black;
+  color: white;
+  text-align: left;
+  padding: 5px;
+  border-radius: 6px;
+  top: 100%;
+  left: 0;
+  position: absolute;
+  z-index: 1;
+  margin-top: 5px;
 }
 
-.StatementFreeText:hover .StatementFreeText_tooltip  {
-visibility: visible;
-transition-delay: 1s;
+.StatementFreeText:hover .StatementFreeText_tooltip {
+  visibility: visible;
+  transition-delay: 1s;
 }
 
 /* statementRoot tooltips css style */
 .StatementRoot .StatementRoot_tooltip {
-visibility: hidden;
-width: fit-content;
-background-color: black;
-color: rgb(255, 255, 255);
-text-align: left;
-padding: 5px;
-border-radius: 6px;
-top: 100%;
-left: 0;
-position:absolute;
-z-index: 1;
-margin-top: 5px;
+  visibility: hidden;
+  width: fit-content;
+  background-color: black;
+  color: rgb(255, 255, 255);
+  text-align: left;
+  padding: 5px;
+  border-radius: 6px;
+  top: 100%;
+  left: 0;
+  position: absolute;
+  z-index: 1;
+  margin-top: 5px;
 }
 
-.StatementRoot:hover .StatementRoot_tooltip  {
-visibility: visible;
-transition-delay: 1s;
+.StatementRoot:hover .StatementRoot_tooltip {
+  visibility: visible;
+  transition-delay: 1s;
 }
-.StatementRoot:active .StatementRoot_tooltip  {
+.StatementRoot:active .StatementRoot_tooltip {
   display: none;
 }
 /* statementStudent tooltips css style */
 .StatementStudent .StatementStudent_tooltip {
-visibility: hidden;
-width: fit-content;
-background-color: black;
-color: white;
-text-align: left;
-padding: 5px;
-border-radius: 6px;
-top: 100%;
-left: 0;
-position:absolute;
-z-index: 1;
-margin-top: 5px;
+  visibility: hidden;
+  width: fit-content;
+  background-color: black;
+  color: white;
+  text-align: left;
+  padding: 5px;
+  border-radius: 6px;
+  top: 100%;
+  left: 0;
+  position: absolute;
+  z-index: 1;
+  margin-top: 5px;
 }
 
-.StatementStudent:hover .StatementStudent_tooltip  {
-visibility: visible;
-transition-delay: 1s;
+.StatementStudent:hover .StatementStudent_tooltip {
+  visibility: visible;
+  transition-delay: 1s;
 }
 
-.StatementStudent:active .StatementStudent_tooltip  {
+.StatementStudent:active .StatementStudent_tooltip {
   display: none;
 }
 
@@ -113,17 +110,16 @@ transition-delay: 1s;
   border-radius: 6px;
   top: 100%;
   left: 0;
-  position:absolute;
+  position: absolute;
   z-index: 1;
   margin-top: 5px;
-    
 }
-  
-.StatementTruth:hover .StatementTruth_tooltip  {
+
+.StatementTruth:hover .StatementTruth_tooltip {
   visibility: visible;
   transition-delay: 1s;
 }
 
-.StatementTruth:active .StatementTruth_tooltip  {
+.StatementTruth:active .StatementTruth_tooltip {
   display: none;
 }

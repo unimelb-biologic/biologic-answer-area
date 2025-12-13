@@ -1,28 +1,56 @@
 <template>
-
-  <div class="connectorContainer" :style="{ left: connleft + 'px', top: conntop + 'px' }" ref="connectorContainerRef"
-    draggable="true" @dragstart="startDragConnector" @drop="onDrop($event, 'x')" @dragend="endDragConnector">
-
-    <FeedbackRubric :isVisible=showFeedback :exnetID=connectorID :isConnector=true />
+  <div
+    class="connectorContainer"
+    :style="{ left: connleft + 'px', top: conntop + 'px' }"
+    ref="connectorContainerRef"
+    draggable="true"
+    @dragstart="startDragConnector"
+    @drop="onDrop($event, 'x')"
+    @dragend="endDragConnector"
+  >
+    <FeedbackRubric
+      :isVisible="showFeedback"
+      :exnetID="connectorID"
+      :isConnector="true"
+    />
     <div v-if="this.parent !== undefined" class="buttons-container">
-
       <Tooltip :text="this.clickCount % 2 === 1 ? 'expand' : 'collapse'">
-          <v-btn icon size="xx-small" @click="displayFormChanged" class="connectorButton"
-            :aria-label="this.clickCount % 2 === 1 ? 'Expand' : 'Collapse'">
-            <v-icon>{{ this.clickCount % 2 === 1 ? 'mdi-arrow-expand' : 'mdi-arrow-collapse' }}</v-icon>
-          </v-btn>
-        </Tooltip>
+        <v-btn
+          icon
+          size="xx-small"
+          @click="displayFormChanged"
+          class="connectorButton"
+          :aria-label="this.clickCount % 2 === 1 ? 'Expand' : 'Collapse'"
+        >
+          <v-icon>{{
+            this.clickCount % 2 === 1
+              ? 'mdi-arrow-expand'
+              : 'mdi-arrow-collapse'
+          }}</v-icon>
+        </v-btn>
+      </Tooltip>
 
       <Tooltip text="Show Feedback">
-        <v-btn icon size="xx-small" v-if="isFeedbackAvailable" @click="showFeedback = !showFeedback"
-          class="connectorButton">
+        <v-btn
+          icon
+          size="xx-small"
+          v-if="isFeedbackAvailable"
+          @click="showFeedback = !showFeedback"
+          class="connectorButton"
+        >
           <v-icon>mdi-comment-quote</v-icon>
         </v-btn>
       </Tooltip>
 
       <Tooltip :text="deleteButtonTooltipText">
-        <v-btn v-if="!displayOnly" :disabled="!hasNoChildren" icon size="xx-small"
-          @click="deleteConnector({ id: connectorID })" class="connectorButton">
+        <v-btn
+          v-if="!displayOnly"
+          :disabled="!hasNoChildren"
+          icon
+          size="xx-small"
+          @click="deleteConnector({ id: connectorID })"
+          class="connectorButton"
+        >
           <v-icon>mdi-delete</v-icon>
         </v-btn>
       </Tooltip>
@@ -32,11 +60,21 @@
       <!-- TODO: The drag function need polish(or just drop this function) -->
       {{ this.contentTextAll }}
     </div>
-    <div class="connectorBox" v-if="clickCount % 2 === 0 || clickCount === undefined"
-      :style="{ flexDirection: orientation }">
+    <div
+      class="connectorBox"
+      v-if="clickCount % 2 === 0 || clickCount === undefined"
+      :style="{ flexDirection: orientation }"
+    >
       <div class="connectorText" v-if="connectorContent[selectedPhrase][0]">
-        <ConnectorContextMenu v-if="!displayOnly" :choice="selectedPhrase" :options="connectorContent"
-          :connector-i-d="connectorID" :parent-i-d="parent" :index="0" @change-link-word="handleLinkWordChange" />
+        <ConnectorContextMenu
+          v-if="!displayOnly"
+          :choice="selectedPhrase"
+          :options="connectorContent"
+          :connector-i-d="connectorID"
+          :parent-i-d="parent"
+          :index="0"
+          @change-link-word="handleLinkWordChange"
+        />
       </div>
 
       <!-- the left section -->
@@ -44,193 +82,341 @@
       <!-- TODO: implement connector -->
       <div class="tooltip">
         <!-- TODO: implement delete -->
-        <div class="connector-sections" v-if="this.leftType === undefined" @drop="onDrop($event, 'a')" @dragover.prevent
-          @dropped-aconn="handleAConnectorDrop" @dropped-bconn="handleBConnectorDrop"
-          @dropped-astat="handleAStatementDrop" @dropped-bstat="handleBStatementDrop">
-
-          <Tooltip text="This is a target box. Drop a Statement or Network here.">
-            <div v-if="this.connectorContentID == 2" class="connector-a-picture-parent" ref="targetBoxRefLeft"
-              @dragover.prevent="this.parent !== undefined ? handleDragOver : null"
-              @dragleave.prevent="this.parent !== undefined ? handleDragLeaveTargetBoxLeft($event) : null"
-              @dragenter.prevent="this.parent !== undefined ? handleDragEnterTargetBoxLeft($event) : null">
-
-              <v-icon color="grey lighten-1" class="image-target-icon">mdi-image-outline</v-icon>
-
+        <div
+          class="connector-sections"
+          v-if="this.leftType === undefined"
+          @drop="onDrop($event, 'a')"
+          @dragover.prevent
+          @dropped-aconn="handleAConnectorDrop"
+          @dropped-bconn="handleBConnectorDrop"
+          @dropped-astat="handleAStatementDrop"
+          @dropped-bstat="handleBStatementDrop"
+        >
+          <Tooltip
+            text="This is a target box. Drop a Statement or Network here."
+          >
+            <div
+              v-if="this.connectorContentID == 2"
+              class="connector-a-picture-parent"
+              ref="targetBoxRefLeft"
+              @dragover.prevent="
+                this.parent !== undefined ? handleDragOver : null
+              "
+              @dragleave.prevent="
+                this.parent !== undefined
+                  ? handleDragLeaveTargetBoxLeft($event)
+                  : null
+              "
+              @dragenter.prevent="
+                this.parent !== undefined
+                  ? handleDragEnterTargetBoxLeft($event)
+                  : null
+              "
+            >
+              <v-icon color="grey lighten-1" class="image-target-icon"
+                >mdi-image-outline</v-icon
+              >
             </div>
 
-            <div v-else class="connector-target-box" ref="targetBoxRefLeft"
-              @dragover.prevent="this.parent !== undefined ? handleDragOver : null"
-              @dragleave.prevent="this.parent !== undefined ? handleDragLeaveTargetBoxLeft($event) : null"
-              @dragenter.prevent="this.parent !== undefined ? handleDragEnterTargetBoxLeft($event) : null">
+            <div
+              v-else
+              class="connector-target-box"
+              ref="targetBoxRefLeft"
+              @dragover.prevent="
+                this.parent !== undefined ? handleDragOver : null
+              "
+              @dragleave.prevent="
+                this.parent !== undefined
+                  ? handleDragLeaveTargetBoxLeft($event)
+                  : null
+              "
+              @dragenter.prevent="
+                this.parent !== undefined
+                  ? handleDragEnterTargetBoxLeft($event)
+                  : null
+              "
+            >
               <!-- just to provide the inner box -->
 
               <!--v-icon color="grey lighten-1" size="small">mdi-crosshairs-question</v-icon-->
-
-
             </div>
           </Tooltip>
         </div>
 
         <!-- TODO: implement delete -->
         <div class="connector-sections" v-if="this.leftType === 'statement'">
-          <RenderStatement ref="leftChildRenderStatement" :statement-data="this.allStatements[this.leftID]"
-            :showToggle="true" @update-statement-content="handleUpdateStatContentA" @mousedown="onMousedown('leftType')"
-            @duplicate-statement="duplicateStatement" @delete-statement="deleteStatement"
+          <RenderStatement
+            ref="leftChildRenderStatement"
+            :statement-data="this.allStatements[this.leftID]"
+            :showToggle="true"
+            @update-statement-content="handleUpdateStatContentA"
+            @mousedown="onMousedown('leftType')"
+            @duplicate-statement="duplicateStatement"
+            @delete-statement="deleteStatement"
             @connector-dropped-on-statement="connectorDroppedOnStatement"
             @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
-            @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement" />
+            @toggle-showPopup-fromrenderstatement="
+              toggleShowPopupFromRenderStatement
+            "
+          />
         </div>
         <!--                    <span class="tooltiptext" v-if="this.leftID !== undefined">Drag to recycle bin to remove</span>-->
 
         <div class="connector-sections" v-if="this.leftType === 'connector'">
-          <Connector ref="leftChildConnector" :connector-i-d="this.leftID" :connector-content-i-d="allConnectors[this.leftID].connectorContentID
-            " :connector-content="allConnectors[this.leftID].connectorContent" :all-statements="this.allStatements"
-            :all-connectors="this.allConnectors" :rootConnectorID="rootConnectorID"
-            :parent="allConnectors[this.leftID].parent" :left-i-d="allConnectors[this.leftID].leftID"
-            :left-type="allConnectors[this.leftID].leftType" :left-content="allConnectors[this.leftID].leftContent"
-            :right-i-d="allConnectors[this.leftID].rightID" :right-type="allConnectors[this.leftID].rightType"
+          <Connector
+            ref="leftChildConnector"
+            :connector-i-d="this.leftID"
+            :connector-content-i-d="
+              allConnectors[this.leftID].connectorContentID
+            "
+            :connector-content="allConnectors[this.leftID].connectorContent"
+            :all-statements="this.allStatements"
+            :all-connectors="this.allConnectors"
+            :rootConnectorID="rootConnectorID"
+            :parent="allConnectors[this.leftID].parent"
+            :left-i-d="allConnectors[this.leftID].leftID"
+            :left-type="allConnectors[this.leftID].leftType"
+            :left-content="allConnectors[this.leftID].leftContent"
+            :right-i-d="allConnectors[this.leftID].rightID"
+            :right-type="allConnectors[this.leftID].rightType"
             :right-content="allConnectors[this.leftID].rightContent"
-            :click-count="allConnectors[this.leftID].clickCount" :orientation="allConnectors[this.leftID].orientation"
-            :selected-phrase="allConnectors[this.leftID].selectedPhrase" @delete-connector="
+            :click-count="allConnectors[this.leftID].clickCount"
+            :orientation="allConnectors[this.leftID].orientation"
+            :selected-phrase="allConnectors[this.leftID].selectedPhrase"
+            @delete-connector="
               deleteChildConnector({
                 id: this.leftID,
                 parentId: this.connectorID,
                 position: 'left',
               })
-              " @delete-child-connector="deleteChildConnector" @dropped-aconn="handleAConnectorDrop"
-            @dropped-bconn="handleBConnectorDrop" @dropped-astat="handleAStatementDrop"
-            @dropped-bstat="handleBStatementDrop" @link-word-changed="handleChildLinkWordChange"
-            @update-connector-content="handleUpdateConnectorContentA" @toggle-orientation="handleToggleOrientation"
+            "
+            @delete-child-connector="deleteChildConnector"
+            @dropped-aconn="handleAConnectorDrop"
+            @dropped-bconn="handleBConnectorDrop"
+            @dropped-astat="handleAStatementDrop"
+            @dropped-bstat="handleBStatementDrop"
+            @link-word-changed="handleChildLinkWordChange"
+            @update-connector-content="handleUpdateConnectorContentA"
+            @toggle-orientation="handleToggleOrientation"
             @update-click-count="handleUpdateChildClickCount"
-            @update-child-connector-content="handleUpdateChildConnector" @update-child-stat="handleUpdateChildStat"
-            @new-connector-dropped-on-connector="handleNewConnectorDroppedOnConnector"
-            @connector-dropped-on-statement="connectorDroppedOnStatement" @duplicate-statement="duplicateStatement"
-            @delete-statement="deleteStatement" @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
-            @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector" />
-
+            @update-child-connector-content="handleUpdateChildConnector"
+            @update-child-stat="handleUpdateChildStat"
+            @new-connector-dropped-on-connector="
+              handleNewConnectorDroppedOnConnector
+            "
+            @connector-dropped-on-statement="connectorDroppedOnStatement"
+            @duplicate-statement="duplicateStatement"
+            @delete-statement="deleteStatement"
+            @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
+            @toggle-collapsed-renderstatement-from-connector="
+              toggleCollapsedRenderStatementFromConnector
+            "
+          />
         </div>
       </div>
 
       <div class="connectorTextContainerNew">
         <Tooltip text="change orientation to horizontal or vertical">
-          <v-btn size="xx-small" v-if="this.clickCount % 2 === 0" @click="handleToggleOrientation({ id: connectorID })"
-            class="connectorButton">
-            <img class="rotate-button" src="./assets/rotate_icon.png" alt="Rotate" width="20" />
+          <v-btn
+            size="xx-small"
+            v-if="this.clickCount % 2 === 0"
+            @click="handleToggleOrientation({ id: connectorID })"
+            class="connectorButton"
+          >
+            <img
+              class="rotate-button"
+              src="./assets/rotate_icon.png"
+              alt="Rotate"
+              width="20"
+            />
           </v-btn>
         </Tooltip>
         <!--p class="connectorText">{{ connectorContent[selectedPhrase][1] }}</p-->
         <div class="connectorMenu" v-if="connectorContent[selectedPhrase][1]">
-          <ConnectorContextMenu v-if="!displayOnly" :choice="selectedPhrase" :options="connectorContent"
-            :connector-i-d="connectorID" :parent-i-d="parent" :index="1" @change-link-word="handleLinkWordChange" />
+          <ConnectorContextMenu
+            v-if="!displayOnly"
+            :choice="selectedPhrase"
+            :options="connectorContent"
+            :connector-i-d="connectorID"
+            :parent-i-d="parent"
+            :index="1"
+            @change-link-word="handleLinkWordChange"
+          />
         </div>
-
       </div>
-
 
       <!-- the right section -->
       <!-- in the order of empty, statement, connector -->
       <!-- TODO: implement connector -->
       <div class="tooltip">
         <!-- TODO: implement delete -->
-        <div class="connector-sections" v-if="this.rightType === undefined" @drop="onDrop($event, 'b')"
-          @dragover.prevent @dragenter.prevent @dropped-aconn="handleAConnectorDrop"
-          @dropped-bconn="handleBConnectorDrop" @dropped-astat="handleAStatementDrop"
-          @dropped-bstat="handleBStatementDrop">
-          <Tooltip text="This is a target box. Drop a Statement or Network on here.">
-            <div class="connector-target-box" ref="targetBoxRefRight"
-              @dragover.prevent="this.parent !== undefined ? handleDragOver : null"
-              @dragleave.prevent="this.parent !== undefined ? handleDragLeaveTargetBoxRight($event) : null"
-              @dragenter.prevent="this.parent !== undefined ? handleDragEnterTargetBoxRight($event) : null">
+        <div
+          class="connector-sections"
+          v-if="this.rightType === undefined"
+          @drop="onDrop($event, 'b')"
+          @dragover.prevent
+          @dragenter.prevent
+          @dropped-aconn="handleAConnectorDrop"
+          @dropped-bconn="handleBConnectorDrop"
+          @dropped-astat="handleAStatementDrop"
+          @dropped-bstat="handleBStatementDrop"
+        >
+          <Tooltip
+            text="This is a target box. Drop a Statement or Network on here."
+          >
+            <div
+              class="connector-target-box"
+              ref="targetBoxRefRight"
+              @dragover.prevent="
+                this.parent !== undefined ? handleDragOver : null
+              "
+              @dragleave.prevent="
+                this.parent !== undefined
+                  ? handleDragLeaveTargetBoxRight($event)
+                  : null
+              "
+              @dragenter.prevent="
+                this.parent !== undefined
+                  ? handleDragEnterTargetBoxRight($event)
+                  : null
+              "
+            >
               <!-- just to provide the inner box -->
               <!--v-icon color="grey lighten-1" size="small">mdi-crosshairs-question</v-icon-->
-
             </div>
           </Tooltip>
-
         </div>
 
         <!-- TODO: implement delete -->
         <div class="connector-sections" v-if="this.rightType === 'statement'">
-          <RenderStatement ref="rightChildRenderStatement" :statement-data="this.allStatements[this.rightID]"
-            :showToggle="true" @update-statement-content="handleUpdateStatContentB"
-            @mousedown="onMousedown('rightType')" @connector-dropped-on-statement="connectorDroppedOnStatement"
-            @duplicate-statement="duplicateStatement" @delete-statement="deleteStatement"
+          <RenderStatement
+            ref="rightChildRenderStatement"
+            :statement-data="this.allStatements[this.rightID]"
+            :showToggle="true"
+            @update-statement-content="handleUpdateStatContentB"
+            @mousedown="onMousedown('rightType')"
+            @connector-dropped-on-statement="connectorDroppedOnStatement"
+            @duplicate-statement="duplicateStatement"
+            @delete-statement="deleteStatement"
             @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
-            @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement" />
+            @toggle-showPopup-fromrenderstatement="
+              toggleShowPopupFromRenderStatement
+            "
+          />
         </div>
 
         <!-- <span class="tooltiptext" v-if="this.b !== null">Drag to recycle bin to remove</span> -->
         <div class="connector-sections" v-if="this.rightType === 'connector'">
-          <Connector ref="rightChildConnector" :connector-i-d="this.rightID" :connector-content-i-d="allConnectors[this.rightID].connectorContentID
-            " :connector-content="allConnectors[this.rightID].connectorContent" :all-statements="this.allStatements"
-            :all-connectors="this.allConnectors" :parent="allConnectors[this.rightID].parent"
-            :left-i-d="allConnectors[this.rightID].leftID" :left-type="allConnectors[this.rightID].leftType"
-            :left-content="allConnectors[this.rightID].leftContent" :right-i-d="allConnectors[this.rightID].rightID"
+          <Connector
+            ref="rightChildConnector"
+            :connector-i-d="this.rightID"
+            :connector-content-i-d="
+              allConnectors[this.rightID].connectorContentID
+            "
+            :connector-content="allConnectors[this.rightID].connectorContent"
+            :all-statements="this.allStatements"
+            :all-connectors="this.allConnectors"
+            :parent="allConnectors[this.rightID].parent"
+            :left-i-d="allConnectors[this.rightID].leftID"
+            :left-type="allConnectors[this.rightID].leftType"
+            :left-content="allConnectors[this.rightID].leftContent"
+            :right-i-d="allConnectors[this.rightID].rightID"
             :right-type="allConnectors[this.rightID].rightType"
             :right-content="allConnectors[this.rightID].rightContent"
-            :click-count="allConnectors[this.rightID].clickCount" :orientation="allConnectors[this.rightID].orientation"
-            :selected-phrase="allConnectors[this.rightID].selectedPhrase" :rootConnectorID="rootConnectorID"
+            :click-count="allConnectors[this.rightID].clickCount"
+            :orientation="allConnectors[this.rightID].orientation"
+            :selected-phrase="allConnectors[this.rightID].selectedPhrase"
+            :rootConnectorID="rootConnectorID"
             @delete-connector="
               deleteChildConnector({
                 id: this.rightID,
                 parentId: this.connectorID,
                 position: 'right',
               })
-              " @delete-child-connector="deleteChildConnector" @dropped-aconn="handleAConnectorDrop"
-            @dropped-bconn="handleBConnectorDrop" @dropped-astat="handleAStatementDrop"
-            @dropped-bstat="handleBStatementDrop" @link-word-changed="handleChildLinkWordChange"
-            @update-connector-content="handleUpdateConnectorContentB" @update-click-count="handleUpdateChildClickCount"
-            @toggle-orientation="handleToggleOrientation" @update-child-connector-content="handleUpdateChildConnector"
+            "
+            @delete-child-connector="deleteChildConnector"
+            @dropped-aconn="handleAConnectorDrop"
+            @dropped-bconn="handleBConnectorDrop"
+            @dropped-astat="handleAStatementDrop"
+            @dropped-bstat="handleBStatementDrop"
+            @link-word-changed="handleChildLinkWordChange"
+            @update-connector-content="handleUpdateConnectorContentB"
+            @update-click-count="handleUpdateChildClickCount"
+            @toggle-orientation="handleToggleOrientation"
+            @update-child-connector-content="handleUpdateChildConnector"
             @update-child-stat="handleUpdateChildStat"
-            @new-connector-dropped-on-connector="handleNewConnectorDroppedOnConnector"
-            @connector-dropped-on-statement="connectorDroppedOnStatement" @duplicate-statement="duplicateStatement"
-            @delete-statement="deleteStatement" @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
-            @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector" />
+            @new-connector-dropped-on-connector="
+              handleNewConnectorDroppedOnConnector
+            "
+            @connector-dropped-on-statement="connectorDroppedOnStatement"
+            @duplicate-statement="duplicateStatement"
+            @delete-statement="deleteStatement"
+            @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
+            @toggle-collapsed-renderstatement-from-connector="
+              toggleCollapsedRenderStatementFromConnector
+            "
+          />
         </div>
       </div>
 
       <div class="connectorText" v-if="connectorContent[selectedPhrase][2]">
-        <ConnectorContextMenu v-if="!displayOnly" :choice="selectedPhrase" :options="connectorContent"
-          :connector-i-d="connectorID" :parent-i-d="parent" :index="2" @change-link-word="handleLinkWordChange" />
+        <ConnectorContextMenu
+          v-if="!displayOnly"
+          :choice="selectedPhrase"
+          :options="connectorContent"
+          :connector-i-d="connectorID"
+          :parent-i-d="parent"
+          :index="2"
+          @change-link-word="handleLinkWordChange"
+        />
       </div>
       <!-- 
       <button @click="showInfo">Info</button> -->
     </div>
   </div>
-
 </template>
 
 <script>
-import RenderStatement from "./RenderStatement.vue";
-import ConnectorContextMenu from "./ConnectorContextMenu.vue";
-import FeedbackRubric from "./FeedbackRubric.vue";
-import Tooltip from "./Tooltip.vue";
+import RenderStatement from './RenderStatement.vue';
+import ConnectorContextMenu from './ConnectorContextMenu.vue';
+import FeedbackRubric from './FeedbackRubric.vue';
+import Tooltip from './Tooltip.vue';
 import { globalConsoleLog } from './util';
 
 export default {
-  name: "Connector",
-  components: { ConnectorContextMenu, RenderStatement, FeedbackRubric, Tooltip },
-  inject: ['isFeedbackAvailable', 'showAllFeedback', 'globalTooltipState', 'displayOnly'],
+  name: 'Connector',
+  components: {
+    ConnectorContextMenu,
+    RenderStatement,
+    FeedbackRubric,
+    Tooltip,
+  },
+  inject: [
+    'isFeedbackAvailable',
+    'showAllFeedback',
+    'globalTooltipState',
+    'displayOnly',
+  ],
   emits: [
-    "droppedAstat",
-    "droppedBstat",
-    "delete-connector",
-    "delete-child-connector",
-    "droppedAconn",
-    "droppedBconn",
-    "update-connector-content",
-    "linkWordChanged",
-    "update-stat-data",
-    "delDroppedItem",
-    "update-child-connector-content",
-    "update-child-stat",
-    "toggle-orientation",
-    "new-connector-dropped-on-connector",
-    "duplicate-statement",
-    "delete-statement",
-    "toggle-collapsed-renderstatement-from-connector",
-    "toggle-showPopup-fromconnector",
-    "connector-dropped-on-statement",
+    'droppedAstat',
+    'droppedBstat',
+    'delete-connector',
+    'delete-child-connector',
+    'droppedAconn',
+    'droppedBconn',
+    'update-connector-content',
+    'linkWordChanged',
+    'update-stat-data',
+    'delDroppedItem',
+    'update-child-connector-content',
+    'update-child-stat',
+    'toggle-orientation',
+    'new-connector-dropped-on-connector',
+    'duplicate-statement',
+    'delete-statement',
+    'toggle-collapsed-renderstatement-from-connector',
+    'toggle-showPopup-fromconnector',
+    'connector-dropped-on-statement',
   ],
   props: {
     connectorContentID: Number,
@@ -265,132 +451,192 @@ export default {
       word: null,
       contentTextAll: null, // Record the contents in children and in itself
       // clickCountInConn: 0,
-      showFeedback: false
+      showFeedback: false,
     };
   },
   computed: {
     deleteButtonTooltipText() {
       if (this.leftID === undefined && this.rightID === undefined)
-        return "Delete Connector";
+        return 'Delete Connector';
       else
-        return "Delete Connector. DISABLED. Remove child elements to enable."
+        return 'Delete Connector. DISABLED. Remove child elements to enable.';
     },
     hasNoChildren() {
       return this.leftID === undefined && this.rightID === undefined;
     },
     getCollapseExpandIcon() {
-      return (this.clickCount % 2 === 0) ? './assets/collapse_icon.png' : './assets/expand_icon.png';
+      return this.clickCount % 2 === 0
+        ? './assets/collapse_icon.png'
+        : './assets/expand_icon.png';
     },
     bulletPointList() {
       // Extract second elements and join them with newlines
       return this.connectorContent
-        .map(item => item[1]) // Get the second element
+        .map((item) => item[1]) // Get the second element
         .filter(Boolean) // Filter out null or undefined
         .join('\n'); // Join with newline
     },
   },
   methods: {
-
     duplicateStatement(id) {
       // emission from either a child RenderStatement or a Connector.
       // just pass this on up the tree for the AnswerArea to deal with
-      globalConsoleLog("conn", "Connector:duplicateStatement")
-      this.$emit("duplicate-statement", id);
+      globalConsoleLog('conn', 'Connector:duplicateStatement');
+      this.$emit('duplicate-statement', id);
     },
     deleteStatement(id) {
       // emission from either a child RenderStatement or a Connector.
       // just pass this on up the tree for the AnswerArea to deal with
-      globalConsoleLog("conn", "Connector:deleteStatement")
-      this.$emit("delete-statement", id);
+      globalConsoleLog('conn', 'Connector:deleteStatement');
+      this.$emit('delete-statement', id);
     },
     toggleCollapsedRenderStatement(id) {
       // emission from  a child RenderStatement.
       // just pass this on up the tree for the AnswerArea to deal with
-      globalConsoleLog("conn", "Connector:toggleCollapsedRenderStatementFromRenderStatement")
-      this.$emit("toggle-collapsed-renderstatement-from-connector", id);
+      globalConsoleLog(
+        'conn',
+        'Connector:toggleCollapsedRenderStatementFromRenderStatement',
+      );
+      this.$emit('toggle-collapsed-renderstatement-from-connector', id);
     },
     toggleCollapsedRenderStatementFromConnector(id) {
       // emission from  a child Connector.
       // just pass this on up the tree for the AnswerArea to deal with
-      globalConsoleLog("conn", "Connector:toggleCollapsedRenderStatementFromConnector")
-      this.$emit("toggle-collapsed-renderstatement-from-connector", id);
+      globalConsoleLog(
+        'conn',
+        'Connector:toggleCollapsedRenderStatementFromConnector',
+      );
+      this.$emit('toggle-collapsed-renderstatement-from-connector', id);
     },
     toggleShowPopupFromRenderStatement(id) {
       // emission from  a child RenderStatement .
       // just pass this on up the tree for the parent Connector OR AnswerArea to deal with
-      globalConsoleLog("conn", "Connector:toggleShowPopupFromRenderStatement emitting toggle-showPopup-fromconnector")
-      this.$emit("toggle-showPopup-fromconnector", id);
+      globalConsoleLog(
+        'conn',
+        'Connector:toggleShowPopupFromRenderStatement emitting toggle-showPopup-fromconnector',
+      );
+      this.$emit('toggle-showPopup-fromconnector', id);
     },
     toggleShowPopupFromConnector(id) {
       // emission from  a child Connector .
       // just pass this on up the tree for the parent Connector OR AnswerArea to deal with
-      globalConsoleLog("conn", "Connector:toggleShowPopupFromConnector emitting toggle-showPopup-fromconnector")
-      this.$emit("toggle-showPopup-fromconnector", id);
+      globalConsoleLog(
+        'conn',
+        'Connector:toggleShowPopupFromConnector emitting toggle-showPopup-fromconnector',
+      );
+      this.$emit('toggle-showPopup-fromconnector', id);
     },
     connector1IsInTreeOfconnector2(conn1, conn2) {
       // if left OR right side is a connector call recursively
       let inLeftTree = false;
-      globalConsoleLog("conn", "connector1IsInTreeOfconnector2: is conn1=", conn1, "  in the tree of conn2=", conn2);
-      if (this.allConnectors[conn2]["leftType"] == "connector") {
-        const leftConnID = this.allConnectors[conn2]["leftID"];
-        globalConsoleLog("conn", "leftside type=", this.allConnectors[conn2]["leftType"], " connID=", leftConnID);
-        inLeftTree = (
-          (leftConnID !== undefined) &&
-          ((conn1 === leftConnID) || this.connector1IsInTreeOfconnector2(conn1, leftConnID))
+      globalConsoleLog(
+        'conn',
+        'connector1IsInTreeOfconnector2: is conn1=',
+        conn1,
+        '  in the tree of conn2=',
+        conn2,
+      );
+      if (this.allConnectors[conn2]['leftType'] == 'connector') {
+        const leftConnID = this.allConnectors[conn2]['leftID'];
+        globalConsoleLog(
+          'conn',
+          'leftside type=',
+          this.allConnectors[conn2]['leftType'],
+          ' connID=',
+          leftConnID,
         );
+        inLeftTree =
+          leftConnID !== undefined &&
+          (conn1 === leftConnID ||
+            this.connector1IsInTreeOfconnector2(conn1, leftConnID));
       }
       let inRightTree = false;
-      if (this.allConnectors[conn2]["rightType"] == "connector") {
-        const rightConnID = this.allConnectors[conn2]["rightID"];
-        globalConsoleLog("conn", "rightside type=", this.allConnectors[conn2]["rightType"], " connID=", rightConnID);
-        inRightTree = (
-          (rightConnID !== undefined) &&
-          ((conn1 === rightConnID) || this.connector1IsInTreeOfconnector2(conn1, rightConnID))
+      if (this.allConnectors[conn2]['rightType'] == 'connector') {
+        const rightConnID = this.allConnectors[conn2]['rightID'];
+        globalConsoleLog(
+          'conn',
+          'rightside type=',
+          this.allConnectors[conn2]['rightType'],
+          ' connID=',
+          rightConnID,
         );
+        inRightTree =
+          rightConnID !== undefined &&
+          (conn1 === rightConnID ||
+            this.connector1IsInTreeOfconnector2(conn1, rightConnID));
       }
       const finalResult = inLeftTree || inRightTree;
-      globalConsoleLog("conn", " FINAL result = inLeftTree=", inLeftTree, " || inRightTree=", inRightTree, " =>", finalResult);
+      globalConsoleLog(
+        'conn',
+        ' FINAL result = inLeftTree=',
+        inLeftTree,
+        ' || inRightTree=',
+        inRightTree,
+        ' =>',
+        finalResult,
+      );
       return finalResult;
     },
     dropIsPermissible(connectorBeingDroppedOn, connectorBeingDropped) {
-      globalConsoleLog("conn", "checking if ", connectorBeingDropped, " can be dropped on ", connectorBeingDroppedOn);
+      globalConsoleLog(
+        'conn',
+        'checking if ',
+        connectorBeingDropped,
+        ' can be dropped on ',
+        connectorBeingDroppedOn,
+      );
       if (Number(connectorBeingDroppedOn) === Number(connectorBeingDropped)) {
-        globalConsoleLog("conn", "theyre the same, so NO");
+        globalConsoleLog('conn', 'theyre the same, so NO');
         return false;
       } else {
-        globalConsoleLog("conn", "check inTree");
-        const inTree = this.connectorBeingDropped !== undefined &&
-          this.connector1IsInTreeOfconnector2(connectorBeingDroppedOn, connectorBeingDropped);
-        globalConsoleLog("conn", "inTree = ", inTree);
+        globalConsoleLog('conn', 'check inTree');
+        const inTree =
+          this.connectorBeingDropped !== undefined &&
+          this.connector1IsInTreeOfconnector2(
+            connectorBeingDroppedOn,
+            connectorBeingDropped,
+          );
+        globalConsoleLog('conn', 'inTree = ', inTree);
         return !inTree;
       }
     },
     connectorDroppedOnStatement(info) {
-      globalConsoleLog("conn", "Connector:connectorDroppedOnStatement");
+      globalConsoleLog('conn', 'Connector:connectorDroppedOnStatement');
       // pass it up the chain and let the AnswerArea deal with it
-      this.$emit("connector-dropped-on-statement", info);
+      this.$emit('connector-dropped-on-statement', info);
     },
     decodeDragInformation(event) {
       //  the DnD spec says that during a drag, the drag data store mode is protected mode.
       // this means you can see the types but not the values. So the workaround is to encode the values into the type names.
       const types = Array.from(event.dataTransfer.types);
-      globalConsoleLog("conn", "TYPES = ", types);
-      const widthType = types.find((type) => type.startsWith("draggedwidth"));
-      const heightType = types.find((type) => type.startsWith("draggedheight"));
-      const typeType = types.find((type) => type.startsWith("draggedtype"));
-      const connectorIDType = types.find((type) => type.startsWith("draggedconnectorid"));
-      const dragWidthStr = widthType ? widthType.split("/")[1] : null;
-      const dragHeightStr = heightType ? heightType.split("/")[1] : null;
-      const dragTypeStr = typeType ? typeType.split("/")[1] : null;
-      const dragConnectorIDStr = connectorIDType ? connectorIDType.split("/")[1] : null;
+      globalConsoleLog('conn', 'TYPES = ', types);
+      const widthType = types.find((type) => type.startsWith('draggedwidth'));
+      const heightType = types.find((type) => type.startsWith('draggedheight'));
+      const typeType = types.find((type) => type.startsWith('draggedtype'));
+      const connectorIDType = types.find((type) =>
+        type.startsWith('draggedconnectorid'),
+      );
+      const dragWidthStr = widthType ? widthType.split('/')[1] : null;
+      const dragHeightStr = heightType ? heightType.split('/')[1] : null;
+      const dragTypeStr = typeType ? typeType.split('/')[1] : null;
+      const dragConnectorIDStr = connectorIDType
+        ? connectorIDType.split('/')[1]
+        : null;
 
-      globalConsoleLog("conn", "DRAG DATA = ", dragWidthStr, dragHeightStr, dragTypeStr, dragConnectorIDStr);
+      globalConsoleLog(
+        'conn',
+        'DRAG DATA = ',
+        dragWidthStr,
+        dragHeightStr,
+        dragTypeStr,
+        dragConnectorIDStr,
+      );
 
       const dragInformation = {
         draggedWidth: dragWidthStr,
         draggedHeight: dragHeightStr,
         drageeType: dragTypeStr,
-        drageeConnectorID: dragConnectorIDStr
+        drageeConnectorID: dragConnectorIDStr,
       };
 
       return dragInformation;
@@ -399,13 +645,22 @@ export default {
       event.preventDefault(); // Allow drop
     },
     handleDragEnterTargetBoxLeft(event) {
-      globalConsoleLog("conn", "Connector:handleDragEnterTargetBoxLeft----------event=", event);
+      globalConsoleLog(
+        'conn',
+        'Connector:handleDragEnterTargetBoxLeft----------event=',
+        event,
+      );
       const dragInformation = this.decodeDragInformation(event);
-      if (dragInformation.drageeType === "connector") {
-        if (this.dropIsPermissible(this.connectorID, dragInformation.drageeConnectorID)) {
-          globalConsoleLog("conn", "DROP IS PERMISSIBLE");
+      if (dragInformation.drageeType === 'connector') {
+        if (
+          this.dropIsPermissible(
+            this.connectorID,
+            dragInformation.drageeConnectorID,
+          )
+        ) {
+          globalConsoleLog('conn', 'DROP IS PERMISSIBLE');
         } else {
-          globalConsoleLog("conn", "DROP IS NOT PERMISSIBLE");
+          globalConsoleLog('conn', 'DROP IS NOT PERMISSIBLE');
           return;
         }
       }
@@ -423,7 +678,10 @@ export default {
       //      connectorContainer.classList.add('drag-over');
     },
     handleDragLeaveTargetBoxLeft(event) {
-      globalConsoleLog("conn", "Connector:handleDragLeaveTargetBoxLeft***********");
+      globalConsoleLog(
+        'conn',
+        'Connector:handleDragLeaveTargetBoxLeft***********',
+      );
       event.preventDefault();
       const targetRef = this.$refs.targetBoxRefLeft;
       targetRef.style.width = 20 + 'px';
@@ -431,17 +689,26 @@ export default {
       targetRef.style.border = '';
     },
     handleDragEnterTargetBoxRight(event) {
-      globalConsoleLog("conn", "Connector:handleDragEnterTargetBoxRight----------event=", event);
+      globalConsoleLog(
+        'conn',
+        'Connector:handleDragEnterTargetBoxRight----------event=',
+        event,
+      );
 
       const dragInformation = this.decodeDragInformation(event);
 
-      globalConsoleLog("conn", 'Draginformation:', dragInformation);
+      globalConsoleLog('conn', 'Draginformation:', dragInformation);
 
-      if (dragInformation.drageeType === "connector") {
-        if (this.dropIsPermissible(this.connectorID, dragInformation.drageeConnectorID)) {
-          globalConsoleLog("conn", "DROP IS PERMISSIBLE");
+      if (dragInformation.drageeType === 'connector') {
+        if (
+          this.dropIsPermissible(
+            this.connectorID,
+            dragInformation.drageeConnectorID,
+          )
+        ) {
+          globalConsoleLog('conn', 'DROP IS PERMISSIBLE');
         } else {
-          globalConsoleLog("conn", "DROP IS NOT PERMISSIBLE");
+          globalConsoleLog('conn', 'DROP IS NOT PERMISSIBLE');
           return;
         }
       }
@@ -460,7 +727,10 @@ export default {
       //      connectorContainer.classList.add('drag-over');
     },
     handleDragLeaveTargetBoxRight(event) {
-      globalConsoleLog("conn", "Connector:handleDragLeaveTargetBoxRight***********");
+      globalConsoleLog(
+        'conn',
+        'Connector:handleDragLeaveTargetBoxRight***********',
+      );
       event.preventDefault();
       const targetRef = this.$refs.targetBoxRefRight;
       targetRef.style.width = 20 + 'px';
@@ -469,175 +739,227 @@ export default {
     },
     onMousedown() {
       let parent = this.$parent;
-      while (parent.$options.name !== "AnswerArea") {
+      while (parent.$options.name !== 'AnswerArea') {
         parent = parent.$parent;
       }
 
       // this.$emit()
     },
     call_connectorString() {
-      alert(this.connectorString())
+      alert(this.connectorString());
     },
     connectorString() {
-      let resultString = "connectorString";
+      let resultString = 'connectorString';
       if (this.leftType === 'connector') {
-        resultString = this.$refs.leftChildConnector.connectorString() + resultString;
+        resultString =
+          this.$refs.leftChildConnector.connectorString() + resultString;
       }
       if (this.rightType === 'connector') {
-        resultString = resultString + this.$refs.rightChildConnector.connectorString();
+        resultString =
+          resultString + this.$refs.rightChildConnector.connectorString();
       }
       return resultString;
     },
     handleLinkWordChange(info) {
       const newChoice = info[1];
       this.currConnectorContent = JSON.parse(
-        JSON.stringify(this.connectorContent[newChoice])
+        JSON.stringify(this.connectorContent[newChoice]),
       );
 
       this.contentTextAll =
         (this.currConnectorContent[0] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[0]) +
-        (this.acontent === null ? "" : this.acontent) +
+        (this.acontent === null ? '' : this.acontent) +
         (this.currConnectorContent[1] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[1]) +
-        (this.bcontent === null ? "" : this.bcontent) +
+        (this.bcontent === null ? '' : this.bcontent) +
         (this.currConnectorContent[2] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[2]);
 
       // DEBUG
       // globalConsoleLog("conn",this.contentTextAll)
 
-      this.$emit("linkWordChanged", info);
+      this.$emit('linkWordChanged', info);
     },
     handleChildLinkWordChange(info) {
-      this.$emit("linkWordChanged", info);
+      this.$emit('linkWordChanged', info);
     },
     startDragConnector(e) {
-      globalConsoleLog("geom", "Connector:startDragConnector left=", this.connleft, " top=", this.conntop);
+      globalConsoleLog(
+        'geom',
+        'Connector:startDragConnector left=',
+        this.connleft,
+        ' top=',
+        this.conntop,
+      );
 
       if (this.displayOnly) {
-        globalConsoleLog("conn", "can't drag connectors in a read only AnswerArea");
+        globalConsoleLog(
+          'conn',
+          "can't drag connectors in a read only AnswerArea",
+        );
         return;
       }
       //globalConsoleLog("conn","globalTooltipState = ",this.globalTooltipState);
       this.globalTooltipState.showTooltips = false;
-      this.globalTooltipState.animal = "cat"
+      this.globalTooltipState.animal = 'cat';
 
       //globalConsoleLog("conn","Connector:startDragConnector");
       e.stopImmediatePropagation();
-      e.dataTransfer.dropEffect = "move";
-      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.dropEffect = 'move';
+      e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData(
-        "data",
+        'data',
         JSON.stringify({
           connectorContentID: this.connectorContentID,
           connectorContent: this.connectorContent,
           selectedPhrase: this.selectedPhrase,
           connectorID: this.connectorID,
           parentID: this.parent,
-        })
+        }),
       );
 
-      e.dataTransfer.setData("type", "connector");
+      e.dataTransfer.setData('type', 'connector');
       // Pass the contained content texts
-      e.dataTransfer.setData("content", this.contentTextAll);
+      e.dataTransfer.setData('content', this.contentTextAll);
 
       // Pass the click offset
       const connectorContainerRef = this.$refs.connectorContainerRef;
       var rectInViewport = connectorContainerRef.getBoundingClientRect();
       const grabOffsetLeft = e.clientX - rectInViewport.left;
       const grabOffsetTop = e.clientY - rectInViewport.top;
-      e.dataTransfer.setData("grabOffsetLeft", grabOffsetLeft.toString());
-      e.dataTransfer.setData("grabOffsetTop", grabOffsetTop.toString());
+      e.dataTransfer.setData('grabOffsetLeft', grabOffsetLeft.toString());
+      e.dataTransfer.setData('grabOffsetTop', grabOffsetTop.toString());
 
       // the following geometry information is used by the Target boxes in the connectors to change size dynamically.
       // However the DnD spec says that during the drag, the drag data store mode is protected mode.
       // this means you can see the types but not the values. So the workaround is to encode the values into the type names.
-      const widthTypeStr = "draggedWidth/" + e.currentTarget.offsetWidth;
-      e.dataTransfer.setData(widthTypeStr, 0 /* i.e. the zero is a dummy value*/);
-      const heightTypeStr = "draggedHeight/" + e.currentTarget.offsetHeight;
-      e.dataTransfer.setData(heightTypeStr, 0 /* i.e. the zero is a dummy value*/);
-      const typeTypeStr = "draggedType/" + "connector";
-      e.dataTransfer.setData(typeTypeStr, 0 /* i.e. the zero is a dummy value*/);
-      const connectorIDTypeStr = "draggedConnectorID/" + this.connectorID;
-      e.dataTransfer.setData(connectorIDTypeStr, 0 /* i.e. the zero is a dummy value*/);
+      const widthTypeStr = 'draggedWidth/' + e.currentTarget.offsetWidth;
+      e.dataTransfer.setData(
+        widthTypeStr,
+        0 /* i.e. the zero is a dummy value*/,
+      );
+      const heightTypeStr = 'draggedHeight/' + e.currentTarget.offsetHeight;
+      e.dataTransfer.setData(
+        heightTypeStr,
+        0 /* i.e. the zero is a dummy value*/,
+      );
+      const typeTypeStr = 'draggedType/' + 'connector';
+      e.dataTransfer.setData(
+        typeTypeStr,
+        0 /* i.e. the zero is a dummy value*/,
+      );
+      const connectorIDTypeStr = 'draggedConnectorID/' + this.connectorID;
+      e.dataTransfer.setData(
+        connectorIDTypeStr,
+        0 /* i.e. the zero is a dummy value*/,
+      );
 
-      globalConsoleLog("geom", " SET UP DATA TRANSFER:", widthTypeStr, heightTypeStr, typeTypeStr, connectorIDTypeStr);
-
+      globalConsoleLog(
+        'geom',
+        ' SET UP DATA TRANSFER:',
+        widthTypeStr,
+        heightTypeStr,
+        typeTypeStr,
+        connectorIDTypeStr,
+      );
     },
 
     endDragConnector() {
-      globalConsoleLog("conn", "\n\n\n\n\n\nConnector::endDragConnector globalTooltipState = ", this.globalTooltipState, "\n\n\n\n\n\n\n\n\n");
+      globalConsoleLog(
+        'conn',
+        '\n\n\n\n\n\nConnector::endDragConnector globalTooltipState = ',
+        this.globalTooltipState,
+        '\n\n\n\n\n\n\n\n\n',
+      );
       this.globalTooltipState.showTooltips = true;
-      this.globalTooltipState.animal = "mouse";
+      this.globalTooltipState.animal = 'mouse';
     },
-
-
 
     updateContentTextAll() {
       this.contentTextAll =
-        (this.currConnectorContent[0] === null ? "" : this.currConnectorContent[0]) +
-        (this.acontent === null ? "" : this.acontent) +
-        (this.currConnectorContent[1] === null ? "" : this.currConnectorContent[1]) +
-        (this.bcontent === null ? "" : this.bcontent) +
-        (this.currConnectorContent[2] === null ? "" : this.currConnectorContent[2]);
+        (this.currConnectorContent[0] === null
+          ? ''
+          : this.currConnectorContent[0]) +
+        (this.acontent === null ? '' : this.acontent) +
+        (this.currConnectorContent[1] === null
+          ? ''
+          : this.currConnectorContent[1]) +
+        (this.bcontent === null ? '' : this.bcontent) +
+        (this.currConnectorContent[2] === null
+          ? ''
+          : this.currConnectorContent[2]);
     },
     onDrop(e, side) {
       e.stopImmediatePropagation();
 
-      const type = e.dataTransfer.getData("type");
-      const data = JSON.parse(e.dataTransfer.getData("data"));
-      globalConsoleLog("conn", "Connector:onDrop  side:", side, "  dropped data: ", data);
+      const type = e.dataTransfer.getData('type');
+      const data = JSON.parse(e.dataTransfer.getData('data'));
+      globalConsoleLog(
+        'conn',
+        'Connector:onDrop  side:',
+        side,
+        '  dropped data: ',
+        data,
+      );
       // Receive the content text from the dropped object
-      const transContent = e.dataTransfer.getData("content");
+      const transContent = e.dataTransfer.getData('content');
 
-      var elementWidthStr = e.dataTransfer.getData("fredWidth");
-      var elementHeightStr = e.dataTransfer.getData("fredWidth");
-      globalConsoleLog("conn", 'Element Size Str:', elementWidthStr, 'x', elementHeightStr);
+      var elementWidthStr = e.dataTransfer.getData('fredWidth');
+      var elementHeightStr = e.dataTransfer.getData('fredWidth');
+      globalConsoleLog(
+        'conn',
+        'Element Size Str:',
+        elementWidthStr,
+        'x',
+        elementHeightStr,
+      );
 
       this.$el.classList.remove('drag-over-happening');
 
-
-      if (side === "a" && type === "statement") {
+      if (side === 'a' && type === 'statement') {
         const statementID = data.id;
         // Update content
         this.acontent = transContent;
         // this.leftContent = transContent
-        this.updateContentTextAll()
-        globalConsoleLog("conn", "Connector:onDrop  emitting SIGNAL droppedAstat");
+        this.updateContentTextAll();
+        globalConsoleLog(
+          'conn',
+          'Connector:onDrop  emitting SIGNAL droppedAstat',
+        );
 
-        this.$emit("droppedAstat", [
+        this.$emit('droppedAstat', [
           this.connectorID,
           statementID,
           transContent,
         ]);
-      } else if (side === "b" && type === "statement") {
+      } else if (side === 'b' && type === 'statement') {
         const statementID = data.id;
-        this.$emit("droppedBstat", [
+        this.$emit('droppedBstat', [
           this.connectorID,
           statementID,
           transContent,
         ]);
         // Update Connector content
         this.bcontent = transContent;
-        this.updateContentTextAll()
-      } else if (side === "a" && type === "connector") {
+        this.updateContentTextAll();
+      } else if (side === 'a' && type === 'connector') {
         this.acontent = transContent;
-        this.updateContentTextAll()
-        this.$emit("droppedAconn", [this.connectorID, data, transContent, e]);
-      } else if (side === "b" && type === "connector") {
+        this.updateContentTextAll();
+        this.$emit('droppedAconn', [this.connectorID, data, transContent, e]);
+      } else if (side === 'b' && type === 'connector') {
         this.bcontent = transContent;
-        this.updateContentTextAll()
-        this.$emit("droppedBconn", [this.connectorID, data, transContent, e]);
-      } else if (side === "x" && type === "connector") {
+        this.updateContentTextAll();
+        this.$emit('droppedBconn', [this.connectorID, data, transContent, e]);
+      } else if (side === 'x' && type === 'connector') {
         // a connector has been dropped on the body of a connector.
         //
         // we deal with two scenarios.
         // 1. if the connector is a new connector from the palette (i.e. undefined parent and no children.)
-        // and it's been dropped  on a connector that is part of a tree. 
+        // and it's been dropped  on a connector that is part of a tree.
         // Then it needs to be inserted into the tree.
         //  So this connector becomes the dropped connectors childA
         // and whoever is the parent of this connector needs to become the parent of the new one.
@@ -646,89 +968,108 @@ export default {
         // 2. a top level connector (i.e. one with a parentID of -1, is being moved a bit and
         //    has been dropped within it's own area - i.e. onto itself or one of it's children.
         //    in this instance we just pass a signal up the tree.
-        globalConsoleLog("conn", "emit new-connector-dropped-on-connector");
-        this.$emit("new-connector-dropped-on-connector", [undefined, this.connectorID, e]);
+        globalConsoleLog('conn', 'emit new-connector-dropped-on-connector');
+        this.$emit('new-connector-dropped-on-connector', [
+          undefined,
+          this.connectorID,
+          e,
+        ]);
       }
     },
     handleAStatementDrop(info) {
-      globalConsoleLog("conn", "Connector:handleAStatementDrop:  emitting signal droppedAstat")
-      this.$emit("droppedAstat", info);
+      globalConsoleLog(
+        'conn',
+        'Connector:handleAStatementDrop:  emitting signal droppedAstat',
+      );
+      this.$emit('droppedAstat', info);
     },
     handleBStatementDrop(info) {
-      globalConsoleLog("conn", "Connector:handleBStatementDrop:  passing data up")
-      this.$emit("droppedBstat", info);
+      globalConsoleLog(
+        'conn',
+        'Connector:handleBStatementDrop:  passing data up',
+      );
+      this.$emit('droppedBstat', info);
     },
     handleAConnectorDrop(info) {
-      globalConsoleLog("conn", "Connector:handleAConnectorDrop:  passing data up")
-      this.$emit("droppedAconn", info);
+      globalConsoleLog(
+        'conn',
+        'Connector:handleAConnectorDrop:  passing data up',
+      );
+      this.$emit('droppedAconn', info);
     },
     handleNewConnectorDroppedOnConnector(info) {
-      globalConsoleLog("conn", "Connector:handleAConnectorDrop:  passing data up")
-      this.$emit("new-connector-dropped-on-connector", info);
+      globalConsoleLog(
+        'conn',
+        'Connector:handleAConnectorDrop:  passing data up',
+      );
+      this.$emit('new-connector-dropped-on-connector', info);
     },
     handleBConnectorDrop(info) {
-      globalConsoleLog("conn", "Connector:handleBConnectorDrop:  passing data up")
-      this.$emit("droppedBconn", info);
+      globalConsoleLog(
+        'conn',
+        'Connector:handleBConnectorDrop:  passing data up',
+      );
+      this.$emit('droppedBconn', info);
     },
     showInfo() {
-      globalConsoleLog("conn", "connectorID", this.connectorID);
-      globalConsoleLog("conn", "leftType", this.leftType);
-      globalConsoleLog("conn", "leftID", this.leftID);
-      globalConsoleLog("conn", "rightType", this.rightType);
-      globalConsoleLog("conn", "rightID", this.rightID);
+      globalConsoleLog('conn', 'connectorID', this.connectorID);
+      globalConsoleLog('conn', 'leftType', this.leftType);
+      globalConsoleLog('conn', 'leftID', this.leftID);
+      globalConsoleLog('conn', 'rightType', this.rightType);
+      globalConsoleLog('conn', 'rightID', this.rightID);
       this.$forceUpdate();
     },
     handleUpdateStatContentA(info) {
       this.acontent = info[0];
       this.contentTextAll =
         (this.currConnectorContent[0] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[0]) +
         this.acontent +
         (this.currConnectorContent[1] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[1]) +
-        (this.bcontent === null ? "" : this.bcontent) +
+        (this.bcontent === null ? '' : this.bcontent) +
         (this.currConnectorContent[2] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[2]);
 
       const newStatData = info[1];
-      this.$emit("update-stat-data", newStatData);
-      this.$emit("update-child-stat", [
+      this.$emit('update-stat-data', newStatData);
+      this.$emit('update-child-stat', [
         this.connectorID,
         this.acontent,
-        "left",
+        'left',
       ]);
     },
     handleUpdateStatContentB(info) {
       this.bcontent = info[0];
       this.contentTextAll =
         (this.currConnectorContent[0] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[0]) +
-        (this.acontent === null ? "" : this.acontent) +
+        (this.acontent === null ? '' : this.acontent) +
         (this.currConnectorContent[1] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[1]) +
         this.bcontent +
         (this.currConnectorContent[2] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[2]);
 
       const newStatData = info[1];
-      this.$emit("update-stat-data", newStatData);
-      this.$emit("update-child-stat", [
+      this.$emit('update-stat-data', newStatData);
+      this.$emit('update-child-stat', [
         this.connectorID,
         this.bcontent,
-        "right",
+        'right',
       ]);
     },
     handleStatDataChange(info) {
-      this.$emit("update-stat-data", info);
+      this.$emit('update-stat-data', info);
     },
     handleUpdateChildStat(info) {
-      this.$emit("update-child-stat", info);
+      this.$emit('update-child-stat', info);
     },
     handleUpdateConnectorContentA(info) {
       const currConnectID = info[0];
@@ -736,22 +1077,22 @@ export default {
 
       this.contentTextAll =
         (this.currConnectorContent[0] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[0]) +
         this.acontent +
         (this.currConnectorContent[1] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[1]) +
-        (this.bcontent === null ? "" : this.bcontent) +
+        (this.bcontent === null ? '' : this.bcontent) +
         (this.currConnectorContent[2] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[2]);
 
-      this.$emit("update-child-connector-content", [
+      this.$emit('update-child-connector-content', [
         currConnectID,
         this.acontent,
         this.connectorID,
-        "left",
+        'left',
       ]);
     },
     handleUpdateConnectorContentB(info) {
@@ -759,65 +1100,65 @@ export default {
       this.bcontent = info[1];
       this.contentTextAll =
         (this.currConnectorContent[0] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[0]) +
-        (this.acontent === null ? "" : this.acontent) +
+        (this.acontent === null ? '' : this.acontent) +
         (this.currConnectorContent[1] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[1]) +
         this.bcontent +
         (this.currConnectorContent[2] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[2]);
 
-      this.$emit("update-child-connector-content", [
+      this.$emit('update-child-connector-content', [
         currConnectID,
         this.bcontent,
         this.connectorID,
-        "right",
+        'right',
       ]);
     },
     handleUpdateChildClickCount(info) {
-      this.$emit("update-click-count", info);
+      this.$emit('update-click-count', info);
     },
     handleToggleOrientation({ id }) {
-      // Emit an event to the parent component indicating that this connector should 
+      // Emit an event to the parent component indicating that this connector should
       //switch from row to column
-      this.$emit("toggle-orientation", { id });
+      this.$emit('toggle-orientation', { id });
     },
     handleUpdateChildConnector(info) {
-      this.$emit("update-child-connector-content", info);
+      this.$emit('update-child-connector-content', info);
     },
     displayFormChanged() {
       // this.clickCountInConn = this.clickCountInConn + 1
-      this.$emit("update-click-count", this.connectorID);
+      this.$emit('update-click-count', this.connectorID);
 
       if (this.clickCount % 2 === 0) {
         this.acontent =
           this.allConnectors[this.connectorID].leftContent === undefined
-            ? "..."
+            ? '...'
             : this.allConnectors[this.connectorID].leftContent;
         this.bcontent =
           this.allConnectors[this.connectorID].rightContent === undefined
-            ? "..."
+            ? '...'
             : this.allConnectors[this.connectorID].rightContent;
         this.contentTextAll =
           (this.currConnectorContent[0] === null
-            ? ""
+            ? ''
             : this.currConnectorContent[0]) +
           this.acontent +
           (this.currConnectorContent[1] === null
-            ? ""
+            ? ''
             : this.currConnectorContent[1]) +
           this.bcontent +
           (this.currConnectorContent[2] === null
-            ? ""
+            ? ''
             : this.currConnectorContent[2]);
       }
     },
     initContent() {
       this.currConnectorContent = JSON.parse(
-        JSON.stringify(this.connectorContent[this.selectedPhrase])
+        JSON.stringify(this.connectorContent[this.selectedPhrase]),
       );
       // this.acontent = this.allConnectors[this.connectorID].leftContent
       // this.acontent = (this.allConnectors[this.connectorID].leftContent === undefined ?
@@ -826,48 +1167,47 @@ export default {
       if (this.allConnectors !== undefined) {
         this.acontent =
           this.allConnectors[this.connectorID].leftContent === undefined
-            ? "..."
+            ? '...'
             : this.allConnectors[this.connectorID].leftContent;
         this.bcontent =
           this.allConnectors[this.connectorID].rightContent === undefined
-            ? "..."
+            ? '...'
             : this.allConnectors[this.connectorID].rightContent;
         this.contentTextAll =
           (this.currConnectorContent[0] === null
-            ? ""
+            ? ''
             : this.currConnectorContent[0]) +
           // + (this.acontent === null ? "" : this.acontent)
           this.acontent +
           (this.currConnectorContent[1] === null
-            ? ""
+            ? ''
             : this.currConnectorContent[1]) +
           // + (this.bcontent === null ? "" : this.bcontent)
           this.bcontent +
           (this.currConnectorContent[2] === null
-            ? ""
+            ? ''
             : this.currConnectorContent[2]);
-        this.word = this.connectorContent[this.selectedPhrase].join("");
+        this.word = this.connectorContent[this.selectedPhrase].join('');
       }
 
       // this.clickCountInConn = this.clickCount === undefined ? 0 : this.clickCount
       // globalConsoleLog("conn",this.currConnectorContent.length)
     },
-    deleteChildConnector({ id, parentId, position = "" }) {
+    deleteChildConnector({ id, parentId, position = '' }) {
       // Emit an event to the parent component indicating that this connector should be deleted
-      this.$emit("delete-child-connector", { id, parentId, position });
+      this.$emit('delete-child-connector', { id, parentId, position });
     },
 
     deleteConnector({ id }) {
       // Emit an event to the parent component indicating that this connector should be deleted
-      this.$emit("delete-connector", { id });
+      this.$emit('delete-connector', { id });
     },
-
   },
   watch: {
     // Pass new content texts once there are changes
     contentTextAll(newConnectorContent) {
       //globalConsoleLog("conn","Content changed");
-      this.$emit("update-connector-content", [
+      this.$emit('update-connector-content', [
         this.connectorID,
         newConnectorContent,
       ]);
@@ -888,46 +1228,45 @@ export default {
     },
 
     leftContent() {
-
       this.acontent =
         this.allConnectors[this.connectorID].leftContent === undefined
-          ? "[A]"
+          ? '[A]'
           : this.allConnectors[this.connectorID].leftContent;
       this.contentTextAll =
         (this.currConnectorContent[0] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[0]) +
         this.acontent +
         (this.currConnectorContent[1] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[1]) +
         this.bcontent +
         (this.currConnectorContent[2] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[2]);
     },
 
     rightContent() {
       this.bcontent =
         this.allConnectors[this.connectorID].rightContent === undefined
-          ? "[B]"
+          ? '[B]'
           : this.allConnectors[this.connectorID].rightContent;
       this.contentTextAll =
         (this.currConnectorContent[0] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[0]) +
-        (this.acontent === null ? "" : this.acontent) +
+        (this.acontent === null ? '' : this.acontent) +
         (this.currConnectorContent[1] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[1]) +
         this.bcontent +
         (this.currConnectorContent[2] === null
-          ? ""
+          ? ''
           : this.currConnectorContent[2]);
     },
     showAllFeedback() {
-      this.showFeedback = this.showAllFeedback
-    }
+      this.showFeedback = this.showAllFeedback;
+    },
   },
   created() {
     // this.currConnectorContent = JSON.parse(JSON.stringify(this.connectorContent[this.selectedPhrase]));
@@ -950,7 +1289,7 @@ export default {
       //             + (this.currConnectorContent[2] === null ? "" : this.currConnectorContent[2])
       //     this.word = this.connectorContent[this.selectedPhrase].join("")
       this.contentTextAll =
-        "[A]" + this.connectorContent[this.selectedPhrase].join("") + "[B]";
+        '[A]' + this.connectorContent[this.selectedPhrase].join('') + '[B]';
     }
     this.initContent();
   },
@@ -959,7 +1298,6 @@ export default {
 
 <style scoped>
 /* CSS for each of the connector */
-
 
 .connectorContainer {
   display: flex;
@@ -1042,7 +1380,6 @@ export default {
   display: inline-block;
   border: 0px solid rgb(188, 176, 123);
 }
-
 
 .delete-button {
   width: 20px;

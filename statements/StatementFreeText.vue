@@ -2,36 +2,66 @@
   <!-- record the statement position-->
   <div class="StatementFreeText">
     <div class="content-wrapper">
-
       <div class="iconContainer">
-
-        <Tooltip :text="statementData.collapsed ? 'expand this statement' : 'collapse this statement'">
-          <v-btn size="x-small" v-show="showToggle" @click="toggleCollapsedStatement" class="statementButton"
-            :aria-label="statementData.collapsed ? 'Expand' : 'Collapse'">
-            <v-icon>{{ statementData.collapsed ? 'mdi-arrow-expand' : 'mdi-arrow-collapse' }}</v-icon>
+        <Tooltip
+          :text="
+            statementData.collapsed
+              ? 'expand this statement'
+              : 'collapse this statement'
+          "
+        >
+          <v-btn
+            size="x-small"
+            v-show="showToggle"
+            @click="toggleCollapsedStatement"
+            class="statementButton"
+            :aria-label="statementData.collapsed ? 'Expand' : 'Collapse'"
+          >
+            <v-icon>{{
+              statementData.collapsed
+                ? 'mdi-arrow-expand'
+                : 'mdi-arrow-collapse'
+            }}</v-icon>
           </v-btn>
         </Tooltip>
 
         <button v-if="showToggle" @click="duplicateMe" class="statementButton">
-          <img class="duplicate-statement-button" src="../assets/duplicate_icon.png" alt="DuplicateStatement"
-            width="20" />
+          <img
+            class="duplicate-statement-button"
+            src="../assets/duplicate_icon.png"
+            alt="DuplicateStatement"
+            width="20"
+          />
         </button>
 
-        <!--Tooltip :text="deleteButtonTooltipText">
-        <v-btn v-if="!displayOnly" icon size="xx-small" @click="deleteStatement" class="statementButton">
-          <v-icon>mdi-delete</v-icon>
-        </v-btn>
-      </Tooltip-->
-
+        <Tooltip text="Delete statement">
+          <v-btn
+            size="x-small"
+            v-if="!displayOnly"
+            @click="deleteStatement"
+            class="statementButton"
+          >
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
+        </Tooltip>
       </div>
 
-      <Tooltip text="White statements are FREE statements. Type in your own statement.">
+      <Tooltip
+        text="White statements are FREE statements. Type in your own statement."
+      >
         <div class="main-content">
-          <div v-if="this.statementData.collapsed" class="concatenated-statement">
+          <div
+            v-if="this.statementData.collapsed"
+            class="concatenated-statement"
+          >
             {{ concatenatedStatement }}
           </div>
           <div v-else>
-            <textarea v-model="userInputText" id="input" class="textarea"></textarea>
+            <textarea
+              v-model="userInputText"
+              id="input"
+              class="textarea"
+            ></textarea>
           </div>
         </div>
       </Tooltip>
@@ -40,16 +70,19 @@
 </template>
 
 <script>
-
 import Tooltip from '../Tooltip.vue';
 
 export default {
-  name: "StatementFreeText",
+  name: 'StatementFreeText',
   components: {
-    Tooltip
+    Tooltip,
   },
-  emits: ["user-input-changed", "duplicate-statement", "delete-statement",
-    "toggle-collapsed-statement-freetext"],
+  emits: [
+    'user-input-changed',
+    'duplicate-statement',
+    'delete-statement',
+    'toggle-collapsed-statement-freetext',
+  ],
   props: {
     statementData: Object,
     position: String,
@@ -65,7 +98,7 @@ export default {
       id: this.statementData.id,
       originalFacts: this.statementData.content.originalFacts,
       previousUserInput: this.statementData.content.userInput,
-      userInputText: "",
+      userInputText: '',
 
       answeredData: null,
     };
@@ -85,23 +118,23 @@ export default {
       this.answeredData = this.statementData;
     },
     duplicateMe() {
-      this.$emit("duplicate-statement", [this.id]);
+      this.$emit('duplicate-statement', [this.id]);
     },
     deleteStatement() {
       // Emit an event to the parent component indicating that this statement should be deleted
-      this.$emit("delete-statement", [this.id]);
+      this.$emit('delete-statement', this.id);
     },
     toggleCollapsedStatement() {
       //this.collapsed = !this.collapsed;
-      console.log("StatementFreeText:toggleCollapsedStatement")
-      this.$emit("toggle-collapsed-statement-freetext", this.id);
+      console.log('StatementFreeText:toggleCollapsedStatement');
+      this.$emit('toggle-collapsed-statement-freetext', this.id);
     },
   },
   watch: {
     // Pass the new input to other component
     userInputText(newUserInput) {
       this.answeredData.content.userInput = newUserInput;
-      this.$emit("user-input-changed", [newUserInput, this.answeredData]);
+      this.$emit('user-input-changed', [newUserInput, this.answeredData]);
     },
     data() {
       this.initContent();
@@ -112,12 +145,12 @@ export default {
   },
   mounted() {
     //console.log("StatementFreeText mounted");
-  }
+  },
 };
 </script>
 
 <style scoped>
-@import "../assets/tooltips.css";
+@import '../assets/tooltips.css';
 
 .StatementFreeText {
   background-color: var(--biologic-freetext-statement-color);
