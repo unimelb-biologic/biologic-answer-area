@@ -1543,15 +1543,24 @@ export default {
       duplicatedStatement['position'] = 'absolute';
       duplicatedStatement['showPopup'] = theStatement['showPopup'];
       duplicatedStatement['collapsed'] = theStatement['collapsed'];
-      this.allStatements[duplicatedStatement.id] = duplicatedStatement; // now add to the keyed list
-      let baseTop = 100;
-      let baseLeft = 100;
+      duplicatedStatement['zIndex'] = 6;
       if (theStatement['parent'] == -1) {
-        baseTop = theStatement['top'];
-        baseLeft = theStatement['left'];
+        // Root elements are duplicated to bottom right
+        duplicatedStatement['top'] = theStatement['top'] + 25;
+        duplicatedStatement['left'] = theStatement['left'] + 75;
+      } else {
+        // Child elements are duplicated onto the top left of the screen, because
+        // for some reason child elements aren't stored with a 'left' and 'top' attribute
+        //
+        // Child elements **should be** duplicated to top left of their parents
+        const parentId = theStatement['parent'];
+        // console.log(this.allConnectors[parentId]);
+        duplicatedStatement['top'] = this.allConnectors[parentId]['top'] - 25;
+        duplicatedStatement['left'] = this.allConnectors[parentId]['left'] - 75;
       }
-      this.allStatements[duplicatedStatement.id]['top'] = baseTop + 25;
-      this.allStatements[duplicatedStatement.id]['left'] = baseLeft + 75;
+      // Place slightly above/to left of parent
+      // Save to relevant data structures
+      this.allStatements[duplicatedStatement.id] = duplicatedStatement;
       this.rootStatementID_set.add(duplicatedStatement.id);
       this.$emit('answerarea-state-change');
     },
