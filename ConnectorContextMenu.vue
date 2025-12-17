@@ -62,18 +62,17 @@ export default {
       this.viewMenu = false;
     },
 
-    setMenu: function (top, left) {
-      const largestHeight =
-        window.innerHeight - this.$refs.right.offsetHeight - 120;
-      const largestWidth =
-        window.innerWidth - this.$refs.right.offsetWidth - 100;
+    setMenuPosition: function (e)
+    {
+      const buttonEl = e.currentTarget;        // the menu button
+      const parentEl = this.$el.offsetParent;      // same positioning context as the menu
 
-      if (top > largestHeight) top = largestHeight;
+      const buttonRect = buttonEl.getBoundingClientRect();
+      const parentRect = parentEl.getBoundingClientRect();
 
-      if (left > largestWidth) left = largestWidth;
-
-      this.top = top + 'px' - 100;
-      this.left = left + 'px' - 200;
+      // Position menu so its top-left matches the button’s top-left
+      this.top = (buttonRect.top - parentRect.top) + 'px';
+      this.left = (buttonRect.left - parentRect.left) + 'px';
     },
 
     closeMenu: function () {
@@ -81,13 +80,14 @@ export default {
     },
 
     openMenu: function (e) {
+      console.log("openMenu at ",e.clientX,e.clientY);
       this.viewMenu = true;
 
       nextTick(
         function () {
           this.$refs.right.focus();
 
-          this.setMenu(e.clientY, e.clientX);
+          this.setMenuPosition(e);
         }.bind(this),
       );
       e.preventDefault();

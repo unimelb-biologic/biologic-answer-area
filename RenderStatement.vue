@@ -1,66 +1,69 @@
 <template>
-  <div
-    class="statement-box"
-    id="renderStatementElement"
-    :draggable="true"
-    @dragstart.stop="startDrag($event, data)"
-    @dragover.prevent
-    @dragenter.prevent="handleDragEnteringRenderStatement"
-    @dragleave.prevent="handleDragLeavingRenderStatement"
-    @drop="onDrop($event)"
-    ref="mmStatementBox"
-    :style="{
-      position: this.statementData.position,
-      left: this.statementData.left + 'px',
-      top: this.statementData.top + 'px',
-    }"
-  >
-    <div class="drag-handle">&nbsp;</div>
+  <Transition name="slide-fade" appear>
+    <div
+      class="statement-box"
+      id="renderStatementElement"
+      :draggable="true"
+      @dragstart.stop="startDrag($event, data)"
+      @dragover.prevent
+      @dragenter.prevent="handleDragEnteringRenderStatement"
+      @dragleave.prevent="handleDragLeavingRenderStatement"
+      @drop="onDrop($event)"
+      ref="mmStatementBox"
+      :style="{
+        position: this.statementData.position,
+        left: this.statementData.left + 'px',
+        top: this.statementData.top + 'px',
+        zIndex: this.statementData.zIndex,
+      }"
+    >
+      <div class="drag-handle">&nbsp;</div>
 
-    <StatementRoot
-      ref="statementRootRef"
-      v-bind="$attrs"
-      v-if="this.statementData.statementType === 0"
-      :statement-data="this.statementData"
-      @user-choice-changed="handleUserChoiceChanged"
-      @duplicate-statement="duplicateStatement"
-      @delete-statement="deleteStatement"
-      @toggle-collapsed-statement-root="toggleCollapsedStatementRoot"
-      @toggle-showPopup-fromstatementroot="toggleShowPopupStatementRoot"
-    />
-    <StatementTruth
-      ref="statementTruthRef"
-      v-bind="$attrs"
-      v-if="this.statementData.statementType === 1"
-      :statement-data="this.statementData"
-      @user-choice-changed="handleUserChoiceChanged"
-      @duplicate-statement="duplicateStatement"
-      @delete-statement="deleteStatement"
-      @toggle-collapsed-statement-truth="toggleCollapsedStatementTruth"
-    />
-    <StatementStudent
-      ref="statementStudentRef"
-      v-bind="$attrs"
-      v-if="this.statementData.statementType === 2"
-      :statement-data="this.statementData"
-      @user-choice-changed="handleUserChoiceChanged"
-      @duplicate-statement="duplicateStatement"
-      @delete-statement="deleteStatement"
-      @toggle-collapsed-statement-student="toggleCollapsedStatementStudent"
-      @toggle-showPopup-fromstatementstudent="toggleShowPopupStatementStudent"
-    />
-    <StatementFreeText
-      ref="statementFreeTextRef"
-      v-bind="$attrs"
-      v-if="this.statementData.statementType === 3"
-      :statement-data="this.statementData"
-      @user-input-changed="handleUserInputChanged"
-      @duplicate-statement="duplicateStatement"
-      @delete-statement="deleteStatement"
-      @toggle-collapsed-statement-freetext="toggleCollapsedStatementFreeText"
-    />
-    <div v-if="renderedText">{{ renderedText }}</div>
-  </div>
+      <StatementRoot
+        ref="statementRootRef"
+        v-bind="$attrs"
+        v-if="this.statementData.statementType === 0"
+        :statement-data="this.statementData"
+        @user-choice-changed="handleUserChoiceChanged"
+        @duplicate-statement="duplicateStatement"
+        @delete-statement="deleteStatement"
+        @toggle-collapsed-statement-root="toggleCollapsedStatementRoot"
+        @toggle-showPopup-fromstatementroot="toggleShowPopupStatementRoot"
+      />
+      <StatementTruth
+        ref="statementTruthRef"
+        v-bind="$attrs"
+        v-if="this.statementData.statementType === 1"
+        :statement-data="this.statementData"
+        @user-choice-changed="handleUserChoiceChanged"
+        @duplicate-statement="duplicateStatement"
+        @delete-statement="deleteStatement"
+        @toggle-collapsed-statement-truth="toggleCollapsedStatementTruth"
+      />
+      <StatementStudent
+        ref="statementStudentRef"
+        v-bind="$attrs"
+        v-if="this.statementData.statementType === 2"
+        :statement-data="this.statementData"
+        @user-choice-changed="handleUserChoiceChanged"
+        @duplicate-statement="duplicateStatement"
+        @delete-statement="deleteStatement"
+        @toggle-collapsed-statement-student="toggleCollapsedStatementStudent"
+        @toggle-showPopup-fromstatementstudent="toggleShowPopupStatementStudent"
+      />
+      <StatementFreeText
+        ref="statementFreeTextRef"
+        v-bind="$attrs"
+        v-if="this.statementData.statementType === 3"
+        :statement-data="this.statementData"
+        @user-input-changed="handleUserInputChanged"
+        @duplicate-statement="duplicateStatement"
+        @delete-statement="deleteStatement"
+        @toggle-collapsed-statement-freetext="toggleCollapsedStatementFreeText"
+      />
+      <div v-if="renderedText">{{ renderedText }}</div>
+    </div>
+  </Transition>
 </template>
 
 <script>
@@ -379,5 +382,15 @@ export default {
 
 .statement-box:hover .iconContainer {
   border: 5px solid rgb(12, 0, 246);
+}
+
+.slide-fade-enter-active {
+  transition: all 0.2s ease-out;
+}
+
+/* Slide in from left */
+.slide-fade-enter-from {
+  transform: translateX(-20px);
+  opacity: 0;
 }
 </style>
