@@ -56,6 +56,7 @@ import uniqueId from "lodash.uniqueid";
 import { computed } from "vue";
 import stringify from "json-stringify-pretty-compact";
 import { globalConsoleLog } from './util';
+import isEqual from "lodash/isEqual";
 
 export default {
   name: "AnswerArea",
@@ -96,6 +97,11 @@ export default {
       answerContent: {}, // {ID: Content} record the element ID and its content
       showAllFeedback: false, // flag used to toggle all the feedback elements at once
 
+      undoStack: [],
+      redoStack: [],
+      currentState: null,
+      ignoreStateChanges: false,
+
       localTestProp: 1,
     };
   },
@@ -108,8 +114,7 @@ export default {
   },
   inject: [
     "isFeedbackAvailable",
-    "showDataStructures",
-    "ignoreStateChanges"
+    "showDataStructures"
   ],
   computed: {
     prettifiedAnswerContentDump() {
@@ -177,13 +182,55 @@ export default {
       };
       return currentState;
     },
+    getStateSnapshot() {
+      return JSON.parse(JSON.stringify(this.getCurrentState()));
+    },
+    resetStateHistory() {
+      this.undoStack.length = 0;
+      this.redoStack.length = 0;
+      this.currentState = this.getStateSnapshot();
+    },
+    notifyStateChange() {
+      if (this.ignoreStateChanges) {
+        return;
+      }
+      const nextState = this.getStateSnapshot();
+      if (this.currentState) {
+        if (!isEqual(this.currentState, nextState)) {
+          this.undoStack.push(this.currentState);
+        } else {
+          return;
+        }
+      }
+      this.currentState = nextState;
+      this.redoStack.length = 0;
+      this.$emit("answerarea-state-change");
+    },
+    async undo() {
+      if (this.undoStack.length === 0) return;
+      this.redoStack.push(this.currentState);
+      this.currentState = this.undoStack.pop();
+      this.ignoreStateChanges = true;
+      await this.loadPreviousAnswer(this.currentState);
+      this.ignoreStateChanges = false;
+      this.$emit("answerarea-state-change");
+    },
+    async redo() {
+      if (this.redoStack.length === 0) return;
+      this.undoStack.push(this.currentState);
+      this.currentState = this.redoStack.pop();
+      this.ignoreStateChanges = true;
+      await this.loadPreviousAnswer(this.currentState);
+      this.ignoreStateChanges = false;
+      this.$emit("answerarea-state-change");
+    },
 
 
 
     handleLinkWordChange(info) {
       const connectorID = info[0];
       this.allConnectors[connectorID]["selectedPhrase"] = info[1];
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
     },
 
     handleAStatementDrop(info) {
@@ -242,7 +289,7 @@ export default {
       this.allConnectors[connectorID]["leftStatementIdentifier"] =
         statementIdentifier;
 
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
 
     },
 
@@ -302,7 +349,7 @@ export default {
       this.allConnectors[connectorID]["rightStatementIdentifier"] =
         statementIdentifier;
 
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
 
     },
     thingIsInTreeOfconnector(objTypeStr, thingID, connID) {
@@ -453,7 +500,7 @@ export default {
         this.allConnectors[droppedConnectorID]["top"]] = this.calculateNewPositionWithinAnswerArea(evt);
         evt.stopImmediatePropagation();
 
-        this.$emit("answerarea-state-change");
+        this.notifyStateChange();
 
         return;
       }
@@ -522,7 +569,7 @@ export default {
       // Record content
       this.answerContent[droppedConnectorID] = info[2];
 
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
 
     },
 
@@ -553,7 +600,7 @@ export default {
         evt.stopImmediatePropagation();
 
 
-        this.$emit("answerarea-state-change");
+        this.notifyStateChange();
 
 
         return;
@@ -624,7 +671,7 @@ export default {
       // Record content
       this.answerContent[droppedConnectorID] = info[2];
 
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
 
     },
 
@@ -704,7 +751,7 @@ export default {
       this.allStatements[droppedStatementID]["top"] = topWithinAnswerArea;
       this.allStatements[droppedStatementID]["left"] = leftWithinAnswerArea;
 
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
 
     },
 
@@ -825,7 +872,7 @@ export default {
         e.stopImmediatePropagation();
 
 
-        this.$emit("answerarea-state-change");
+        this.notifyStateChange();
 
 
         return;
@@ -971,7 +1018,7 @@ export default {
           }
         }
       }
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
     },
 
     onDrop(e) {
@@ -1045,7 +1092,7 @@ export default {
       // Receive the content of dropped object
       const transContent = e.dataTransfer.getData("content");
 
-      this.ignoreStateChanges.value = true;
+      this.ignoreStateChanges = true;
 
       // Deal with the dropped type is 'Connector' and with no child
       if (type === "connector") {
@@ -1186,9 +1233,9 @@ export default {
         }
         this.answerContent[statementID] = transContent;
       }
-      this.ignoreStateChanges.value = false;
+      this.ignoreStateChanges = false;
 
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
     },
 
     connectorDroppedOnStatement(statementID, e) {
@@ -1243,7 +1290,7 @@ export default {
         }
       }
 
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
 
     },
 
@@ -1280,7 +1327,7 @@ export default {
       //console.log("AnswerArea:handleUpdateStatementContent ",contentText,statementID);
       this.answerContent[statementID] = contentText[0];
       this.allStatements[statementID].content.userInput = contentText[1].content.userInput;
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
     },
 
     emitUpdateContent(newAnswerContentObject) {
@@ -1381,7 +1428,7 @@ export default {
         delete this.answerContent[id];
       }
       this.$emit("connector-deleted", id);
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
     },
 
     duplicateStatement(id) {
@@ -1404,7 +1451,7 @@ export default {
       this.allStatements[duplicatedStatement.id]["top"] = baseTop + 25;
       this.allStatements[duplicatedStatement.id]["left"] = baseLeft + 75;
       this.rootStatementID_set.add(duplicatedStatement.id);
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
     },
 
     deleteStatement(id) {
@@ -1417,14 +1464,14 @@ export default {
         // need to tell connector parent to forget it
       }
       delete this.allStatements[id];
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
     },
 
     toggleCollapsedRenderStatement(id) {
       globalConsoleLog("any", "AnswerArea:toggleCollapsedRenderStatement ID:", id);
       this.allStatements[id]["collapsed"] =
         !this.allStatements[id]["collapsed"];
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
     },
 
     toggleCollapsedRenderStatementFromConnector(id) {
@@ -1434,7 +1481,7 @@ export default {
       );
       this.allStatements[id]["collapsed"] =
         !this.allStatements[id]["collapsed"];
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
     },
 
     toggleShowPopupFromRenderStatement(id) {
@@ -1445,7 +1492,7 @@ export default {
         "AnswerArea:toggleShowPopupFromRenderStatement is now",
         this.allStatements[id]["showPopup"]
       );
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
     },
 
     toggleShowPopupFromConnector(id) {
@@ -1456,7 +1503,7 @@ export default {
         "AnswerArea:toggleShowPopupFromConnector is now",
         this.allStatements[id]["showPopup"]
       );
-      this.$emit("answerarea-state-change");
+      this.notifyStateChange();
     },
 
     toggleAllFeedback() {
