@@ -463,25 +463,15 @@ export default {
         scrollTop,
         ')',
       );
-      globalConsoleLog(
-        'geom',
-        'parent position=',
-        scrollableDisplayWorkspace.offsetLeft,
-        ',',
-        scrollableDisplayWorkspace.offsetTop,
-        ')',
-      );
+
+      const sRect = scrollableDisplayWorkspace.getBoundingClientRect();
+      globalConsoleLog('geom', 'parent pos=', sRect.left, ',', sRect.top, ')');
+      const posWithinWorkspaceLeft = e.clientX - sRect.left;
+      const posWithinWorkspaceTop = e.clientY - sRect.top;
 
       leftWithinAnswerArea =
-        e.clientX -
-        scrollableDisplayWorkspace.offsetLeft -
-        grabOffsetLeft +
-        scrollLeft;
-      topWithinAnswerArea =
-        e.clientY -
-        scrollableDisplayWorkspace.offsetTop -
-        grabOffsetTop +
-        scrollTop;
+        posWithinWorkspaceLeft - grabOffsetLeft + scrollLeft;
+      topWithinAnswerArea = posWithinWorkspaceTop - grabOffsetTop + scrollTop;
 
       globalConsoleLog(
         'geom',
@@ -752,43 +742,11 @@ export default {
         e.currentTarget.offsetTop,
       );
 
-      let leftWithinAnswerArea = 0;
-      let topWithinAnswerArea = 0;
-
-      // account for scrolling
-      // get access to the enclosing "div" which is the element with the overflow-y:scroll set
-      const scrollableDisplayWorkspace =
-        e.currentTarget.closest('.displayWorkspace');
-      const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
-      const scrollTop = scrollableDisplayWorkspace.scrollTop;
-      globalConsoleLog(
-        'geom',
-        'parent scroll=',
-        scrollLeft,
-        ',',
-        scrollTop,
-        ')',
-      );
-
-      const sRect = scrollableDisplayWorkspace.getBoundingClientRect();
-      globalConsoleLog('geom', 'parent pos=', sRect.left, ',', sRect.top, ')');
-      const posWithinWorkspaceLeft = e.clientX - sRect.left;
-      const posWithinWorkspaceTop = e.clientY - sRect.top;
-
-      leftWithinAnswerArea =
-        posWithinWorkspaceLeft - grabOffsetLeft + scrollLeft;
-      topWithinAnswerArea = posWithinWorkspaceTop - grabOffsetTop + scrollTop;
-
-      globalConsoleLog(
-        'geom',
-        'SOOOO (left,top) Within AnswerArea = ',
-        leftWithinAnswerArea,
-        topWithinAnswerArea,
-      );
-
       this.allStatements[droppedStatementID]['position'] = 'absolute';
-      this.allStatements[droppedStatementID]['top'] = topWithinAnswerArea;
-      this.allStatements[droppedStatementID]['left'] = leftWithinAnswerArea;
+      [
+        this.allStatements[droppedStatementID]['left'],
+        this.allStatements[droppedStatementID]['top'],
+      ] = this.calculateNewPositionWithinAnswerArea(e);
 
       this.$emit('answerarea-state-change');
     },
@@ -1119,77 +1077,13 @@ export default {
         'geom',
         '\n\n--------------ANSWER AREA onDrop-------------------\n\n\n',
       );
-
-      globalConsoleLog(
-        'geom',
-        ' grabOffset: ',
-        grabOffsetLeft.toFixed(2),
-        grabOffsetTop.toFixed(2),
-      );
-
-      globalConsoleLog(
-        'geom',
-        'onDrop evt(i.e. mouse) e.client i.e. global position=(',
-        e.clientX,
-        e.clientY,
-        ') e.currentTarget.offset i.e. offset_within_thing_dropped_on = (',
-        e.currentTarget.offsetLeft,
-        e.currentTarget.offsetTop,
-        'the actual currentTarget=',
-        e.currentTarget,
-      );
-
       let leftWithinAnswerArea = 0;
       let topWithinAnswerArea = 0;
 
-      // account for scrolling
-      // get access to the enclosing "div" which is the element with the overflow-y:scroll set
-      const scrollableDisplayWorkspace =
-        e.currentTarget.closest('.displayWorkspace');
-      const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
-      const scrollTop = scrollableDisplayWorkspace.scrollTop;
-      globalConsoleLog(
-        'geom',
-        'parent scroll=',
-        scrollLeft,
-        ',',
-        scrollTop,
-        ')',
-      );
-      /*
-            leftWithinAnswerArea =
-              e.clientX - e.currentTarget.offsetLeft - grabOffsetLeft + scrollLeft;
-            topWithinAnswerArea =
-              e.clientY - e.currentTarget.offsetTop - grabOffsetTop + scrollTop;
-      */
-      const sRect = e.currentTarget.getBoundingClientRect();
-      globalConsoleLog(
-        'geom',
-        'answer_area pos=',
-        sRect.left,
-        ',',
-        sRect.top,
-        ')',
-      );
-      const posWithinWorkspaceLeft = e.clientX - sRect.left;
-      const posWithinWorkspaceTop = e.clientY - sRect.top;
-      globalConsoleLog(
-        'geom',
-        'poisiton within answerArea =',
-        posWithinWorkspaceLeft,
-        ',',
-        posWithinWorkspaceTop,
-        ')',
-      );
-      leftWithinAnswerArea = posWithinWorkspaceLeft - grabOffsetLeft;
-      topWithinAnswerArea = posWithinWorkspaceTop - grabOffsetTop;
-
-      globalConsoleLog(
-        'geom',
-        'SOOOO (left,top) Within AnswerArea = ',
+      [
         leftWithinAnswerArea,
         topWithinAnswerArea,
-      );
+      ] = this.calculateNewPositionWithinAnswerArea(e);
 
       e.stopImmediatePropagation();
 
