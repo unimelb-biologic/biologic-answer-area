@@ -1,8 +1,7 @@
 <template>
-
-
-  <div v-if="showDataStructures" class="data-structure-window">
-    <pre>
+  <div class="answer-area-container" ref="answerAreaContainer">
+    <div v-if="showDataStructures" class="data-structure-window">
+      <pre>
     {{ prettifiedAnswerContentDump }}
     {{ prettifiedStatementsDump }}
     {{ prettifiedAllStatementsDump }}
@@ -10,16 +9,38 @@
     {{ prettifiedRootConnectorID_List_Dump }}
     {{ prettifiedRootStatementIDs_Dump }}
     </pre>
-  </div>
-  <div ref="answer_area_ref" class="answer_area_class" @drop="onDrop" @dragover.prevent>
-    <!--h4>{{ testProp }} and localTestProp = {{ localTestProp }} this.connectorCount={{ this.connectorCount }}</h4-->
-    <RenderStatement v-for="item in rootStatementID_set" :key="item" :statement-data="allStatements[item]"
-      :showToggle="true" @duplicate-statement="duplicateStatement" @delete-statement="deleteStatement"
-      @update-statement-content="handleUpdateStatementContent"
-      @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething"
-      @statement-dropped-on-statement="handleStatementDroppedOnStatement"
-      @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
-      @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement" />
+    </div>
+    <div v-if="!displayOnly" class="answer-area-toolbar">
+      <ConnectorArea class="answer-area-toolbar-connectors" toolbar-mode />
+      <div class="answer-area-toolbar-buttons">
+        <Tooltip text="Undo last change">
+          <v-btn class="answer-area-button" size="small" id="undoBtn" :disabled="!canUndo" @click="undo">
+            <v-icon class="answer-area-icon" size="20">mdi-undo</v-icon>
+          </v-btn>
+        </Tooltip>
+        <Tooltip text="Redo last change">
+          <v-btn class="answer-area-button" size="small" id="redoBtn" :disabled="!canRedo" @click="redo">
+            <v-icon class="answer-area-icon" size="20">mdi-redo</v-icon>
+          </v-btn>
+        </Tooltip>
+        <Tooltip :text="isFullscreen ? 'Exit full screen' : 'Full screen'">
+          <v-btn class="answer-area-button" size="small" id="fullscreenBtn" @click="toggleFullscreen">
+            <v-icon class="answer-area-icon" size="20">
+              {{ isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen' }}
+            </v-icon>
+          </v-btn>
+        </Tooltip>
+      </div>
+    </div>
+    <div class="answer-area-workspace">
+      <div ref="answer_area_ref" class="answer_area_class" @drop="onDrop" @dragover.prevent>
+        <RenderStatement v-for="item in rootStatementID_set" :key="item" :statement-data="allStatements[item]"
+          :showToggle="true" @duplicate-statement="duplicateStatement" @delete-statement="deleteStatement"
+          @update-statement-content="handleUpdateStatementContent"
+          @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething"
+          @statement-dropped-on-statement="handleStatementDroppedOnStatement"
+        @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
+        @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement" />
 
     <Connector v-for="rootConnectorID in rootConnectorID_set" :key="rootConnectorID"
       :connector-i-d="allConnectors[rootConnectorID].connectorID"
@@ -46,7 +67,7 @@
       @delete-statement="deleteStatement"
       @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
       @toggle-showPopup-fromconnector="toggleShowPopupFromConnector" />
-    <ConnectorArea v-if="!displayOnly" />
+   
   </div>
 </template>
 
@@ -59,6 +80,7 @@ import { computed } from "vue";
 import stringify from "json-stringify-pretty-compact";
 import { globalConsoleLog } from './util';
 import isEqual from "lodash/isEqual";
+import Tooltip from "./Tooltip.vue";
 
 export default {
   name: "AnswerArea",
@@ -66,6 +88,7 @@ export default {
     Connector,
     RenderStatement,
     ConnectorArea,
+    Tooltip,
   },
   emits: [
     "update-answer-area-content",
@@ -105,6 +128,11 @@ export default {
       ignoreStateChanges: false,
 
       localTestProp: 1,
+      isFullscreen: false,
+      globalTooltipState: {
+        showTooltips: true,
+        animal: "mouse",
+      },
     };
   },
   provide() {
@@ -112,6 +140,7 @@ export default {
     return {
       showAllFeedback: computed(() => this.showAllFeedback),
       displayOnly: this.displayOnly,
+      globalTooltipState: this.globalTooltipState,
     };
   },
   inject: [
@@ -160,9 +189,24 @@ export default {
     isDev() {
       return this.$route.query.isDev;
     },
+    canUndo() {
+      return this.undoStack.length > 0;
+    },
+    canRedo() {
+      return this.redoStack.length > 0;
+    },
   },
 
   methods: {
+    getScrollableWorkspace(element) {
+      if (!element) return null;
+      return (
+        element.closest(".answer-area-workspace") ||
+        this.$el?.querySelector(".answer-area-workspace") ||
+        this.$refs.answer_area_ref?.parentElement ||
+        null
+      );
+    },
 
     getCurrentState() {
       const currentState = {
@@ -225,6 +269,19 @@ export default {
       await this.loadPreviousAnswer(this.currentState);
       this.ignoreStateChanges = false;
       this.$emit("answerarea-state-change");
+    },
+    handleFullscreenChange() {
+      const element = this.$refs.answerAreaContainer;
+      this.isFullscreen = document.fullscreenElement === element;
+    },
+    async toggleFullscreen() {
+      const element = this.$refs.answerAreaContainer;
+      if (!element) return;
+      if (document.fullscreenElement === element) {
+        await document.exitFullscreen();
+      } else {
+        await element.requestFullscreen();
+      }
     },
 
 
@@ -450,27 +507,28 @@ export default {
 
       // account for scrolling
       // get access to the enclosing "div" which is the element with the overflow-y:scroll set
-      const scrollableDisplayWorkspace =
-        e.currentTarget.closest(".displayWorkspace");
-      const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
-      const scrollTop = scrollableDisplayWorkspace.scrollTop;
-      globalConsoleLog(
-        'geom',
-        'parent scroll=',
-        scrollLeft,
-        ',',
-        scrollTop,
-        ')',
-      );
+      const scrollableDisplayWorkspace = this.getScrollableWorkspace(e.currentTarget);
+      const scrollLeft = scrollableDisplayWorkspace?.scrollLeft ?? 0;
+      const scrollTop = scrollableDisplayWorkspace?.scrollTop ?? 0;
+      globalConsoleLog("geom", "parent scroll=", scrollLeft, ",", scrollTop, ")");
+      if (scrollableDisplayWorkspace) {
+        globalConsoleLog(
+          "geom",
+          "parent position=",
+          scrollableDisplayWorkspace.offsetLeft,
+          ",",
+          scrollableDisplayWorkspace.offsetTop,
+          ")"
+        );
+      }
 
-      const sRect = scrollableDisplayWorkspace.getBoundingClientRect();
-      globalConsoleLog('geom', 'parent pos=', sRect.left, ',', sRect.top, ')');
-      const posWithinWorkspaceLeft = e.clientX - sRect.left;
-      const posWithinWorkspaceTop = e.clientY - sRect.top;
-
+      const workspaceRect = (
+        scrollableDisplayWorkspace || e.currentTarget
+      ).getBoundingClientRect();
       leftWithinAnswerArea =
-        posWithinWorkspaceLeft - grabOffsetLeft + scrollLeft;
-      topWithinAnswerArea = posWithinWorkspaceTop - grabOffsetTop + scrollTop;
+        e.clientX - workspaceRect.left - grabOffsetLeft + scrollLeft;
+      topWithinAnswerArea =
+        e.clientY - workspaceRect.top - grabOffsetTop + scrollTop;
 
       globalConsoleLog("geom",
         "SOOOO (left,top) Within AnswerArea = ",
@@ -1607,7 +1665,11 @@ export default {
 
   mounted() {
     globalConsoleLog("conn", "AnswerArea:mounted");
+    document.addEventListener("fullscreenchange", this.handleFullscreenChange);
     //this.initialiseWithStatementElements();
+  },
+  beforeUnmount() {
+    document.removeEventListener("fullscreenchange", this.handleFullscreenChange);
   },
 
   watch: {
@@ -1630,13 +1692,67 @@ export default {
 </script>
 
 <style>
+.v-spacer {
+  flex: 1 1 auto;
+}
+
+.v-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.v-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.answer-area-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.answer-area-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px;
+  background-color: var(--biologic-grey-color);
+  border: 1px solid var(--biologic-blue-color);
+  border-bottom: none;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.answer-area-toolbar-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.answer-area-toolbar-connectors {
+  flex: 1;
+}
+
+.answer-area-workspace {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  background: #ffffff;
+}
+
 .answer_area_class {
-  position: static;
+  position: relative;
   min-height: 100%;
   height: 2000px;   /* these hard-coded sizes are a rough fix for now to make sure there is enough workspace - since the auto scaling was problematic */
   width: 2000px;
   display: flex;
   border: 1px solid var(--biologic-blue-color);
+  border-top: none;
   flex-grow: 1;
   flex-direction: column;
 }
