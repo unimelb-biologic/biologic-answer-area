@@ -1,5 +1,5 @@
 <template>
-  <div class="answer-area-container">
+  <div class="answer-area-container" ref="answerAreaContainer">
     <div v-if="showDataStructures" class="data-structure-window">
       <pre>
     {{ prettifiedAnswerContentDump }}
@@ -21,6 +21,13 @@
         <Tooltip text="Redo last change">
           <v-btn class="answer-area-button" size="small" id="redoBtn" :disabled="!canRedo" @click="redo">
             <v-icon class="answer-area-icon" size="20">mdi-redo</v-icon>
+          </v-btn>
+        </Tooltip>
+        <Tooltip :text="isFullscreen ? 'Exit full screen' : 'Full screen'">
+          <v-btn class="answer-area-button" size="small" id="fullscreenBtn" @click="toggleFullscreen">
+            <v-icon class="answer-area-icon" size="20">
+              {{ isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen' }}
+            </v-icon>
           </v-btn>
         </Tooltip>
       </div>
@@ -121,6 +128,11 @@ export default {
       ignoreStateChanges: false,
 
       localTestProp: 1,
+      isFullscreen: false,
+      globalTooltipState: {
+        showTooltips: true,
+        animal: "mouse",
+      },
     };
   },
   provide() {
@@ -128,6 +140,7 @@ export default {
     return {
       showAllFeedback: computed(() => this.showAllFeedback),
       displayOnly: this.displayOnly,
+      globalTooltipState: this.globalTooltipState,
     };
   },
   inject: [
@@ -185,6 +198,15 @@ export default {
   },
 
   methods: {
+    getScrollableWorkspace(element) {
+      if (!element) return null;
+      return (
+        element.closest(".answer-area-workspace") ||
+        this.$el?.querySelector(".answer-area-workspace") ||
+        this.$refs.answer_area_ref?.parentElement ||
+        null
+      );
+    },
 
     getCurrentState() {
       const currentState = {
@@ -247,6 +269,19 @@ export default {
       await this.loadPreviousAnswer(this.currentState);
       this.ignoreStateChanges = false;
       this.$emit("answerarea-state-change");
+    },
+    handleFullscreenChange() {
+      const element = this.$refs.answerAreaContainer;
+      this.isFullscreen = document.fullscreenElement === element;
+    },
+    async toggleFullscreen() {
+      const element = this.$refs.answerAreaContainer;
+      if (!element) return;
+      if (document.fullscreenElement === element) {
+        await document.exitFullscreen();
+      } else {
+        await element.requestFullscreen();
+      }
     },
 
 
@@ -472,17 +507,28 @@ export default {
 
       // account for scrolling
       // get access to the enclosing "div" which is the element with the overflow-y:scroll set
-      const scrollableDisplayWorkspace =
-        e.currentTarget.closest(".displayWorkspace");
-      const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
-      const scrollTop = scrollableDisplayWorkspace.scrollTop;
+      const scrollableDisplayWorkspace = this.getScrollableWorkspace(e.currentTarget);
+      const scrollLeft = scrollableDisplayWorkspace?.scrollLeft ?? 0;
+      const scrollTop = scrollableDisplayWorkspace?.scrollTop ?? 0;
       globalConsoleLog("geom", "parent scroll=", scrollLeft, ",", scrollTop, ")");
-      globalConsoleLog("geom", "parent position=", scrollableDisplayWorkspace.offsetLeft, ",", scrollableDisplayWorkspace.offsetTop, ")");
+      if (scrollableDisplayWorkspace) {
+        globalConsoleLog(
+          "geom",
+          "parent position=",
+          scrollableDisplayWorkspace.offsetLeft,
+          ",",
+          scrollableDisplayWorkspace.offsetTop,
+          ")"
+        );
+      }
 
+      const workspaceRect = (
+        scrollableDisplayWorkspace || e.currentTarget
+      ).getBoundingClientRect();
       leftWithinAnswerArea =
-        e.clientX - scrollableDisplayWorkspace.offsetLeft - grabOffsetLeft + scrollLeft;
+        e.clientX - workspaceRect.left - grabOffsetLeft + scrollLeft;
       topWithinAnswerArea =
-        e.clientY - scrollableDisplayWorkspace.offsetTop - grabOffsetTop + scrollTop;
+        e.clientY - workspaceRect.top - grabOffsetTop + scrollTop;
 
       globalConsoleLog("geom",
         "SOOOO (left,top) Within AnswerArea = ",
@@ -750,13 +796,14 @@ export default {
 
       // account for scrolling
       // get access to the enclosing "div" which is the element with the overflow-y:scroll set
-      const scrollableDisplayWorkspace =
-        e.currentTarget.closest(".displayWorkspace");
-      const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
-      const scrollTop = scrollableDisplayWorkspace.scrollTop;
+      const scrollableDisplayWorkspace = this.getScrollableWorkspace(e.currentTarget);
+      const scrollLeft = scrollableDisplayWorkspace?.scrollLeft ?? 0;
+      const scrollTop = scrollableDisplayWorkspace?.scrollTop ?? 0;
       globalConsoleLog("geom", "parent scroll=", scrollLeft, ",", scrollTop, ")");
 
-      const sRect = scrollableDisplayWorkspace.getBoundingClientRect();
+      const sRect = (
+        scrollableDisplayWorkspace || e.currentTarget
+      ).getBoundingClientRect();
       globalConsoleLog("geom", "parent pos=", sRect.left, ",", sRect.top, ")");
       const posWithinWorkspaceLeft = e.clientX - sRect.left;
       const posWithinWorkspaceTop = e.clientY - sRect.top;
@@ -1081,10 +1128,9 @@ export default {
 
       // account for scrolling
       // get access to the enclosing "div" which is the element with the overflow-y:scroll set
-      const scrollableDisplayWorkspace =
-        e.currentTarget.closest(".displayWorkspace");
-      const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
-      const scrollTop = scrollableDisplayWorkspace.scrollTop;
+      const scrollableDisplayWorkspace = this.getScrollableWorkspace(e.currentTarget);
+      const scrollLeft = scrollableDisplayWorkspace?.scrollLeft ?? 0;
+      const scrollTop = scrollableDisplayWorkspace?.scrollTop ?? 0;
       globalConsoleLog("geom", "parent scroll=", scrollLeft, ",", scrollTop, ")");
       /*
             leftWithinAnswerArea =
@@ -1603,7 +1649,11 @@ export default {
 
   mounted() {
     globalConsoleLog("conn", "AnswerArea:mounted");
+    document.addEventListener("fullscreenchange", this.handleFullscreenChange);
     //this.initialiseWithStatementElements();
+  },
+  beforeUnmount() {
+    document.removeEventListener("fullscreenchange", this.handleFullscreenChange);
   },
 
   watch: {
@@ -1626,6 +1676,23 @@ export default {
 </script>
 
 <style>
+.v-spacer {
+  flex: 1 1 auto;
+}
+
+.v-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.v-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .answer-area-container {
   display: flex;
   flex-direction: column;
