@@ -67,7 +67,8 @@
       @delete-statement="deleteStatement"
       @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
       @toggle-showPopup-fromconnector="toggleShowPopupFromConnector" />
-   
+      </div>
+    </div>
   </div>
 </template>
 
