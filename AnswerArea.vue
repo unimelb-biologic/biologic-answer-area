@@ -67,6 +67,7 @@
       @new-connector-dropped-on-connector="handleNewConnectorDroppedOnSomething"
       @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething"
       @duplicate-statement="duplicateStatement"
+      @duplicate-connector="duplicateConnector"
       @delete-statement="deleteStatement"
       @toggle-collapsed-renderstatement-from-connector="
         toggleCollapsedRenderStatementFromConnector
@@ -1089,6 +1090,7 @@ export default {
 
       const type = e.dataTransfer.getData('type');
       const data = JSON.parse(e.dataTransfer.getData('data'));
+      globalConsoleLog('conn','AnswerArea::onDrop data = ',data);
 
       // Receive the content of dropped object
       const transContent = e.dataTransfer.getData('content');
@@ -1427,9 +1429,18 @@ export default {
       this.$emit('answerarea-state-change');
     },
 
-    duplicateStatement(id) {
-      globalConsoleLog('conn', 'AnswerArea:duplicateStatement');
-      const theStatement = this.allStatements[id];
+    duplicateStatement(payload) {
+
+      globalConsoleLog('conn', 'AnswerArea:duplicateStatement ',
+        payload.id,
+        ' (',
+        payload.posX, // this is the mouse click position
+        ',',
+        payload.posY, // this is the mouse click position
+        ')'
+      );
+
+      const theStatement = this.allStatements[payload.id];
       const duplicatedStatement = JSON.parse(JSON.stringify(theStatement)); // Create a copy of the last element
       duplicatedStatement.id = uniqueId(); //just need a new unique number
       duplicatedStatement['visible'] = true;
@@ -1438,25 +1449,84 @@ export default {
       duplicatedStatement['showPopup'] = theStatement['showPopup'];
       duplicatedStatement['collapsed'] = theStatement['collapsed'];
       duplicatedStatement['zIndex'] = 6;
-      if (theStatement['parent'] == -1) {
-        // Root elements are duplicated to bottom right
-        duplicatedStatement['top'] = theStatement['top'] + 25;
-        duplicatedStatement['left'] = theStatement['left'] + 75;
-      } else {
-        // Child elements are duplicated onto the top left of the screen, because
-        // for some reason child elements aren't stored with a 'left' and 'top' attribute
-        //
-        // Child elements **should be** duplicated to top left of their parents
-        const parentId = theStatement['parent'];
-        // console.log(this.allConnectors[parentId]);
-        duplicatedStatement['top'] = this.allConnectors[parentId]['top'] - 25;
-        duplicatedStatement['left'] = this.allConnectors[parentId]['left'] - 75;
-      }
-      // Place slightly above/to left of parent
+
+      // place it at the mouseclick
+      const box = this.$refs.answer_area_ref.getBoundingClientRect();
+      globalConsoleLog('conn','AnswerArea:duplicateStatement box=',box);
+      duplicatedStatement['top'] = payload.posY - box.top;
+      duplicatedStatement['left'] = payload.posX - box.left;
+
       // Save to relevant data structures
       this.allStatements[duplicatedStatement.id] = duplicatedStatement;
       this.rootStatementID_set.add(duplicatedStatement.id);
       this.$emit('answerarea-state-change');
+    },
+
+    cloneConnector(oldConnectorID) {
+      const oldConn = this.allConnectors[oldConnectorID];
+      globalConsoleLog('conn','AnswerArea:cloneConnector oldConn=',oldConnectorID,oldConn);
+      const newConn =  JSON.parse(JSON.stringify(oldConn)); // make a deep copy
+      this.allConnectors[this.connectorCount] = newConn; // add it to our collection
+      newConn['connectorID'] = this.connectorCount;
+      this.connectorCount++;
+      globalConsoleLog('conn','AnswerArea:cloneConnector newConn=',newConn);
+
+      // now recursively create new connectors and statements in the tree
+
+      if (oldConn['leftType']=='statement') {
+        globalConsoleLog('conn','AnswerArea:cloneConnector making clone of left statement ',oldConn['leftID']);
+        const newLeftStatement = JSON.parse(JSON.stringify(this.allStatements[oldConn['leftID']]));
+        newLeftStatement['id'] = uniqueId();
+        this.allStatements[newLeftStatement['id']] = newLeftStatement;
+        newLeftStatement['parent'] = newConn.connectorID;
+        newConn['leftID'] = newLeftStatement['id'];
+        globalConsoleLog('conn','AnswerArea:cloneConnector new left statement =',newLeftStatement);
+      } else if (oldConn['leftType']=='connector') {
+        globalConsoleLog('conn','AnswerArea:cloneConnector recursively cloning left Conn ',oldConn['leftID']);
+        const newLeftConn = this.cloneConnector(oldConn['leftID']);
+        newConn['leftID'] = newLeftConn['connectorID'];
+        newLeftConn['parent']=newConn['connectorID'];
+      }
+      if (oldConn['rightType']=='statement') {
+        globalConsoleLog('conn','AnswerArea:cloneConnector making clone of right statement ',oldConn['rightID']);
+        const newRightStatement = JSON.parse(JSON.stringify(this.allStatements[oldConn['rightID']]));
+        newRightStatement['id'] = uniqueId();
+        this.allStatements[newRightStatement['id']] = newRightStatement;
+        newRightStatement['parent'] = newConn.connectorID;
+        newConn['rightID'] = newRightStatement['id'];
+        globalConsoleLog('conn','AnswerArea:cloneConnector new right statement =',newRightStatement);
+      } else if (oldConn['rightType']=='connector') {
+        globalConsoleLog('conn','AnswerArea:cloneConnector recursively cloning right Conn ',oldConn['rightID']);
+        const newRightConn = this.cloneConnector(oldConn['rightID']);
+        newConn['rightID'] = newRightConn['connectorID'];
+        newRightConn['parent']=newConn['connectorID'];
+      }
+      return newConn;
+    },
+
+    duplicateConnector(payload){
+      globalConsoleLog('conn', 'AnswerArea:duplicateConnector ',
+        payload.id,
+        ' (',
+        payload.posX,
+        ',',
+        payload.posY,
+        ')'
+      );
+      const oldConn = this.allConnectors[payload.id];
+      const newConn = this.cloneConnector(payload.id);
+
+      const box = this.$refs.answer_area_ref.getBoundingClientRect();
+      globalConsoleLog('conn','AnswerArea:duplicateConnector box=',box);
+
+      const relativeX = payload.posX - box.left;
+      const relativeY = payload.posY - box.top;
+
+      //newConn['top'] = oldConn['top'] + 100;
+      //newConn['left'] = oldConn['left'] + 100;
+      newConn['top'] = relativeY;
+      newConn['left'] = relativeX;
+      this.rootConnectorID_set.add(newConn['connectorID']);
     },
 
     deleteStatement(id) {
@@ -1665,7 +1735,7 @@ export default {
   top: 150px;
   left: 100px;
   width: 500px;
-  height: 1000px;
+  height: 300px;
   background: rgb(242, 252, 238);
   border: 1px solid #ccc;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);

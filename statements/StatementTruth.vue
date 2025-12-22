@@ -31,7 +31,7 @@
           <v-btn
             size="x-small"
             v-if="showToggle && !displayOnly"
-            @click="duplicateMe"
+            @click="duplicateMe($event,id)"
             class="statementButton"
           >
             <!--img class="statementButtonImage" src="../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
@@ -194,8 +194,13 @@ export default {
       //console.log("testing if fact<",fact," is an image - result is ",isImg);
       return isImg;
     },
-    duplicateMe() {
-      this.$emit('duplicate-statement', [this.id]);
+    duplicateMe(event, theID) {
+      globalConsoleLog('conn', 'StatementTruth:duplicateMe ', theID, event.clientX, event.clientY);
+      this.$emit('duplicate-statement', {
+        id: theID,
+        posX: event.clientX,
+        posY: event.clientY
+      });
     },
     deleteStatement() {
       // Emit an event to the parent component indicating that this statement should be deleted
