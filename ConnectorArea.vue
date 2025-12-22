@@ -1,5 +1,35 @@
 <template>
+  <div v-if="toolbarMode" class="connector-toolbar">
+    <Tooltip
+      text="Drag a connector from this dropdown into your workspace to build relationships."
+    >
+      <v-btn
+        class="connector-toolbar-trigger"
+        size="small"
+        @click="toggleToolbarDropdown"
+      >
+        Connectors
+        <v-icon size="18">
+          {{ toolbarDropdownOpen ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+        </v-icon>
+      </v-btn>
+    </Tooltip>
+    <div
+      v-if="toolbarDropdownOpen"
+      class="connector-toolbar-dropdown"
+    >
+      <Connector
+        v-for="connector in connectors"
+        :key="connector[0]"
+        :connector-i-d="undefined"
+        :selected-phrase="0"
+        :connector-content-i-d="connector[0]"
+        :connector-content="connector[1]"
+      />
+    </div>
+  </div>
   <vue-draggable-resizable
+    v-else
     :x="position.x"
     :y="position.y"
     :w="collapsed ? 35 : 200"
@@ -52,7 +82,12 @@ import Tooltip from './Tooltip.vue';
 
 export default {
   name: 'ConnectorArea',
-  props: {},
+  props: {
+    toolbarMode: {
+      type: Boolean,
+      default: false,
+    },
+  },
   emits: [],
   components: {
     Connector,
@@ -66,6 +101,9 @@ export default {
     },
     toggleCollapse() {
       this.collapsed = !this.collapsed;
+    },
+    toggleToolbarDropdown() {
+      this.toolbarDropdownOpen = !this.toolbarDropdownOpen;
     },
   },
   data() {
@@ -137,9 +175,13 @@ export default {
       ],
       position: { x: 0, y: 0 }, // iniitial position
       collapsed: true,
+      toolbarDropdownOpen: false,
     };
   },
   mounted() {
+    if (this.toolbarMode) {
+      return;
+    }
     this.$nextTick(() => {
       const parent = this.$el.parentElement;
       if (parent) {
@@ -153,6 +195,33 @@ export default {
 </script>
 
 <style scoped>
+.connector-toolbar {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 10;
+}
+
+.connector-toolbar-trigger {
+  background-color: var(--biologic-blue-color);
+  color: white;
+  text-transform: none;
+}
+
+.connector-toolbar-dropdown {
+  position: absolute;
+  top: 38px;
+  left: 0;
+  z-index: 10;
+  background: #fff;
+  border: 1px solid var(--biologic-blue-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
 .draggable-box {
   border: 1px solid #ccc;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.3);
