@@ -265,13 +265,14 @@ export default {
       );
     },
 
-    duplicateStatement(id) {
+    duplicateStatement(payload) {
       if (this.displayOnly) return;
 
-      console.log(
-        'RenderStatement:duplicateStatement - calling emit duplicate-statement',
+      globalConsoleLog(
+        'conn',
+        'RenderStatement:duplicateStatement - calling emit duplicate-statement', payload
       );
-      this.$emit('duplicate-statement', id); // pass it on up the chain
+      this.$emit('duplicate-statement', payload); // pass it on up the chain
     },
 
     deleteStatement(id) {

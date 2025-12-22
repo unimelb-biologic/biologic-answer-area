@@ -45,7 +45,7 @@
           <v-btn
             size="x-small"
             v-if="showToggle && !displayOnly"
-            @click="duplicateMe"
+            @click="duplicateMe($event,id)"
             class="statementButton"
           >
             <!--img class="statementButtonImage" src="../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
@@ -285,9 +285,15 @@ export default {
         this.answeredData,
       ]);
     },
-    duplicateMe() {
-      this.$emit('duplicate-statement', [this.id]);
+    duplicateMe(event, theID) {
+      globalConsoleLog('conn', 'StatementRoot:duplicateMe ', theID, event.clientX, event.clientY);
+      this.$emit('duplicate-statement', {
+        id: theID,
+        posX: event.clientX,
+        posY: event.clientY
+      });
     },
+
     deleteStatement() {
       // Emit an event to the parent component indicating that this statement should be deleted
       this.$emit('delete-statement', this.id);
