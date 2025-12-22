@@ -42,6 +42,19 @@
         </v-btn>
       </Tooltip>
 
+      <Tooltip text="duplicate this connector and all the sub-connectors/statements">
+          <v-btn
+            size="x-small"
+            v-if="!displayOnly"
+            @click="onDuplicateConnectorClick( $event, connectorID )"
+            class="connectorButton"
+          >
+            <!--img class="statementButtonImage" src="../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
+            <v-icon>mdi-content-duplicate</v-icon>
+          </v-btn>
+        </Tooltip>
+
+
       <Tooltip :text="deleteButtonTooltipText">
         <v-btn
           v-if="!displayOnly"
@@ -206,6 +219,7 @@
             "
             @connector-dropped-on-statement="connectorDroppedOnStatement"
             @duplicate-statement="duplicateStatement"
+            @duplicate-connector="duplicateConnector"
             @delete-statement="deleteStatement"
             @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
             @toggle-collapsed-renderstatement-from-connector="
@@ -350,6 +364,7 @@
             "
             @connector-dropped-on-statement="connectorDroppedOnStatement"
             @duplicate-statement="duplicateStatement"
+            @duplicate-connector="duplicateConnector"
             @delete-statement="deleteStatement"
             @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
             @toggle-collapsed-renderstatement-from-connector="
@@ -413,6 +428,7 @@ export default {
     'toggle-orientation',
     'new-connector-dropped-on-connector',
     'duplicate-statement',
+    'duplicate-connector',
     'delete-statement',
     'toggle-collapsed-renderstatement-from-connector',
     'toggle-showPopup-fromconnector',
@@ -478,11 +494,11 @@ export default {
     },
   },
   methods: {
-    duplicateStatement(id) {
+    duplicateStatement(payload) {
       // emission from either a child RenderStatement or a Connector.
       // just pass this on up the tree for the AnswerArea to deal with
-      globalConsoleLog('conn', 'Connector:duplicateStatement');
-      this.$emit('duplicate-statement', id);
+      globalConsoleLog('conn', 'Connector:duplicateStatement',payload);
+      this.$emit('duplicate-statement', payload);
     },
     deleteStatement(id) {
       // emission from either a child RenderStatement or a Connector.
@@ -1198,6 +1214,22 @@ export default {
       this.$emit('delete-child-connector', { id, parentId, position });
     },
 
+    onDuplicateConnectorClick(event, theID) {
+      globalConsoleLog('conn', 'Connector:onDuplicateConnectorClick ', theID, event.clientX, event.clientY);
+      this.$emit('duplicate-connector', {
+        id: theID,
+        posX: event.clientX,
+        posY: event.clientY
+      });
+
+    },
+
+    duplicateConnector(payload) {
+      globalConsoleLog('conn','Connector:duplicateConnector ',payload);
+      this.$emit('duplicate-connector', payload);
+    },
+
+    
     deleteConnector({ id }) {
       // Emit an event to the parent component indicating that this connector should be deleted
       this.$emit('delete-connector', { id });

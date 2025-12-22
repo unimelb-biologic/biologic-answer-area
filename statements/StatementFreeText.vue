@@ -25,7 +25,7 @@
           </v-btn>
         </Tooltip>
 
-        <button v-if="showToggle" @click="duplicateMe" class="statementButton">
+        <button v-if="showToggle" @click="duplicateMe($event,id)" class="statementButton">
           <img
             class="duplicate-statement-button"
             src="../assets/duplicate_icon.png"
@@ -117,9 +117,15 @@ export default {
       this.userInputText = this.previousUserInput;
       this.answeredData = this.statementData;
     },
-    duplicateMe() {
-      this.$emit('duplicate-statement', [this.id]);
+    duplicateMe(event, theID) {
+      globalConsoleLog('conn', 'StatementFreeText:duplicateMe ', theID, event.clientX, event.clientY);
+      this.$emit('duplicate-statement', {
+        id: theID,
+        posX: event.clientX,
+        posY: event.clientY
+      });
     },
+
     deleteStatement() {
       // Emit an event to the parent component indicating that this statement should be deleted
       this.$emit('delete-statement', this.id);

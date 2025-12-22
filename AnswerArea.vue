@@ -40,7 +40,9 @@
       @toggle-orientation="handleToggleOrientation" @update-child-connector-content="handleUpdateChildConnector"
       @update-child-stat="handleUpdateChildStat"
       @new-connector-dropped-on-connector="handleNewConnectorDroppedOnSomething"
-      @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething" @duplicate-statement="duplicateStatement"
+      @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething"
+      @duplicate-statement="duplicateStatement"
+      @duplicate-connector="duplicateConnector"
       @delete-statement="deleteStatement"
       @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
       @toggle-showPopup-fromconnector="toggleShowPopupFromConnector" />
@@ -452,13 +454,23 @@ export default {
         e.currentTarget.closest(".displayWorkspace");
       const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
       const scrollTop = scrollableDisplayWorkspace.scrollTop;
-      globalConsoleLog("geom", "parent scroll=", scrollLeft, ",", scrollTop, ")");
-      globalConsoleLog("geom", "parent position=", scrollableDisplayWorkspace.offsetLeft, ",", scrollableDisplayWorkspace.offsetTop, ")");
+      globalConsoleLog(
+        'geom',
+        'parent scroll=',
+        scrollLeft,
+        ',',
+        scrollTop,
+        ')',
+      );
+
+      const sRect = scrollableDisplayWorkspace.getBoundingClientRect();
+      globalConsoleLog('geom', 'parent pos=', sRect.left, ',', sRect.top, ')');
+      const posWithinWorkspaceLeft = e.clientX - sRect.left;
+      const posWithinWorkspaceTop = e.clientY - sRect.top;
 
       leftWithinAnswerArea =
-        e.clientX - scrollableDisplayWorkspace.offsetLeft - grabOffsetLeft + scrollLeft;
-      topWithinAnswerArea =
-        e.clientY - scrollableDisplayWorkspace.offsetTop - grabOffsetTop + scrollTop;
+        posWithinWorkspaceLeft - grabOffsetLeft + scrollLeft;
+      topWithinAnswerArea = posWithinWorkspaceTop - grabOffsetTop + scrollTop;
 
       globalConsoleLog("geom",
         "SOOOO (left,top) Within AnswerArea = ",
@@ -721,35 +733,11 @@ export default {
         e.currentTarget.offsetTop
       );
 
-      let leftWithinAnswerArea = 0;
-      let topWithinAnswerArea = 0;
-
-      // account for scrolling
-      // get access to the enclosing "div" which is the element with the overflow-y:scroll set
-      const scrollableDisplayWorkspace =
-        e.currentTarget.closest(".displayWorkspace");
-      const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
-      const scrollTop = scrollableDisplayWorkspace.scrollTop;
-      globalConsoleLog("geom", "parent scroll=", scrollLeft, ",", scrollTop, ")");
-
-      const sRect = scrollableDisplayWorkspace.getBoundingClientRect();
-      globalConsoleLog("geom", "parent pos=", sRect.left, ",", sRect.top, ")");
-      const posWithinWorkspaceLeft = e.clientX - sRect.left;
-      const posWithinWorkspaceTop = e.clientY - sRect.top;
-
-      leftWithinAnswerArea =
-        posWithinWorkspaceLeft - grabOffsetLeft + scrollLeft;
-      topWithinAnswerArea = posWithinWorkspaceTop - grabOffsetTop + scrollTop;
-
-      globalConsoleLog("geom",
-        "SOOOO (left,top) Within AnswerArea = ",
-        leftWithinAnswerArea,
-        topWithinAnswerArea
-      );
-
-      this.allStatements[droppedStatementID]["position"] = "absolute";
-      this.allStatements[droppedStatementID]["top"] = topWithinAnswerArea;
-      this.allStatements[droppedStatementID]["left"] = leftWithinAnswerArea;
+      this.allStatements[droppedStatementID]['position'] = 'absolute';
+      [
+        this.allStatements[droppedStatementID]['left'],
+        this.allStatements[droppedStatementID]['top'],
+      ] = this.calculateNewPositionWithinAnswerArea(e);
 
       this.notifyStateChange();
 
@@ -1034,60 +1022,23 @@ export default {
       const grabOffsetLeft = parseInt(e.dataTransfer.getData("grabOffsetLeft"));
       const grabOffsetTop = parseInt(e.dataTransfer.getData("grabOffsetTop"));
 
-      globalConsoleLog("geom", "\n\n--------------ANSWER AREA onDrop-------------------\n\n\n");
-
-      globalConsoleLog("geom",
-        " grabOffset: ",
-        grabOffsetLeft.toFixed(2),
-        grabOffsetTop.toFixed(2)
+      globalConsoleLog(
+        'geom',
+        '\n\n--------------ANSWER AREA onDrop-------------------\n\n\n',
       );
-
-      globalConsoleLog("geom",
-        "onDrop evt(i.e. mouse) e.client i.e. global position=(",
-        e.clientX,
-        e.clientY,
-        ") e.currentTarget.offset i.e. offset_within_thing_dropped_on = (",
-        e.currentTarget.offsetLeft,
-        e.currentTarget.offsetTop,
-        "the actual currentTarget=", e.currentTarget
-      );
-
       let leftWithinAnswerArea = 0;
       let topWithinAnswerArea = 0;
 
-      // account for scrolling
-      // get access to the enclosing "div" which is the element with the overflow-y:scroll set
-      const scrollableDisplayWorkspace =
-        e.currentTarget.closest(".displayWorkspace");
-      const scrollLeft = scrollableDisplayWorkspace.scrollLeft;
-      const scrollTop = scrollableDisplayWorkspace.scrollTop;
-      globalConsoleLog("geom", "parent scroll=", scrollLeft, ",", scrollTop, ")");
-      /*
-            leftWithinAnswerArea =
-              e.clientX - e.currentTarget.offsetLeft - grabOffsetLeft + scrollLeft;
-            topWithinAnswerArea =
-              e.clientY - e.currentTarget.offsetTop - grabOffsetTop + scrollTop;
-      */
-      const sRect = e.currentTarget.getBoundingClientRect();
-      globalConsoleLog("geom", "answer_area pos=", sRect.left, ",", sRect.top, ")");
-      const posWithinWorkspaceLeft = e.clientX - sRect.left;
-      const posWithinWorkspaceTop = e.clientY - sRect.top;
-      globalConsoleLog("geom", "poisiton within answerArea =", posWithinWorkspaceLeft, ",", posWithinWorkspaceTop, ")");
-      leftWithinAnswerArea = posWithinWorkspaceLeft - grabOffsetLeft;
-      topWithinAnswerArea = posWithinWorkspaceTop - grabOffsetTop;
-
-
-
-      globalConsoleLog("geom",
-        "SOOOO (left,top) Within AnswerArea = ",
+      [
         leftWithinAnswerArea,
-        topWithinAnswerArea
-      );
+        topWithinAnswerArea,
+      ] = this.calculateNewPositionWithinAnswerArea(e);
 
       e.stopImmediatePropagation();
 
-      const type = e.dataTransfer.getData("type");
-      const data = JSON.parse(e.dataTransfer.getData("data"));
+      const type = e.dataTransfer.getData('type');
+      const data = JSON.parse(e.dataTransfer.getData('data'));
+      globalConsoleLog('conn','AnswerArea::onDrop data = ',data);
 
       // Receive the content of dropped object
       const transContent = e.dataTransfer.getData("content");
@@ -1431,27 +1382,104 @@ export default {
       this.notifyStateChange();
     },
 
-    duplicateStatement(id) {
-      globalConsoleLog("conn", "AnswerArea:duplicateStatement");
-      const theStatement = this.allStatements[id];
+    duplicateStatement(payload) {
+
+      globalConsoleLog('conn', 'AnswerArea:duplicateStatement ',
+        payload.id,
+        ' (',
+        payload.posX, // this is the mouse click position
+        ',',
+        payload.posY, // this is the mouse click position
+        ')'
+      );
+
+      const theStatement = this.allStatements[payload.id];
       const duplicatedStatement = JSON.parse(JSON.stringify(theStatement)); // Create a copy of the last element
       duplicatedStatement.id = uniqueId(); //just need a new unique number
-      duplicatedStatement["visible"] = true;
-      duplicatedStatement["parent"] = -1;
-      duplicatedStatement["position"] = "absolute";
-      duplicatedStatement["showPopup"] = theStatement["showPopup"];
-      duplicatedStatement["collapsed"] = theStatement["collapsed"];
-      this.allStatements[duplicatedStatement.id] = duplicatedStatement; // now add to the keyed list
-      let baseTop = 100;
-      let baseLeft = 100;
-      if (theStatement["parent"] == -1) {
-        baseTop = theStatement["top"];
-        baseLeft = theStatement["left"];
-      }
-      this.allStatements[duplicatedStatement.id]["top"] = baseTop + 25;
-      this.allStatements[duplicatedStatement.id]["left"] = baseLeft + 75;
+      duplicatedStatement['visible'] = true;
+      duplicatedStatement['parent'] = -1;
+      duplicatedStatement['position'] = 'absolute';
+      duplicatedStatement['showPopup'] = theStatement['showPopup'];
+      duplicatedStatement['collapsed'] = theStatement['collapsed'];
+      duplicatedStatement['zIndex'] = 6;
+
+      // place it at the mouseclick
+      const box = this.$refs.answer_area_ref.getBoundingClientRect();
+      globalConsoleLog('conn','AnswerArea:duplicateStatement box=',box);
+      duplicatedStatement['top'] = payload.posY - box.top;
+      duplicatedStatement['left'] = payload.posX - box.left;
+
+      // Save to relevant data structures
+      this.allStatements[duplicatedStatement.id] = duplicatedStatement;
       this.rootStatementID_set.add(duplicatedStatement.id);
       this.notifyStateChange();
+    },
+
+    cloneConnector(oldConnectorID) {
+      const oldConn = this.allConnectors[oldConnectorID];
+      globalConsoleLog('conn','AnswerArea:cloneConnector oldConn=',oldConnectorID,oldConn);
+      const newConn =  JSON.parse(JSON.stringify(oldConn)); // make a deep copy
+      this.allConnectors[this.connectorCount] = newConn; // add it to our collection
+      newConn['connectorID'] = this.connectorCount;
+      this.connectorCount++;
+      globalConsoleLog('conn','AnswerArea:cloneConnector newConn=',newConn);
+
+      // now recursively create new connectors and statements in the tree
+
+      if (oldConn['leftType']=='statement') {
+        globalConsoleLog('conn','AnswerArea:cloneConnector making clone of left statement ',oldConn['leftID']);
+        const newLeftStatement = JSON.parse(JSON.stringify(this.allStatements[oldConn['leftID']]));
+        newLeftStatement['id'] = uniqueId();
+        this.allStatements[newLeftStatement['id']] = newLeftStatement;
+        newLeftStatement['parent'] = newConn.connectorID;
+        newConn['leftID'] = newLeftStatement['id'];
+        globalConsoleLog('conn','AnswerArea:cloneConnector new left statement =',newLeftStatement);
+      } else if (oldConn['leftType']=='connector') {
+        globalConsoleLog('conn','AnswerArea:cloneConnector recursively cloning left Conn ',oldConn['leftID']);
+        const newLeftConn = this.cloneConnector(oldConn['leftID']);
+        newConn['leftID'] = newLeftConn['connectorID'];
+        newLeftConn['parent']=newConn['connectorID'];
+      }
+      if (oldConn['rightType']=='statement') {
+        globalConsoleLog('conn','AnswerArea:cloneConnector making clone of right statement ',oldConn['rightID']);
+        const newRightStatement = JSON.parse(JSON.stringify(this.allStatements[oldConn['rightID']]));
+        newRightStatement['id'] = uniqueId();
+        this.allStatements[newRightStatement['id']] = newRightStatement;
+        newRightStatement['parent'] = newConn.connectorID;
+        newConn['rightID'] = newRightStatement['id'];
+        globalConsoleLog('conn','AnswerArea:cloneConnector new right statement =',newRightStatement);
+      } else if (oldConn['rightType']=='connector') {
+        globalConsoleLog('conn','AnswerArea:cloneConnector recursively cloning right Conn ',oldConn['rightID']);
+        const newRightConn = this.cloneConnector(oldConn['rightID']);
+        newConn['rightID'] = newRightConn['connectorID'];
+        newRightConn['parent']=newConn['connectorID'];
+      }
+      return newConn;
+    },
+
+    duplicateConnector(payload){
+      globalConsoleLog('conn', 'AnswerArea:duplicateConnector ',
+        payload.id,
+        ' (',
+        payload.posX,
+        ',',
+        payload.posY,
+        ')'
+      );
+      const oldConn = this.allConnectors[payload.id];
+      const newConn = this.cloneConnector(payload.id);
+
+      const box = this.$refs.answer_area_ref.getBoundingClientRect();
+      globalConsoleLog('conn','AnswerArea:duplicateConnector box=',box);
+
+      const relativeX = payload.posX - box.left;
+      const relativeY = payload.posY - box.top;
+
+      //newConn['top'] = oldConn['top'] + 100;
+      //newConn['left'] = oldConn['left'] + 100;
+      newConn['top'] = relativeY;
+      newConn['left'] = relativeX;
+      this.rootConnectorID_set.add(newConn['connectorID']);
     },
 
     deleteStatement(id) {
@@ -1643,7 +1671,7 @@ export default {
   top: 150px;
   left: 100px;
   width: 500px;
-  height: 1000px;
+  height: 300px;
   background: rgb(242, 252, 238);
   border: 1px solid #ccc;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
