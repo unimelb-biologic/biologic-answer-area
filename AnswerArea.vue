@@ -1,8 +1,7 @@
 <template>
-
-
-  <div v-if="showDataStructures" class="data-structure-window">
-    <pre>
+  <div class="answer-area-container">
+    <div v-if="showDataStructures" class="data-structure-window">
+      <pre>
     {{ prettifiedAnswerContentDump }}
     {{ prettifiedStatementsDump }}
     {{ prettifiedAllStatementsDump }}
@@ -10,42 +9,59 @@
     {{ prettifiedRootConnectorID_List_Dump }}
     {{ prettifiedRootStatementIDs_Dump }}
     </pre>
-  </div>
-  <div ref="answer_area_ref" class="answer_area_class" @drop="onDrop" @dragover.prevent>
-    <!--h4>{{ testProp }} and localTestProp = {{ localTestProp }} this.connectorCount={{ this.connectorCount }}</h4-->
-    <RenderStatement v-for="item in rootStatementID_set" :key="item" :statement-data="allStatements[item]"
-      :showToggle="true" @duplicate-statement="duplicateStatement" @delete-statement="deleteStatement"
-      @update-statement-content="handleUpdateStatementContent"
-      @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething"
-      @statement-dropped-on-statement="handleStatementDroppedOnStatement"
-      @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
-      @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement" />
+    </div>
+    <div v-if="!displayOnly" class="answer-area-toolbar">
+      <ConnectorArea class="answer-area-toolbar-connectors" toolbar-mode />
+      <div class="answer-area-toolbar-buttons">
+        <Tooltip text="Undo last change">
+          <v-btn class="answer-area-button" size="small" id="undoBtn" :disabled="!canUndo" @click="undo">
+            <v-icon class="answer-area-icon" size="20">mdi-undo</v-icon>
+          </v-btn>
+        </Tooltip>
+        <Tooltip text="Redo last change">
+          <v-btn class="answer-area-button" size="small" id="redoBtn" :disabled="!canRedo" @click="redo">
+            <v-icon class="answer-area-icon" size="20">mdi-redo</v-icon>
+          </v-btn>
+        </Tooltip>
+      </div>
+    </div>
+    <div class="answer-area-workspace">
+      <div ref="answer_area_ref" class="answer_area_class" @drop="onDrop" @dragover.prevent>
+        <RenderStatement v-for="item in rootStatementID_set" :key="item" :statement-data="allStatements[item]"
+          :showToggle="true" @duplicate-statement="duplicateStatement" @delete-statement="deleteStatement"
+          @update-statement-content="handleUpdateStatementContent"
+          @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething"
+          @statement-dropped-on-statement="handleStatementDroppedOnStatement"
+        @toggle-collapsed-renderstatement="toggleCollapsedRenderStatement"
+        @toggle-showPopup-fromrenderstatement="toggleShowPopupFromRenderStatement" />
 
-    <Connector v-for="rootConnectorID in rootConnectorID_set" :key="rootConnectorID"
-      :connector-i-d="allConnectors[rootConnectorID].connectorID"
-      :connector-content-i-d="allConnectors[rootConnectorID].connectorContentID"
-      :connector-content="allConnectors[rootConnectorID].connectorContent" :all-statements="this.allStatements"
-      :all-connectors="this.allConnectors" :parent="allConnectors[rootConnectorID].parent"
-      :left-i-d="allConnectors[rootConnectorID].leftID" :left-type="allConnectors[rootConnectorID].leftType"
-      :left-content="allConnectors[rootConnectorID].leftContent" :right-i-d="allConnectors[rootConnectorID].rightID"
-      :right-type="allConnectors[rootConnectorID].rightType"
-      :right-content="allConnectors[rootConnectorID].rightContent"
-      :click-count="allConnectors[rootConnectorID].clickCount" :orientation="allConnectors[rootConnectorID].orientation"
-      :selected-phrase="allConnectors[rootConnectorID].selectedPhrase" :conntop="allConnectors[rootConnectorID].top"
-      :connleft="allConnectors[rootConnectorID].left" :moveItem="moveItem" :rootConnectorID="rootConnectorID"
-      @delete-child-connector="deleteChildConnector" @delete-connector="deleteConnector"
-      @dropped-astat="handleAStatementDrop" @dropped-bstat="handleBStatementDrop" @dropped-aconn="handleAConnectorDrop"
-      @dropped-bconn="handleBConnectorDrop" @link-word-changed="handleLinkWordChange"
-      @update-connector-content="handleConnectContentChange" @update-click-count="handleUpdateClickCount"
-      @toggle-orientation="handleToggleOrientation" @update-child-connector-content="handleUpdateChildConnector"
-      @update-child-stat="handleUpdateChildStat"
-      @new-connector-dropped-on-connector="handleNewConnectorDroppedOnSomething"
-      @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething" @duplicate-statement="duplicateStatement"
-      @delete-statement="deleteStatement"
-      @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
-      @toggle-showPopup-fromconnector="toggleShowPopupFromConnector" />
-    <ConnectorArea v-if="!displayOnly" />
+      <Connector v-for="rootConnectorID in rootConnectorID_set" :key="rootConnectorID"
+        :connector-i-d="allConnectors[rootConnectorID].connectorID"
+        :connector-content-i-d="allConnectors[rootConnectorID].connectorContentID"
+        :connector-content="allConnectors[rootConnectorID].connectorContent" :all-statements="this.allStatements"
+        :all-connectors="this.allConnectors" :parent="allConnectors[rootConnectorID].parent"
+        :left-i-d="allConnectors[rootConnectorID].leftID" :left-type="allConnectors[rootConnectorID].leftType"
+        :left-content="allConnectors[rootConnectorID].leftContent" :right-i-d="allConnectors[rootConnectorID].rightID"
+        :right-type="allConnectors[rootConnectorID].rightType"
+        :right-content="allConnectors[rootConnectorID].rightContent"
+        :click-count="allConnectors[rootConnectorID].clickCount"
+        :orientation="allConnectors[rootConnectorID].orientation"
+        :selected-phrase="allConnectors[rootConnectorID].selectedPhrase" :conntop="allConnectors[rootConnectorID].top"
+        :connleft="allConnectors[rootConnectorID].left" :moveItem="moveItem" :rootConnectorID="rootConnectorID"
+        @delete-child-connector="deleteChildConnector" @delete-connector="deleteConnector"
+        @dropped-astat="handleAStatementDrop" @dropped-bstat="handleBStatementDrop"
+        @dropped-aconn="handleAConnectorDrop" @dropped-bconn="handleBConnectorDrop"
+        @link-word-changed="handleLinkWordChange" @update-connector-content="handleConnectContentChange"
+        @update-click-count="handleUpdateClickCount" @toggle-orientation="handleToggleOrientation"
+        @update-child-connector-content="handleUpdateChildConnector" @update-child-stat="handleUpdateChildStat"
+        @new-connector-dropped-on-connector="handleNewConnectorDroppedOnSomething"
+        @connector-dropped-on-statement="handleNewConnectorDroppedOnSomething" @duplicate-statement="duplicateStatement"
+        @delete-statement="deleteStatement"
+        @toggle-collapsed-renderstatement-from-connector="toggleCollapsedRenderStatementFromConnector"
+        @toggle-showPopup-fromconnector="toggleShowPopupFromConnector" />
+    </div>
   </div>
+</div>
 </template>
 
 <script>
@@ -57,6 +73,7 @@ import { computed } from "vue";
 import stringify from "json-stringify-pretty-compact";
 import { globalConsoleLog } from './util';
 import isEqual from "lodash/isEqual";
+import Tooltip from "./Tooltip.vue";
 
 export default {
   name: "AnswerArea",
@@ -64,6 +81,7 @@ export default {
     Connector,
     RenderStatement,
     ConnectorArea,
+    Tooltip,
   },
   emits: [
     "update-answer-area-content",
@@ -157,6 +175,12 @@ export default {
     },
     isDev() {
       return this.$route.query.isDev;
+    },
+    canUndo() {
+      return this.undoStack.length > 0;
+    },
+    canRedo() {
+      return this.redoStack.length > 0;
     },
   },
 
@@ -1602,13 +1626,50 @@ export default {
 </script>
 
 <style>
+.answer-area-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.answer-area-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px;
+  background-color: var(--biologic-grey-color);
+  border: 1px solid var(--biologic-blue-color);
+  border-bottom: none;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.answer-area-toolbar-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.answer-area-toolbar-connectors {
+  flex: 1;
+}
+
+.answer-area-workspace {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  background: #ffffff;
+}
+
 .answer_area_class {
-  position: static;
+  position: relative;
   min-height: 100%;
   height: 2000px;   /* these hard-coded sizes are a rough fix for now to make sure there is enough workspace - since the auto scaling was problematic */
   width: 2000px;
   display: flex;
   border: 1px solid var(--biologic-blue-color);
+  border-top: none;
   flex-grow: 1;
   flex-direction: column;
 }
