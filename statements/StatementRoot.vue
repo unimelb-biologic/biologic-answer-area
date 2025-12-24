@@ -45,7 +45,7 @@
           <v-btn
             size="x-small"
             v-if="showToggle && !displayOnly"
-            @click="duplicateMe($event,id)"
+            @click="duplicateMe($event, id)"
             class="statementButton"
           >
             <!--img class="statementButtonImage" src="../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
@@ -169,6 +169,7 @@
 <script>
 import FeedbackRubric from '../FeedbackRubric.vue';
 import Tooltip from '../Tooltip.vue';
+import { globalConsoleLog } from '../util';
 
 export default {
   name: 'StatementRoot',
@@ -218,7 +219,7 @@ export default {
             ? this.isImage(segment)
               ? ''
               : segment
-            : this.userSelected[index] || segment[0],
+            : this.userSelected[index] || segment[0]
         )
         .join(' ');
     },
@@ -255,7 +256,7 @@ export default {
     toggleShowPopup() {
       //this.showPopup = !this.showPopup;
       console.log(
-        'StatementRoot:toggleShowPopup emitting toggle-showPopup-fromstatementroot',
+        'StatementRoot:toggleShowPopup emitting toggle-showPopup-fromstatementroot'
       );
       this.$emit('toggle-showPopup-fromstatementroot', [this.id]);
     },
@@ -286,11 +287,17 @@ export default {
       ]);
     },
     duplicateMe(event, theID) {
-      globalConsoleLog('conn', 'StatementRoot:duplicateMe ', theID, event.clientX, event.clientY);
+      globalConsoleLog(
+        'conn',
+        'StatementRoot:duplicateMe ',
+        theID,
+        event.clientX,
+        event.clientY
+      );
       this.$emit('duplicate-statement', {
         id: theID,
         posX: event.clientX,
-        posY: event.clientY
+        posY: event.clientY,
       });
     },
 
