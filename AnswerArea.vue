@@ -423,19 +423,19 @@ export default {
       if (statementOldParent === undefined) {
         globalConsoleLog(
           'net',
-          'A statement was dragged directly onto connector right side.'
+          'A statement was dragged directly onto connector right side.',
         );
         this.$emit('statement-used', statementID);
       } else if (statementOldParent === -1) {
         globalConsoleLog(
           'net',
-          'A statement was dragged from ans area onto connector right side.'
+          'A statement was dragged from ans area onto connector right side.',
         );
         this.rootStatementID_set.delete(statementID);
       } else {
         globalConsoleLog(
           'net',
-          'A statement was dragged from a connector to a connector right side.'
+          'A statement was dragged from a connector to a connector right side.',
         );
         if (statementOldSide === 'left') {
           this.allConnectors[statementOldParent]['leftID'] = undefined;
@@ -471,7 +471,7 @@ export default {
         thingID,
         '  in the tree of conn=',
         connID,
-        '??'
+        '??',
       );
 
       // if left OR right side is a connector call recursively
@@ -487,7 +487,7 @@ export default {
         'rightside type=',
         rightType,
         ' rightID=',
-        rightID
+        rightID,
       );
 
       if (leftID !== undefined) {
@@ -522,7 +522,7 @@ export default {
         ' || inRightTree=',
         inRightTree,
         ' =>',
-        finalResult
+        finalResult,
       );
       return finalResult;
     },
@@ -530,7 +530,7 @@ export default {
     dropIsPermissible(
       objectTypeString,
       thingBeingDroppedOnID,
-      connectorBeingDroppedID
+      connectorBeingDroppedID,
     ) {
       globalConsoleLog(
         'net',
@@ -539,7 +539,7 @@ export default {
         ' can be dropped on ',
         objectTypeString,
         'ID',
-        thingBeingDroppedOnID
+        thingBeingDroppedOnID,
       );
       if (
         objectTypeString === 'connector' &&
@@ -552,7 +552,7 @@ export default {
         const inTree = this.thingIsInTreeOfconnector(
           objectTypeString,
           thingBeingDroppedOnID,
-          connectorBeingDroppedID
+          connectorBeingDroppedID,
         );
         globalConsoleLog('net', 'inTree = ', inTree);
         return !inTree;
@@ -568,7 +568,7 @@ export default {
         'geom',
         ' grabOffset: ',
         grabOffsetLeft.toFixed(2),
-        grabOffsetTop.toFixed(2)
+        grabOffsetTop.toFixed(2),
       );
 
       globalConsoleLog(
@@ -578,7 +578,7 @@ export default {
         e.clientY,
         ') e.currentTarget.offset i.e. offset_within_thing_dropped_on = (',
         e.currentTarget.offsetLeft,
-        e.currentTarget.offsetTop
+        e.currentTarget.offsetTop,
       );
 
       let leftWithinAnswerArea = 0;
@@ -587,7 +587,7 @@ export default {
       // account for scrolling
       // get access to the enclosing "div" which is the element with the overflow-y:scroll set
       const scrollableDisplayWorkspace = this.getScrollableWorkspace(
-        e.currentTarget
+        e.currentTarget,
       );
       const scrollLeft = scrollableDisplayWorkspace?.scrollLeft ?? 0;
       const scrollTop = scrollableDisplayWorkspace?.scrollTop ?? 0;
@@ -597,7 +597,7 @@ export default {
         scrollLeft,
         ',',
         scrollTop,
-        ')'
+        ')',
       );
       if (scrollableDisplayWorkspace) {
         globalConsoleLog(
@@ -606,7 +606,7 @@ export default {
           scrollableDisplayWorkspace.offsetLeft,
           ',',
           scrollableDisplayWorkspace.offsetTop,
-          ')'
+          ')',
         );
       }
 
@@ -622,7 +622,7 @@ export default {
         'geom',
         'SOOOO (left,top) Within AnswerArea = ',
         leftWithinAnswerArea,
-        topWithinAnswerArea
+        topWithinAnswerArea,
       );
 
       return [leftWithinAnswerArea, topWithinAnswerArea];
@@ -644,7 +644,7 @@ export default {
         'droppedConnectorID ',
         droppedConnectorID,
         'evt = ',
-        evt
+        evt,
       );
 
       // if it is a connector from the palette it won't have an ID yet.
@@ -717,7 +717,7 @@ export default {
             undefined;
         } else {
           console.error(
-            'Something went wrong! The logic of connector to connector is wrong!!'
+            'Something went wrong! The logic of connector to connector is wrong!!',
           );
         }
         this.allConnectors[droppedConnectorID]['parent'] = connectorID;
@@ -748,7 +748,7 @@ export default {
         'droppedConnectorID ',
         droppedConnectorID,
         'evt =',
-        evt
+        evt,
       );
 
       if (
@@ -819,7 +819,7 @@ export default {
             undefined;
         } else {
           console.error(
-            'Something went wrong! The logic of connector to connector is wrong!!'
+            'Something went wrong! The logic of connector to connector is wrong!!',
           );
         }
 
@@ -853,7 +853,7 @@ export default {
         'AnswerArea::handleStatementDroppedOnStatement  statement',
         droppedStatementID,
         ' dropped on ',
-        droppedOnStatementID
+        droppedOnStatementID,
       );
 
       // this method is to deal with a topLevel statement being moved.
@@ -868,13 +868,13 @@ export default {
 
       globalConsoleLog(
         'geom',
-        '\n--------------ANSWER AREA onDrop-------------------'
+        '\n--------------ANSWER AREA onDrop-------------------',
       );
       globalConsoleLog(
         'geom',
         ' grabOffset: ',
         grabOffsetLeft.toFixed(2),
-        grabOffsetTop.toFixed(2)
+        grabOffsetTop.toFixed(2),
       );
 
       globalConsoleLog(
@@ -884,7 +884,7 @@ export default {
         e.clientY,
         ') e.currentTarget.offset offset_within_thing_dropped_on = (',
         e.currentTarget.offsetLeft,
-        e.currentTarget.offsetTop
+        e.currentTarget.offsetTop,
       );
 
       this.allStatements[droppedStatementID]['position'] = 'absolute';
@@ -1003,7 +1003,7 @@ export default {
         !this.dropIsPermissible(
           droppedOn_is_Statement ? 'statement' : 'connector',
           droppedOn_is_Statement ? droppedOnStatementID : droppedOnConnectorID,
-          droppedConnectorID
+          droppedConnectorID,
         )
       ) {
         globalConsoleLog('net', 'ERROR CIRCULAR REFERENCE');
@@ -1143,21 +1143,21 @@ export default {
           globalConsoleLog(
             'net',
             "parentConnID isn't -1 it is: ",
-            parentConnID
+            parentConnID,
           );
           if (
             this.allConnectors[parentConnID]['leftID'] == droppedOnStatementID
           ) {
             globalConsoleLog(
               'net',
-              'this.allConnectors[parentConnID][leftID]==droppedOnStatementID'
+              'this.allConnectors[parentConnID][leftID]==droppedOnStatementID',
             );
             this.allConnectors[parentConnID]['leftID'] = droppedConnectorID;
             this.allConnectors[parentConnID]['leftType'] = 'connector';
           } else {
             globalConsoleLog(
               'net',
-              'this.allConnectors[parentConnID][rightID]==droppedOnStatementID'
+              'this.allConnectors[parentConnID][rightID]==droppedOnStatementID',
             );
             // must be the right side.
             this.allConnectors[parentConnID]['rightID'] = droppedConnectorID;
@@ -1201,7 +1201,7 @@ export default {
       if (this.displayOnly) {
         globalConsoleLog(
           'face',
-          "AnswerArea::onDrop but returning because it's readOnly"
+          "AnswerArea::onDrop but returning because it's readOnly",
         );
         return;
       }
@@ -1214,7 +1214,7 @@ export default {
 
       globalConsoleLog(
         'geom',
-        '\n\n--------------ANSWER AREA onDrop-------------------\n\n\n'
+        '\n\n--------------ANSWER AREA onDrop-------------------\n\n\n',
       );
       let leftWithinAnswerArea = 0;
       let topWithinAnswerArea = 0;
@@ -1390,7 +1390,7 @@ export default {
         ' data=',
         data,
         ' transContent=',
-        transContent
+        transContent,
       );
 
       if (data.connectorID === undefined) {
@@ -1421,7 +1421,7 @@ export default {
         this.connectorCount++;
         globalConsoleLog(
           'net',
-          ' A new connector from the right (undefined) is dropped onto statement.'
+          ' A new connector from the right (undefined) is dropped onto statement.',
         );
         this.handleAStatementDrop([
           this.connectorCount - 1,
@@ -1582,7 +1582,7 @@ export default {
         payload.posX, // this is the mouse click position
         ',',
         payload.posY, // this is the mouse click position
-        ')'
+        ')',
       );
 
       const theStatement = this.allStatements[payload.id];
@@ -1613,7 +1613,7 @@ export default {
         'conn',
         'AnswerArea:cloneConnector oldConn=',
         oldConnectorID,
-        oldConn
+        oldConn,
       );
       const newConn = JSON.parse(JSON.stringify(oldConn)); // make a deep copy
       this.allConnectors[this.connectorCount] = newConn; // add it to our collection
@@ -1627,10 +1627,10 @@ export default {
         globalConsoleLog(
           'conn',
           'AnswerArea:cloneConnector making clone of left statement ',
-          oldConn['leftID']
+          oldConn['leftID'],
         );
         const newLeftStatement = JSON.parse(
-          JSON.stringify(this.allStatements[oldConn['leftID']])
+          JSON.stringify(this.allStatements[oldConn['leftID']]),
         );
         newLeftStatement['id'] = uniqueId();
         this.allStatements[newLeftStatement['id']] = newLeftStatement;
@@ -1639,13 +1639,13 @@ export default {
         globalConsoleLog(
           'conn',
           'AnswerArea:cloneConnector new left statement =',
-          newLeftStatement
+          newLeftStatement,
         );
       } else if (oldConn['leftType'] == 'connector') {
         globalConsoleLog(
           'conn',
           'AnswerArea:cloneConnector recursively cloning left Conn ',
-          oldConn['leftID']
+          oldConn['leftID'],
         );
         const newLeftConn = this.cloneConnector(oldConn['leftID']);
         newConn['leftID'] = newLeftConn['connectorID'];
@@ -1655,10 +1655,10 @@ export default {
         globalConsoleLog(
           'conn',
           'AnswerArea:cloneConnector making clone of right statement ',
-          oldConn['rightID']
+          oldConn['rightID'],
         );
         const newRightStatement = JSON.parse(
-          JSON.stringify(this.allStatements[oldConn['rightID']])
+          JSON.stringify(this.allStatements[oldConn['rightID']]),
         );
         newRightStatement['id'] = uniqueId();
         this.allStatements[newRightStatement['id']] = newRightStatement;
@@ -1667,13 +1667,13 @@ export default {
         globalConsoleLog(
           'conn',
           'AnswerArea:cloneConnector new right statement =',
-          newRightStatement
+          newRightStatement,
         );
       } else if (oldConn['rightType'] == 'connector') {
         globalConsoleLog(
           'conn',
           'AnswerArea:cloneConnector recursively cloning right Conn ',
-          oldConn['rightID']
+          oldConn['rightID'],
         );
         const newRightConn = this.cloneConnector(oldConn['rightID']);
         newConn['rightID'] = newRightConn['connectorID'];
@@ -1691,7 +1691,7 @@ export default {
         payload.posX,
         ',',
         payload.posY,
-        ')'
+        ')',
       );
       // const oldConn = this.allConnectors[payload.id];
       const newConn = this.cloneConnector(payload.id);
@@ -1727,7 +1727,7 @@ export default {
       globalConsoleLog(
         'any',
         'AnswerArea:toggleCollapsedRenderStatement ID:',
-        id
+        id,
       );
       this.allStatements[id]['collapsed'] =
         !this.allStatements[id]['collapsed'];
@@ -1738,7 +1738,7 @@ export default {
       globalConsoleLog(
         'any',
         'AnswerArea:toggleCollapsedRenderStatementFromConnector ID:',
-        id
+        id,
       );
       this.allStatements[id]['collapsed'] =
         !this.allStatements[id]['collapsed'];
@@ -1752,7 +1752,7 @@ export default {
       globalConsoleLog(
         'any',
         'AnswerArea:toggleShowPopupFromRenderStatement is now',
-        this.allStatements[id]['showPopup']
+        this.allStatements[id]['showPopup'],
       );
       this.notifyStateChange();
     },
@@ -1764,7 +1764,7 @@ export default {
       globalConsoleLog(
         'any',
         'AnswerArea:toggleShowPopupFromConnector is now',
-        this.allStatements[id]['showPopup']
+        this.allStatements[id]['showPopup'],
       );
       this.notifyStateChange();
     },
@@ -1848,7 +1848,7 @@ export default {
   beforeUnmount() {
     document.removeEventListener(
       'fullscreenchange',
-      this.handleFullscreenChange
+      this.handleFullscreenChange,
     );
   },
 

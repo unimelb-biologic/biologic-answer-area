@@ -128,7 +128,7 @@ export default {
         'StatementFreeText:duplicateMe ',
         theID,
         event.clientX,
-        event.clientY
+        event.clientY,
       );
       this.$emit('duplicate-statement', {
         id: theID,

@@ -158,7 +158,7 @@ export default {
             ? this.isImage(segment)
               ? ''
               : segment
-            : this.userSelected[index] || segment[0]
+            : this.userSelected[index] || segment[0],
         )
         .join(' ');
     },
@@ -204,7 +204,7 @@ export default {
         'StatementTruth:duplicateMe ',
         theID,
         event.clientX,
-        event.clientY
+        event.clientY,
       );
       this.$emit('duplicate-statement', {
         id: theID,
@@ -230,7 +230,7 @@ export default {
           // formatting original fact to remove https links and images
           const formattedFact = this.originalFacts[i].replace(
             /(https?:\/\/[^\s]+)|(\.png$)|(\.jpg$)|(\.jpeg$)/gi,
-            ''
+            '',
           );
           studentContentText += formattedFact;
           studentContentText += ' ';

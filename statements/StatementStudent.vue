@@ -213,7 +213,7 @@ export default {
             ? this.isImage(segment)
               ? ''
               : segment
-            : this.userSelected[index] || segment[0]
+            : this.userSelected[index] || segment[0],
         )
         .join(' ');
     },
@@ -240,7 +240,7 @@ export default {
     toggleShowPopup() {
       //this.showPopup = !this.showPopup;
       console.log(
-        'StatementStudent:toggleShowPopup emitting toggle-showPopup-fromstatementstudent'
+        'StatementStudent:toggleShowPopup emitting toggle-showPopup-fromstatementstudent',
       );
       this.$emit('toggle-showPopup-fromstatementstudent', [this.id]);
     },
@@ -276,7 +276,7 @@ export default {
         'StatementStudent:duplicateMe ',
         theID,
         event.clientX,
-        event.clientY
+        event.clientY,
       );
       this.$emit('duplicate-statement', {
         id: theID,

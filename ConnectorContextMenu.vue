@@ -62,17 +62,16 @@ export default {
       this.viewMenu = false;
     },
 
-    setMenuPosition: function (e)
-    {
-      const buttonEl = e.currentTarget;        // the menu button
-      const parentEl = this.$el.offsetParent;      // same positioning context as the menu
+    setMenuPosition: function (e) {
+      const buttonEl = e.currentTarget; // the menu button
+      const parentEl = this.$el.offsetParent; // same positioning context as the menu
 
       const buttonRect = buttonEl.getBoundingClientRect();
       const parentRect = parentEl.getBoundingClientRect();
 
       // Position menu so its top-left matches the button’s top-left
-      this.top = (buttonRect.top - parentRect.top) + 'px';
-      this.left = (buttonRect.left - parentRect.left) + 'px';
+      this.top = buttonRect.top - parentRect.top + 'px';
+      this.left = buttonRect.left - parentRect.left + 'px';
     },
 
     closeMenu: function () {
@@ -80,7 +79,7 @@ export default {
     },
 
     openMenu: function (e) {
-      console.log("openMenu at ",e.clientX,e.clientY);
+      console.log('openMenu at ', e.clientX, e.clientY);
       this.viewMenu = true;
 
       nextTick(
@@ -148,9 +147,7 @@ h1 {
 #right-click-menu {
   background: #f9f0f0;
   border: 1px solid #ffd0d0;
-  box-shadow:
-    0 2px 2px 0 rgba(0, 0, 0, 0.14),
-    0 3px 1px -2px rgba(0, 0, 0, 0.2),
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2),
     0 1px 5px 0 rgba(0, 0, 0, 0.12);
   display: block;
   list-style: none;
