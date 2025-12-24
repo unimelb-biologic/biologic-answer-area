@@ -14,10 +14,7 @@
         </v-icon>
       </v-btn>
     </Tooltip>
-    <div
-      v-if="toolbarDropdownOpen"
-      class="connector-toolbar-dropdown"
-    >
+    <div v-if="toolbarDropdownOpen" class="connector-toolbar-dropdown">
       <Connector
         v-for="connector in connectors"
         :key="connector[0]"

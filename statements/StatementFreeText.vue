@@ -25,7 +25,11 @@
           </v-btn>
         </Tooltip>
 
-        <button v-if="showToggle" @click="duplicateMe($event,id)" class="statementButton">
+        <button
+          v-if="showToggle"
+          @click="duplicateMe($event, id)"
+          class="statementButton"
+        >
           <img
             class="duplicate-statement-button"
             src="../assets/duplicate_icon.png"
@@ -71,6 +75,7 @@
 
 <script>
 import Tooltip from '../Tooltip.vue';
+import { globalConsoleLog } from '../util';
 
 export default {
   name: 'StatementFreeText',
@@ -118,11 +123,17 @@ export default {
       this.answeredData = this.statementData;
     },
     duplicateMe(event, theID) {
-      globalConsoleLog('conn', 'StatementFreeText:duplicateMe ', theID, event.clientX, event.clientY);
+      globalConsoleLog(
+        'conn',
+        'StatementFreeText:duplicateMe ',
+        theID,
+        event.clientX,
+        event.clientY,
+      );
       this.$emit('duplicate-statement', {
         id: theID,
         posX: event.clientX,
-        posY: event.clientY
+        posY: event.clientY,
       });
     },
 

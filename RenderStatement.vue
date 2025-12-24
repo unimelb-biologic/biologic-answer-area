@@ -270,7 +270,8 @@ export default {
 
       globalConsoleLog(
         'conn',
-        'RenderStatement:duplicateStatement - calling emit duplicate-statement', payload
+        'RenderStatement:duplicateStatement - calling emit duplicate-statement',
+        payload,
       );
       this.$emit('duplicate-statement', payload); // pass it on up the chain
     },
