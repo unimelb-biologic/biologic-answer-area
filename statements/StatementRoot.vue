@@ -114,7 +114,7 @@
               </div>
               <div v-else class="statementRadioButtons">
                 <div v-for="item in segment">
-                  <div v-if="item.indexOf('--') !== 0">
+                  <div v-if="!isPlaceHolderOption(item)">
                     <input
                       :disabled="displayOnly"
                       type="radio"
