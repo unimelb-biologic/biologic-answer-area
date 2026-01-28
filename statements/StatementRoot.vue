@@ -169,6 +169,7 @@
 <script>
 import FeedbackRubric from '../FeedbackRubric.vue';
 import Tooltip from '../Tooltip.vue';
+import { globalConsoleLog } from '../util';
 
 export default {
   name: 'StatementRoot',

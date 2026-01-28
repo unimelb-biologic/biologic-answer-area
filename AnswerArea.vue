@@ -1077,10 +1077,6 @@ export default {
 
       e.preventDefault();
 
-      //retrieve the internal grab offsets that were recorded at the start of the drag
-      const grabOffsetLeft = parseInt(e.dataTransfer.getData("grabOffsetLeft"));
-      const grabOffsetTop = parseInt(e.dataTransfer.getData("grabOffsetTop"));
-
       globalConsoleLog(
         'geom',
         '\n\n--------------ANSWER AREA onDrop-------------------\n\n\n',
@@ -1525,7 +1521,6 @@ export default {
         payload.posY,
         ')'
       );
-      const oldConn = this.allConnectors[payload.id];
       const newConn = this.cloneConnector(payload.id);
 
       const box = this.$refs.answer_area_ref.getBoundingClientRect();

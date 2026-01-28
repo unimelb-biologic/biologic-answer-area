@@ -71,6 +71,7 @@
 
 <script>
 import Tooltip from '../Tooltip.vue';
+import { globalConsoleLog } from '../util';
 
 export default {
   name: 'StatementFreeText',
