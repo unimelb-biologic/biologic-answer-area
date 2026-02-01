@@ -108,7 +108,7 @@
               </div>
               <div v-else class="statementRadioButtons">
                 <div v-for="item in segment">
-                  <div v-if="item.indexOf('--')">
+                  <div v-if="!isPlaceHolderOption(item)">
                     <input
                       :disabled="displayOnly"
                       type="radio"
@@ -116,7 +116,7 @@
                       :value="item"
                       v-model="userSelected[index]"
                     />
-                    <label :for="item in segment">{{ item }}</label
+                    <label>{{ item }}</label
                     ><br />
                   </div>
                 </div>
@@ -169,6 +169,7 @@
 import FeedbackRubric from '../FeedbackRubric.vue';
 import Tooltip from '../Tooltip.vue';
 import { globalConsoleLog } from '../util';
+import { isPlaceHolderOption } from './statementLogic';
 
 export default {
   name: 'StatementStudent',
@@ -224,6 +225,7 @@ export default {
     },
   },
   methods: {
+    isPlaceHolderOption,
     isImage(fact) {
       const isImg =
         fact.endsWith('.jpg') ||
@@ -295,16 +297,22 @@ export default {
       this.originalFacts = this.statementData.content.originalFacts;
       this.previousUserInput = this.statementData.content.userInput;
 
-      let userInputID = 0;
-      this.userSelected = [];
-      for (let i = 0; i < this.originalFacts.length; i++) {
-        if (typeof this.originalFacts[i] === 'string') {
-          this.userSelected.push('');
-        } else {
-          this.userSelected.push(this.previousUserInput[userInputID]);
-          userInputID += 1;
+      this.userSelected = this.originalFacts.map((fact, userInputID) => {
+        if (typeof fact === 'string') {
+          return '';
         }
-      }
+        // If a choice hasn't been selected, select the first "real" choice by default
+        const prev = this.previousUserInput[userInputID];
+        if (!prev) {
+          if (fact.length > 1 && isPlaceHolderOption(fact[0])) {
+            return fact[1];
+          } else {
+            return fact[0];
+          }
+        } else {
+          return prev;
+        }
+      });
 
       this.answeredData = this.statementData;
     },
