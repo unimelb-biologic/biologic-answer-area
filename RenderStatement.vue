@@ -18,48 +18,22 @@
       }"
     >
       <div class="drag-handle">&nbsp;</div>
-
-      <StatementRoot
-        ref="statementRootRef"
+      <Statement
+        :statement-class="statementProps.statementClass"
+        :ref="statementProps.ref"
+        :tooltip-text="statementProps.tooltipText"
         v-bind="$attrs"
-        v-if="this.statementData.statementType === 0"
+        :allow-switch="
+          this.statementData.statementType === 0 ||
+          this.statementData.statementType === 2
+        "
+        :free-answer="this.statementData.statementType === 3"
         :statement-data="this.statementData"
         @user-choice-changed="handleUserChoiceChanged"
         @duplicate-statement="duplicateStatement"
         @delete-statement="deleteStatement"
-        @toggle-collapsed-statement-root="toggleCollapsedStatementRoot"
-        @toggle-showPopup-fromstatementroot="toggleShowPopupStatementRoot"
-      />
-      <StatementTruth
-        ref="statementTruthRef"
-        v-bind="$attrs"
-        v-if="this.statementData.statementType === 1"
-        :statement-data="this.statementData"
-        @user-choice-changed="handleUserChoiceChanged"
-        @duplicate-statement="duplicateStatement"
-        @delete-statement="deleteStatement"
-        @toggle-collapsed-statement-truth="toggleCollapsedStatementTruth"
-      />
-      <StatementStudent
-        ref="statementStudentRef"
-        v-bind="$attrs"
-        v-if="this.statementData.statementType === 2"
-        :statement-data="this.statementData"
-        @user-choice-changed="handleUserChoiceChanged"
-        @duplicate-statement="duplicateStatement"
-        @delete-statement="deleteStatement"
-        @toggle-collapsed-statement-student="toggleCollapsedStatementStudent"
-        @toggle-showPopup-fromstatementstudent="toggleShowPopupStatementStudent"
-      />
-      <StatementFreeText
-        ref="statementFreeTextRef"
-        v-bind="$attrs"
-        v-if="this.statementData.statementType === 3"
-        :statement-data="this.statementData"
-        @user-input-changed="handleUserInputChanged"
-        @duplicate-statement="duplicateStatement"
-        @delete-statement="deleteStatement"
-        @toggle-collapsed-statement-freetext="toggleCollapsedStatementFreeText"
+        @toggle-collapsed-statement="toggleCollapsedStatement"
+        @toggle-showPopup-fromstatement="toggleShowPopupStatement"
       />
       <div v-if="renderedText">{{ renderedText }}</div>
     </div>
@@ -67,19 +41,13 @@
 </template>
 
 <script>
-import StatementRoot from './statements/StatementRoot.vue';
-import StatementTruth from './statements/StatementTruth.vue';
-import StatementStudent from './statements/StatementStudent.vue';
-import StatementFreeText from './statements/StatementFreeText.vue';
+import Statement from './Statement.vue';
 import { globalConsoleLog } from './util';
 
 export default {
   name: 'RenderStatement',
   components: {
-    StatementFreeText,
-    StatementStudent,
-    StatementTruth,
-    StatementRoot,
+    Statement,
   },
   emits: [
     'update-statement-content',
@@ -126,6 +94,49 @@ export default {
           );
       } else {
         return `Reference for statementType ${this.statementData.statementType} is not available`;
+      }
+    },
+    statementProps() {
+      switch (this.statementData.statementType) {
+        case 0: {
+          return {
+            statementClass: 'StatementRoot',
+            ref: 'statementRootRef',
+            tooltipText:
+              'Blue statements are called ROOT statements. They will usually form the first or last statement of your answer.',
+          };
+        }
+        case 1: {
+          return {
+            statementClass: 'StatementTruth',
+            ref: 'statementTruthRef',
+            tooltipText:
+              'Green statements are TRUTHs. i.e. a provided fact that you can use in your answer',
+          };
+        }
+        case 2: {
+          return {
+            statementClass: 'StatementStudent',
+            ref: 'statementStudentRef',
+            tooltipText:
+              'Yellow statements are called STUDENT statements. Choose the menu/radiobutton options to modify the statement.',
+          };
+        }
+        case 3: {
+          return {
+            statementClass: 'StatementFreeText',
+            ref: 'statementFreeTextRef',
+            tooltipText:
+              'White statements are FREE statements. Type in your own statement.',
+          };
+        }
+        default: {
+          return {
+            statementClass: '',
+            ref: '',
+            tooltipText: '',
+          };
+        }
       }
     },
   },
@@ -284,46 +295,18 @@ export default {
       );
       this.$emit('delete-statement', id); // pass it on up the chain
     },
-
-    toggleCollapsedStatementStudent(id) {
+    toggleCollapsedStatement(id) {
       console.log(
-        'RenderStatement:toggleCollapsedStatementStudent - calling emit toggle-collapsed-renderstatement',
+        'RenderStatement:toggleCollapsedStatement - calling emit toggle-collapsed-renderstatement',
       );
       this.$emit('toggle-collapsed-renderstatement', id); // pass it on up the chain
     },
-    toggleCollapsedStatementTruth(id) {
+    toggleShowPopupStatement(id) {
       console.log(
-        'RenderStatement:toggleCollapsedStatementTruth - calling emit toggle-collapsed-renderstatement',
-      );
-      this.$emit('toggle-collapsed-renderstatement', id); // pass it on up the chain
-    },
-    toggleCollapsedStatementRoot(id) {
-      console.log(
-        'RenderStatement:toggleCollapsedStatementRoot - calling emit toggle-collapsed-renderstatement',
-      );
-      this.$emit('toggle-collapsed-renderstatement', id); // pass it on up the chain
-    },
-    toggleCollapsedStatementFreeText(id) {
-      console.log(
-        'RenderStatement:toggleCollapsedStatementFreeText - calling emit toggle-collapsed-renderstatement',
-      );
-      this.$emit('toggle-collapsed-renderstatement', id); // pass it on up the chain
-    },
-
-    toggleShowPopupStatementStudent(id) {
-      console.log(
-        'RenderStatement:toggleShowPopupStatementStudent - calling emit toggle-showPopup-fromrenderstatement',
+        'RenderStatement:toggleShowPopupStatement - calling emit toggle-showPopup-fromrenderstatement',
       );
       this.$emit('toggle-showPopup-fromrenderstatement', id); // pass it on up the chain
     },
-
-    toggleShowPopupStatementRoot(id) {
-      console.log(
-        'RenderStatement:toggleShowPopupStatementRoot - calling emit toggle-showPopup-fromrenderstatement',
-      );
-      this.$emit('toggle-showPopup-fromrenderstatement', id); // pass it on up the chain
-    },
-
     initContent() {
       if (
         this.statementData.statementType === 0 ||

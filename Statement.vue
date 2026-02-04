@@ -1,8 +1,8 @@
 <template>
-  <div class="StatementRoot">
+  <div :class="statementClass">
     <FeedbackRubric :isVisible="showFeedback" :exnetID="id" />
 
-    <div class="content-wrapper">
+    <div :class="freeAnswer ? 'free-content-wrapper' : 'content-wrapper'">
       <div class="iconContainer">
         <Tooltip
           :text="
@@ -26,7 +26,10 @@
           </v-btn>
         </Tooltip>
 
-        <Tooltip text="switch between menus and radio-buttons">
+        <Tooltip
+          text="switch between menus and radio-buttons"
+          v-if="allowSwitch"
+        >
           <v-btn
             size="x-small"
             v-if="showToggle && !this.statementData.collapsed"
@@ -35,7 +38,7 @@
           >
             <img
               class="statementButtonImage"
-              src="../assets/popup_radio_icon.png"
+              src="./assets/popup_radio_icon.png"
               alt="RadioPopupToggle"
             />
           </v-btn>
@@ -48,7 +51,6 @@
             @click="duplicateMe($event, id)"
             class="statementButton"
           >
-            <!--img class="statementButtonImage" src="../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
             <v-icon>mdi-content-duplicate</v-icon>
           </v-btn>
         </Tooltip>
@@ -70,16 +72,14 @@
           class="statementButton"
         >
           <img
-            src="../assets/feedback-rubric.png"
+            src="./assets/feedback-rubric.png"
             alt="FeedbackStatement"
             width="20"
           />
         </button>
       </div>
 
-      <Tooltip
-        text="Blue statements are called ROOT statements. They will usually form the first or last statement of your answer."
-      >
+      <Tooltip :text="tooltipText">
         <div class="main-content">
           <div
             v-if="this.statementData.collapsed"
@@ -87,7 +87,13 @@
           >
             {{ concatenatedStatement }}
           </div>
-
+          <div v-else-if="freeAnswer">
+            <textarea
+              v-model="freeInputText"
+              id="input"
+              class="textarea"
+            ></textarea>
+          </div>
           <div
             v-else-if="!this.statementData.showPopup"
             class="radio-statement"
@@ -100,7 +106,7 @@
               :key="index"
               style="float: left"
             >
-              <div v-if="typeof segment === 'string'" class="segmentString">
+              <div v-if="typeof segment === 'string'">
                 <div v-if="isImage(segment)">
                   <img
                     :src="segment"
@@ -108,7 +114,7 @@
                     v-hover-preview="500"
                   />
                 </div>
-                <div v-else class="segmentString">
+                <div v-else>
                   {{ segment }}
                 </div>
               </div>
@@ -167,13 +173,12 @@
 </template>
 
 <script>
-import FeedbackRubric from '../FeedbackRubric.vue';
-import Tooltip from '../Tooltip.vue';
-import { globalConsoleLog } from '../util';
-import { isPlaceHolderOption } from './statementLogic';
+import FeedbackRubric from './FeedbackRubric.vue';
+import Tooltip from './Tooltip.vue';
+import { globalConsoleLog } from './util';
 
 export default {
-  name: 'StatementRoot',
+  name: 'Statement',
   components: {
     FeedbackRubric,
     Tooltip,
@@ -182,8 +187,8 @@ export default {
     'user-choice-changed',
     'duplicate-statement',
     'delete-statement',
-    'toggle-showPopup-fromstatementroot',
-    'toggle-collapsed-statement-root',
+    'toggle-showPopup-fromstatement',
+    'toggle-collapsed-statement',
   ],
   inject: [
     'displayOnly', // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
@@ -198,6 +203,16 @@ export default {
       type: Boolean,
       default: true,
     },
+    statementClass: String,
+    tooltipText: String,
+    allowSwitch: {
+      type: Boolean,
+      default: false,
+    },
+    freeAnswer: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -210,10 +225,12 @@ export default {
       hide_collapsed: false,
       hide_showPopup: true,
       showFeedback: false,
+      freeInputText: '',
     };
   },
   computed: {
     concatenatedStatement() {
+      if (this.freeAnswer) return this.freeInputText;
       return this.statementData.content.originalFacts
         .map((segment, index) =>
           typeof segment === 'string'
@@ -224,23 +241,10 @@ export default {
         )
         .join(' ');
     },
-    getCollapseExpandIcon() {
-      return this.collapsed
-        ? '../assets/expand_icon.png'
-        : '../assets/collapse_icon.png';
-    },
   },
   methods: {
-    isPlaceHolderOption,
-    handleDragEnteringStatementRoot(e) {
-      console.log('statementRoot enter event');
-      //      e.preventDefault();
-      // Prevent child events from reaching the parent
-      e.stopPropagation();
-    },
-    handleDragLeavingStatementRoot() {
-      console.log('statementRoot leave event');
-      //      e.preventDefault();
+    isPlaceHolderOption(option) {
+      return option.startsWith('--');
     },
     isImage(fact) {
       const isImg =
@@ -252,15 +256,15 @@ export default {
     },
     toggleCollapsedStatement() {
       //this.collapsed = !this.collapsed;
-      console.log('StatementRoot:toggleCollapsedStatement');
-      this.$emit('toggle-collapsed-statement-root', this.id);
+      console.log('Statement:toggleCollapsedStatement');
+      this.$emit('toggle-collapsed-statement', this.id);
     },
     toggleShowPopup() {
       //this.showPopup = !this.showPopup;
       console.log(
-        'StatementRoot:toggleShowPopup emitting toggle-showPopup-fromstatementroot',
+        'Statement:toggleShowPopup emitting toggle-showPopup-fromstatement',
       );
-      this.$emit('toggle-showPopup-fromstatementroot', [this.id]);
+      this.$emit('toggle-showPopup-fromstatement', [this.id]);
     },
     handleSelectChange() {
       let studentContentText = '';
@@ -282,7 +286,6 @@ export default {
         }
       }
       this.answeredData.content.userInput = newUserInput;
-      //console.log("StatementRoot::emitting user-choice-changed ",studentContentText,this.answeredData);
       this.$emit('user-choice-changed', [
         studentContentText,
         this.answeredData,
@@ -291,7 +294,7 @@ export default {
     duplicateMe(event, theID) {
       globalConsoleLog(
         'conn',
-        'StatementRoot:duplicateMe ',
+        'Statement:duplicateMe ',
         theID,
         event.clientX,
         event.clientY,
@@ -313,7 +316,8 @@ export default {
       this.id = this.statementData.id;
       this.originalFacts = this.statementData.content.originalFacts;
       this.previousUserInput = this.statementData.content.userInput;
-
+      this.freeInputText = this.freeAnswer ? this.previousUserInput : '';
+      this.answeredData = this.freeAnswer ? this.statementData : null;
       console.log('init');
       this.userSelected = this.originalFacts.map((fact, userInputID) => {
         if (typeof fact === 'string') {
@@ -322,7 +326,7 @@ export default {
         // If a choice hasn't been selected, select the first "real" choice by default
         const prev = this.previousUserInput[userInputID];
         if (!prev) {
-          if (fact.length > 1 && isPlaceHolderOption(fact[0])) {
+          if (fact.length > 1 && this.isPlaceHolderOption(fact[0])) {
             return fact[1];
           } else {
             return fact[0];
@@ -334,9 +338,6 @@ export default {
       console.log(this.userSelected);
       this.answeredData = this.statementData;
     },
-  },
-  mounted() {
-    //console.log("StatementRoot mounted",this);
   },
 
   watch: {
@@ -353,6 +354,10 @@ export default {
     showAllFeedback() {
       this.showFeedback = this.showAllFeedback;
     },
+    freeInputText(newUserInput) {
+      this.answeredData.content.userInput = newUserInput;
+      this.$emit('user-input-changed', [newUserInput, this.answeredData]);
+    },
   },
   created() {
     this.initContent();
@@ -361,18 +366,40 @@ export default {
 </script>
 
 <style scoped>
-@import '../assets/tooltips.css';
+@import 'assets/tooltips.css';
 
 .StatementRoot {
   background-color: var(--biologic-root-statement-color);
   padding: 2px;
-  margin: 2px;
   font-size: var(--biologic-statement-font-size);
   position: relative;
 }
 
-.StatementRoot:hover .iconContainer {
-  opacity: 1;
+.StatementFreeText {
+  background-color: var(--biologic-freetext-statement-color);
+  font-size: var(--biologic-statement-font-size);
+  padding: 2px;
+  width: fit-content;
+  height: fit-content;
+  text-align: center;
+  position: relative;
+  display: inline-block;
+}
+
+.StatementStudent {
+  background-color: var(--biologic-student-statement-color);
+  font-size: var(--biologic-statement-font-size);
+  padding: 2px;
+  position: relative;
+}
+
+.StatementTruth {
+  background-color: var(--biologic-truth-statement-color);
+  font-size: var(--biologic-statement-font-size);
+  padding: 2px;
+  position: relative;
+  white-space: pre-wrap;
+  max-width: 150px;
 }
 
 .content-wrapper {
@@ -390,11 +417,6 @@ button {
   margin-right: 2px;
 }
 
-.segmentString {
-  /*min-height: inherit;*/
-  /*padding: 10% 2px;*/
-}
-
 .concatenated-statement {
   white-space: pre-wrap;
   max-width: 100px;
@@ -407,6 +429,10 @@ button {
   padding: 2px;
   opacity: 0.05;
   transition: opacity 0.3s ease;
+}
+
+.iconContainer:hover {
+  opacity: 1;
 }
 
 .statementButton {
@@ -437,5 +463,19 @@ button {
 .biologicImage {
   max-width: 100%;
   width: 100px;
+}
+
+.free-content-wrapper {
+  display: flex;
+  align-items: flex-start;
+}
+
+.free-text {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.textarea {
+  height: 6vw;
 }
 </style>
