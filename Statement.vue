@@ -1,9 +1,13 @@
 <template>
-  <div :class="statementClass">
+  <div
+    :class="['Statement', statementClass]"
+    v-on:mouseenter="showButtons = true"
+    v-on:mouseleave="showButtons = false"
+  >
     <FeedbackRubric :isVisible="showFeedback" :exnetID="id" />
 
     <div :class="freeAnswer ? 'free-content-wrapper' : 'content-wrapper'">
-      <div class="iconContainer">
+      <div v-show="showButtons" class="iconContainer">
         <Tooltip
           :text="
             statementData.collapsed
@@ -78,7 +82,6 @@
           />
         </button>
       </div>
-
       <Tooltip :text="tooltipText">
         <div class="main-content">
           <div
@@ -226,6 +229,7 @@ export default {
       hide_showPopup: true,
       showFeedback: false,
       freeInputText: '',
+      showButtons: false,
     };
   },
   computed: {
@@ -368,36 +372,40 @@ export default {
 <style scoped>
 @import 'assets/tooltips.css';
 
-.StatementRoot {
-  background-color: var(--biologic-root-statement-color);
+.Statement {
+  border-radius: 5px;
+  min-width: 70px;
+  min-height: 70px;
   padding: 2px;
   font-size: var(--biologic-statement-font-size);
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.StatementRoot {
+  background-color: var(--biologic-root-statement-color);
+  background-image: var(--biologic-root-statement-gradient);
 }
 
 .StatementFreeText {
-  background-color: var(--biologic-freetext-statement-color);
-  font-size: var(--biologic-statement-font-size);
-  padding: 2px;
+  background-color: var(--biologic-free-statement-color);
+  background-image: var(--biologic-free-statement-gradient);
   width: fit-content;
   height: fit-content;
   text-align: center;
-  position: relative;
   display: inline-block;
 }
 
 .StatementStudent {
   background-color: var(--biologic-student-statement-color);
-  font-size: var(--biologic-statement-font-size);
-  padding: 2px;
-  position: relative;
+  background-image: var(--biologic-student-statement-gradient);
 }
 
 .StatementTruth {
   background-color: var(--biologic-truth-statement-color);
-  font-size: var(--biologic-statement-font-size);
-  padding: 2px;
-  position: relative;
+  background-image: var(--biologic-truth-statement-gradient);
   white-space: pre-wrap;
   max-width: 150px;
 }
@@ -431,7 +439,7 @@ button {
   transition: opacity 0.3s ease;
 }
 
-.iconContainer:hover {
+.Statement:hover .iconContainer {
   opacity: 1;
 }
 

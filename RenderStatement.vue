@@ -17,7 +17,7 @@
         zIndex: this.statementData.zIndex,
       }"
     >
-      <div class="drag-handle">&nbsp;</div>
+      <!-- <div class="drag-handle">&nbsp;</div> -->
       <Statement
         :statement-class="statementProps.statementClass"
         :ref="statementProps.ref"
@@ -352,6 +352,9 @@ export default {
   border: 1px solid rgb(209, 210, 158);
   /* Optional: Add border for visualization */
   position: relative;
+  border-radius: 5px;
+  min-width: 70px;
+  min-height: 70px;
 }
 
 .statement-box:hover {
