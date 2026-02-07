@@ -75,7 +75,7 @@
 import Connector from './Connector.vue';
 import VueDraggableResizable from 'vue-draggable-resizable';
 import './assets/VueDraggableResizable_Style.css';
-import Tooltip from './Tooltip.vue';
+import Tooltip from './shared/Tooltip.vue';
 
 export default {
   name: 'ConnectorArea',
