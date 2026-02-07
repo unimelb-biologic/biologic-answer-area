@@ -157,7 +157,9 @@ export default {
   white-space: normal;
   opacity: 0;
   transform: translateY(2px);
-  transition: opacity 150ms ease, transform 150ms ease;
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
   pointer-events: none;
 }
 .tooltip-bubble.is-visible {
