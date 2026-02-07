@@ -1,16 +1,5 @@
 <template>
   <div class="answer-area-container" ref="answerAreaContainer">
-    <div v-if="showDataStructures" class="data-structure-window">
-      <pre>
-    {{ prettifiedAnswerContentDump }}
-    {{ prettifiedStatementsDump }}
-    {{ prettifiedAllStatementsDump }}
-    {{ prettifiedAllConnectorsDump }}
-    {{ prettifiedRootConnectorID_List_Dump }}
-    {{ prettifiedRootStatementIDs_Dump }}
-    </pre
-      >
-    </div>
     <div v-if="!displayOnly" class="answer-area-toolbar">
       <ConnectorArea class="answer-area-toolbar-connectors" toolbar-mode />
       <div class="answer-area-toolbar-buttons">
@@ -50,7 +39,10 @@
         </Tooltip>
       </div>
     </div>
-    <div class="answer-area-workspace">
+    <div
+      class="answer-area-workspace"
+      style="display: flex; flex-direction: row"
+    >
       <div
         ref="answer_area_ref"
         class="answer_area_class"
@@ -122,6 +114,17 @@
           @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
         />
       </div>
+      <div>
+        <pre>
+    {{ prettifiedAnswerContentDump }}
+    {{ prettifiedStatementsDump }}
+    {{ prettifiedAllStatementsDump }}
+    {{ prettifiedAllConnectorsDump }}
+    {{ prettifiedRootConnectorID_List_Dump }}
+    {{ prettifiedRootStatementIDs_Dump }}
+    </pre
+        >
+      </div>
     </div>
   </div>
 </template>
@@ -135,7 +138,7 @@ import { computed } from 'vue';
 import stringify from 'json-stringify-pretty-compact';
 import { globalConsoleLog } from './util';
 import isEqual from 'lodash/isEqual';
-import Tooltip from './Tooltip.vue';
+import Tooltip from './shared/Tooltip.vue';
 
 export default {
   name: 'AnswerArea',
@@ -1713,11 +1716,30 @@ export default {
       globalConsoleLog('conn', 'AnswerArea:deleteStatement');
 
       const theStatement = this.allStatements[id];
-      if (theStatement['parent'] == -1) {
-        // so it is a top level statement
+      const oldParentID = theStatement['parent'];
+      if (oldParentID == -1) {
+        // so it is a top level statement and needs to be removed from the root statements
         this.rootStatementID_set.delete(id);
       } else {
-        // need to tell connector parent to forget it
+        // need to tell its parent to forget it
+        if (
+          this.allConnectors[oldParentID]['leftID'] !== undefined &&
+          this.allConnectors[oldParentID]['leftID'] === id
+        ) {
+          // it's the left child
+          this.allConnectors[oldParentID]['leftID'] = undefined;
+          this.allConnectors[oldParentID]['leftType'] = undefined;
+          this.allConnectors[oldParentID]['leftContent'] = undefined;
+          this.allConnectors[oldParentID]['leftStatementIdentifier'] =
+            undefined;
+        } else {
+          // must be the right child
+          this.allConnectors[oldParentID]['rightID'] = undefined;
+          this.allConnectors[oldParentID]['rightType'] = undefined;
+          this.allConnectors[oldParentID]['rightContent'] = undefined;
+          this.allConnectors[oldParentID]['rightStatementIdentifier'] =
+            undefined;
+        }
       }
       delete this.allStatements[id];
       this.notifyStateChange();

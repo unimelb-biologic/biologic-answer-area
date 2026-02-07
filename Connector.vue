@@ -396,7 +396,7 @@
 import RenderStatement from './RenderStatement.vue';
 import ConnectorContextMenu from './ConnectorContextMenu.vue';
 import FeedbackRubric from './FeedbackRubric.vue';
-import Tooltip from './Tooltip.vue';
+import Tooltip from './shared/Tooltip.vue';
 import { globalConsoleLog } from './util';
 
 export default {
