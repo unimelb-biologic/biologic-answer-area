@@ -1121,6 +1121,7 @@ export default {
         globalConsoleLog('net', 'droppedOn_is_Statement');
         parentConnID = this.allStatements[droppedOnStatementID]['parent'];
         this.allStatements[droppedOnStatementID]['parent'] = droppedConnectorID;
+        this.allStatements[droppedOnStatementID]['side'] = targetStr;
         if (parentConnID === -1) {
           // the statement was at the top level
           globalConsoleLog('net', 'parentConnID === -1');
@@ -1139,7 +1140,6 @@ export default {
             this.allStatements[droppedOnStatementID]['left'];
           this.allStatements[droppedOnStatementID]['top'] = undefined; //since it's now part of a tree
           this.allStatements[droppedOnStatementID]['left'] = undefined; //since it's now part of a tree
-          this.allStatements[droppedOnStatementID]['side'] = 'left';
         } else {
           // we need to make the parent of the droppedOnStatement replace its left or right child with the droppedConnector
           globalConsoleLog(
