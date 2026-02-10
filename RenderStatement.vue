@@ -17,6 +17,13 @@
         zIndex: this.statementData.zIndex,
       }"
     >
+      <div v-if="globalDebugMode">
+        id={{ statementData.id }}&nbsp;st_id={{
+          statementData.statementIdentifier
+        }}&nbsp;&nbsp;parent={{ statementData.parent }}&nbsp;&nbsp;side={{
+          statementData.side
+        }}
+      </div>
       <!-- <div class="drag-handle">&nbsp;</div> -->
       <Statement
         :statement-class="statementProps.statementClass"
@@ -65,6 +72,7 @@ export default {
   },
   inject: [
     'displayOnly', // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
+    'globalDebugMode',
   ],
   data() {
     return {

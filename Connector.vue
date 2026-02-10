@@ -8,6 +8,9 @@
     @drop="onDrop($event, 'x')"
     @dragend="endDragConnector"
   >
+    <p v-if="globalDebugMode">
+      CONNECTOR_ID = {{ connectorID }}&nbsp;&nbsp;&nbsp;parent={{ parent }}
+    </p>
     <FeedbackRubric
       :isVisible="showFeedback"
       :exnetID="connectorID"
@@ -96,6 +99,8 @@
       <!-- TODO: implement connector -->
       <div class="tooltip">
         <!-- TODO: implement delete -->
+        <div v-if="globalDebugMode"> LEFT
+      = {{ leftID }}</div>
         <div
           class="connector-sections"
           v-if="this.leftType === undefined"
@@ -265,6 +270,9 @@
       <!-- TODO: implement connector -->
       <div class="tooltip">
         <!-- TODO: implement delete -->
+        <div  v-if="globalDebugMode"> RIGHT
+      = {{ rightID }}</div>
+        <div
         <div
           class="connector-sections"
           v-if="this.rightType === undefined"
@@ -411,6 +419,7 @@ export default {
     'isFeedbackAvailable',
     'showAllFeedback',
     'globalTooltipState',
+    'globalDebugMode',
     'displayOnly',
   ],
   emits: [
