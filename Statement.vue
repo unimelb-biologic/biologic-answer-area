@@ -1,13 +1,12 @@
 <template>
-  <div
-    :class="['Statement', statementClass]"
-    v-on:mouseenter="showButtons = true"
-    v-on:mouseleave="showButtons = false"
-  >
+  <div :class="['Statement', statementClass]">
     <FeedbackRubric :isVisible="showFeedback" :exnetID="id" />
-
     <div :class="freeAnswer ? 'free-content-wrapper' : 'content-wrapper'">
-      <div v-show="showButtons" class="iconContainer">
+      <div
+        v-show="showButtons && !dragInProgress"
+        class="iconContainer"
+        :class="statementClass"
+      >
         <Tooltip
           :text="
             statementData.collapsed
@@ -198,6 +197,9 @@ export default {
     'isFeedbackAvailable',
     'showAllFeedback',
     'displayOnly',
+    'activeHover',
+    'setActiveHover',
+    'clearActiveHover',
   ],
   props: {
     statementData: Object,
@@ -213,6 +215,10 @@ export default {
       default: false,
     },
     freeAnswer: {
+      type: Boolean,
+      default: false,
+    },
+    dragInProgress: {
       type: Boolean,
       default: false,
     },
@@ -244,6 +250,9 @@ export default {
             : this.userSelected[index] || segment[0],
         )
         .join(' ');
+    },
+    showButtons() {
+      return this.activeHover.id === this.statementData.id;
     },
   },
   methods: {
@@ -410,9 +419,32 @@ export default {
   max-width: 150px;
 }
 
+.iconContainer.StatementFreeText {
+  background-color: var(--biologic-free-statement-color);
+  opacity: 25%;
+}
+
+.iconContainer.StatementStudent {
+  background-color: var(--biologic-student-statement-color);
+  opacity: 25%;
+}
+
+.iconContainer.StatementTruth {
+  background-color: var(--biologic-truth-statement-color);
+  opacity: 25%;
+}
+.iconContainer.StatementRoot {
+  background-color: var(--biologic-root-statement-color);
+  opacity: 25%;
+}
+
 .content-wrapper {
   display: flex;
   height: 100%;
+}
+.free-content-wrapper {
+  display: flex;
+  align-items: flex-start;
 }
 
 .main-content {
@@ -437,6 +469,12 @@ button {
   padding: 2px;
   opacity: 0.05;
   transition: opacity 0.3s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateX(-100%);
+  z-index: 10;
+  pointer-events: auto;
 }
 
 .Statement:hover .iconContainer {
@@ -471,11 +509,6 @@ button {
 .biologicImage {
   max-width: 100%;
   width: 100px;
-}
-
-.free-content-wrapper {
-  display: flex;
-  align-items: flex-start;
 }
 
 .free-text {

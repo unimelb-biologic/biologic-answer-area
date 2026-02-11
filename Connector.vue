@@ -1,19 +1,28 @@
 <template>
   <div
-    class="connectorContainer"
+    :class="['connectorContainer',{'currentHoverTarget':showButtons}]"
     :style="{ left: connleft + 'px', top: conntop + 'px' }"
     ref="connectorContainerRef"
     draggable="true"
+    :data-hover-id="connectorID"
+    :data-hover-depth="depth"
     @dragstart="startDragConnector"
     @drop="onDrop($event, 'x')"
     @dragend="endDragConnector"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
   >
+    <p v-if="globalDebugMode">
+      DEPTH = {{ depth }} Active.id =  {{ activeHover.id }} activeDepth=  {{ activeHover.depth }}  CONNECTOR_ID = {{ connectorID }}&nbsp;&nbsp;&nbsp;parent={{ parent }}
+      showButtons={{ showButtons }} activeHover.id type={{ typeof activeHover.id }}
+  connectorID type={{ typeof connectorID }}
+    </p>
     <FeedbackRubric
       :isVisible="showFeedback"
       :exnetID="connectorID"
       :isConnector="true"
     />
-    <div v-if="this.parent !== undefined" class="buttons-container">
+    <div v-if="this.parent !== undefined && showButtons && !dragInProgress" class="buttons-container">
       <Tooltip :text="this.clickCount % 2 === 1 ? 'expand' : 'collapse'">
         <v-btn
           icon
@@ -96,6 +105,8 @@
       <!-- TODO: implement connector -->
       <div class="tooltip">
         <!-- TODO: implement delete -->
+        <div v-if="globalDebugMode"> LEFT
+      = {{ leftID }}</div>
         <div
           class="connector-sections"
           v-if="this.leftType === undefined"
@@ -163,6 +174,7 @@
             ref="leftChildRenderStatement"
             :statement-data="this.allStatements[this.leftID]"
             :showToggle="true"
+            :depth="depthPlusOne"
             @update-statement-content="handleUpdateStatContentA"
             @mousedown="onMousedown('leftType')"
             @duplicate-statement="duplicateStatement"
@@ -197,6 +209,7 @@
             :click-count="allConnectors[this.leftID].clickCount"
             :orientation="allConnectors[this.leftID].orientation"
             :selected-phrase="allConnectors[this.leftID].selectedPhrase"
+            :depth="depthPlusOne"
             @delete-connector="
               deleteChildConnector({
                 id: this.leftID,
@@ -265,6 +278,9 @@
       <!-- TODO: implement connector -->
       <div class="tooltip">
         <!-- TODO: implement delete -->
+        <div  v-if="globalDebugMode"> RIGHT
+      = {{ rightID }}</div>
+        <div
         <div
           class="connector-sections"
           v-if="this.rightType === undefined"
@@ -308,6 +324,7 @@
             ref="rightChildRenderStatement"
             :statement-data="this.allStatements[this.rightID]"
             :showToggle="true"
+            :depth="depthPlusOne"
             @update-statement-content="handleUpdateStatContentB"
             @mousedown="onMousedown('rightType')"
             @connector-dropped-on-statement="connectorDroppedOnStatement"
@@ -342,6 +359,7 @@
             :orientation="allConnectors[this.rightID].orientation"
             :selected-phrase="allConnectors[this.rightID].selectedPhrase"
             :rootConnectorID="rootConnectorID"
+            :depth="depthPlusOne"
             @delete-connector="
               deleteChildConnector({
                 id: this.rightID,
@@ -411,7 +429,11 @@ export default {
     'isFeedbackAvailable',
     'showAllFeedback',
     'globalTooltipState',
+    'globalDebugMode',
     'displayOnly',
+    'activeHover',
+    'setActiveHover',
+    'clearActiveHover'
   ],
   emits: [
     'droppedAstat',
@@ -456,6 +478,10 @@ export default {
     allStatements: Object,
     clickCount: Number,
     orientation: String,
+    depth: {
+    type: Number,
+    required: true,
+  },
   },
   data() {
     return {
@@ -469,9 +495,13 @@ export default {
       contentTextAll: null, // Record the contents in children and in itself
       // clickCountInConn: 0,
       showFeedback: false,
+      dragInProgress: false,
     };
   },
   computed: {
+    depthPlusOne() {
+      return this.depth + 1;
+    },
     deleteButtonTooltipText() {
       if (this.leftID === undefined && this.rightID === undefined)
         return 'Delete Connector';
@@ -493,8 +523,31 @@ export default {
         .filter(Boolean) // Filter out null or undefined
         .join('\n'); // Join with newline
     },
+    showButtons() {
+      return this.activeHover.id === this.connectorID;
+    },
+
   },
   methods: {
+    handleMouseEnter() {
+      console.log('Connector:mouseEnter');
+      this.setActiveHover(this.connectorID, this.depth);
+    },
+    handleMouseLeave(e) {
+      console.log('Connector:mouseLeave ', e.relatedTarget);
+      const rt = e.relatedTarget; // where the mouse went *to*
+
+      // If we moved into another hoverable (or inside one), promote hover to it
+      const next = rt && rt.closest && rt.closest('[data-hover-id]');
+      if (next) {
+        const nextId = Number(next.getAttribute('data-hover-id'));
+        const nextDepth = Number(next.getAttribute('data-hover-depth'));
+        this.setActiveHover(nextId, nextDepth);
+        return;
+      }
+      // Otherwise we really left the hoverable hierarchy -> clear
+      this.clearActiveHover(this.connectorID);
+    },
     duplicateStatement(payload) {
       // emission from either a child RenderStatement or a Connector.
       // just pass this on up the tree for the AnswerArea to deal with
@@ -820,6 +873,7 @@ export default {
         );
         return;
       }
+      this.dragInProgress = true;
       //globalConsoleLog("conn","globalTooltipState = ",this.globalTooltipState);
       this.globalTooltipState.showTooltips = false;
       this.globalTooltipState.animal = 'cat';
@@ -894,8 +948,8 @@ export default {
       );
       this.globalTooltipState.showTooltips = true;
       this.globalTooltipState.animal = 'mouse';
+      this.dragInProgress = false;
     },
-
     updateContentTextAll() {
       this.contentTextAll =
         (this.currConnectorContent[0] === null
@@ -1366,8 +1420,8 @@ export default {
   /* Show childA when hovering over the parent */
 }
 
-.connectorContainer:hover {
-  border: 2px solid var(--biologic-hover-border-color);
+.currentHoverTarget {
+  border: 1px solid var(--biologic-hover-border-color);
   /*transform: translate(-1px, -1px);*/
   cursor: move;
 }
@@ -1382,7 +1436,7 @@ export default {
 }
 
 .onlyText {
-  background-color: rgb(236, 236, 236);
+  background-color: var(--biologic-collapsed-statement-color);
   max-width: 400px;
   overflow-wrap: break-word;
   /*aspect-ratio: 2/1;*/
@@ -1430,6 +1484,13 @@ export default {
   align-items: flex-start;
   justify-items: flex-start;
   padding: 10px;
+  position:absolute;
+  top: 0;
+  left: 0;
+  transform: translateX(-100%);
+  pointer-events: auto;
+  border-radius: 6px;
+  border: 1px solid var(--biologic-hover-border-color);
 }
 
 .connectorButton {
