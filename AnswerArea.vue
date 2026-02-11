@@ -54,6 +54,7 @@
           :key="item"
           :statement-data="allStatements[item]"
           :showToggle="true"
+          :depth="0"
           @duplicate-statement="duplicateStatement"
           @delete-statement="deleteStatement"
           @update-statement-content="handleUpdateStatementContent"
@@ -89,6 +90,7 @@
           :connleft="allConnectors[rootConnectorID].left"
           :moveItem="moveItem"
           :rootConnectorID="rootConnectorID"
+          :depth="0"
           @delete-child-connector="deleteChildConnector"
           @delete-connector="deleteConnector"
           @dropped-astat="handleAStatementDrop"
@@ -189,6 +191,7 @@ export default {
       globalTooltipState: {
         showTooltips: true,
       },
+      activeHover: { id: null, depth: -1 },
     };
   },
   provide() {
@@ -197,6 +200,10 @@ export default {
       showAllFeedback: computed(() => this.showAllFeedback),
       displayOnly: this.displayOnly,
       globalTooltipState: this.globalTooltipState,
+
+      activeHover: this.activeHover,
+      setActiveHover: this.setActiveHover,
+      clearActiveHover: this.clearActiveHover,
     };
   },
   inject: ['isFeedbackAvailable', 'showDataStructures', 'globalDebugMode'],
@@ -251,6 +258,23 @@ export default {
   },
 
   methods: {
+    setActiveHover(id, depth) {
+      // only allow same-or-deeper to take over
+      console.log('setActiveHover = ', id, depth);
+      //if (depth >= this.activeHover.depth) {
+      this.activeHover.id = id;
+      this.activeHover.depth = depth;
+      //}
+    },
+    clearActiveHover(id) {
+      // only clear if you're the current active target
+      console.log('clearActiveHover = ', id);
+      if (this.activeHover.id === id) {
+        this.activeHover.id = null;
+        this.activeHover.depth = -1;
+      }
+    },
+
     getScrollableWorkspace(element) {
       if (!element) return null;
       return (
