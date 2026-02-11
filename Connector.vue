@@ -1,6 +1,6 @@
 <template>
   <div
-    :class="['connectorContainer',{'currentHoverTarget':showButtons}]"
+    :class="['connectorContainer', { currentHoverTarget: showButtons }]"
     :style="{ left: connleft + 'px', top: conntop + 'px' }"
     ref="connectorContainerRef"
     draggable="true"
@@ -9,20 +9,28 @@
     @dragstart="startDragConnector"
     @drop="onDrop($event, 'x')"
     @dragend="endDragConnector"
-      @mouseenter="handleMouseEnter"
-      @mouseleave="handleMouseLeave"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
   >
     <p v-if="globalDebugMode">
-      DEPTH = {{ depth }} Active.id =  {{ activeHover.id }} activeDepth=  {{ activeHover.depth }}  CONNECTOR_ID = {{ connectorID }}&nbsp;&nbsp;&nbsp;parent={{ parent }}
-      showButtons={{ showButtons }} activeHover.id type={{ typeof activeHover.id }}
-  connectorID type={{ typeof connectorID }}
+      DEPTH = {{ depth }} Active.id = {{ activeHover.id }} activeDepth=
+      {{ activeHover.depth }} CONNECTOR_ID =
+      {{ connectorID }}&nbsp;&nbsp;&nbsp;parent={{ parent }} showButtons={{
+        showButtons
+      }}
+      activeHover.id type={{ typeof activeHover.id }} connectorID type={{
+        typeof connectorID
+      }}
     </p>
     <FeedbackRubric
       :isVisible="showFeedback"
       :exnetID="connectorID"
       :isConnector="true"
     />
-    <div v-if="this.parent !== undefined && showButtons && !dragInProgress" class="buttons-container">
+    <div
+      v-if="this.parent !== undefined && showButtons && !dragInProgress"
+      class="buttons-container"
+    >
       <Tooltip :text="this.clickCount % 2 === 1 ? 'expand' : 'collapse'">
         <v-btn
           icon
@@ -105,8 +113,7 @@
       <!-- TODO: implement connector -->
       <div class="tooltip">
         <!-- TODO: implement delete -->
-        <div v-if="globalDebugMode"> LEFT
-      = {{ leftID }}</div>
+        <div v-if="globalDebugMode">LEFT = {{ leftID }}</div>
         <div
           class="connector-sections"
           v-if="this.leftType === undefined"
@@ -278,9 +285,8 @@
       <!-- TODO: implement connector -->
       <div class="tooltip">
         <!-- TODO: implement delete -->
-        <div  v-if="globalDebugMode"> RIGHT
-      = {{ rightID }}</div>
-        <div
+        <div v-if="globalDebugMode">RIGHT = {{ rightID }}</div>
+
         <div
           class="connector-sections"
           v-if="this.rightType === undefined"
@@ -433,7 +439,7 @@ export default {
     'displayOnly',
     'activeHover',
     'setActiveHover',
-    'clearActiveHover'
+    'clearActiveHover',
   ],
   emits: [
     'droppedAstat',
@@ -479,9 +485,9 @@ export default {
     clickCount: Number,
     orientation: String,
     depth: {
-    type: Number,
-    required: true,
-  },
+      type: Number,
+      required: true,
+    },
   },
   data() {
     return {
@@ -526,7 +532,6 @@ export default {
     showButtons() {
       return this.activeHover.id === this.connectorID;
     },
-
   },
   methods: {
     handleMouseEnter() {
@@ -1484,7 +1489,7 @@ export default {
   align-items: flex-start;
   justify-items: flex-start;
   padding: 10px;
-  position:absolute;
+  position: absolute;
   top: 0;
   left: 0;
   transform: translateX(-100%);
