@@ -1794,6 +1794,139 @@ export default {
       this.showAllFeedback = !this.showAllFeedback;
     },
 
+    _normalizeStatementId(id) {
+      return id === undefined || id === null ? '' : String(id);
+    },
+    _detachStatementFromConnectors(statementId) {
+      const id = this._normalizeStatementId(statementId);
+      Object.values(this.allConnectors).forEach((connector) => {
+        if (
+          connector.leftType === 'statement' &&
+          this._normalizeStatementId(connector.leftID) === id
+        ) {
+          connector.leftID = undefined;
+          connector.leftType = undefined;
+          connector.leftContent = undefined;
+          connector.leftStatementIdentifier = undefined;
+        }
+        if (
+          connector.rightType === 'statement' &&
+          this._normalizeStatementId(connector.rightID) === id
+        ) {
+          connector.rightID = undefined;
+          connector.rightType = undefined;
+          connector.rightContent = undefined;
+          connector.rightStatementIdentifier = undefined;
+        }
+      });
+    },
+    _updateConnectorStatementContent(statementId, statement) {
+      const id = this._normalizeStatementId(statementId);
+      const content = statement?.content?.originalFacts;
+      const statementIdentifier = statement?.statementIdentifier;
+      Object.values(this.allConnectors).forEach((connector) => {
+        if (
+          connector.leftType === 'statement' &&
+          this._normalizeStatementId(connector.leftID) === id
+        ) {
+          connector.leftContent = content;
+          connector.leftStatementIdentifier = statementIdentifier;
+        }
+        if (
+          connector.rightType === 'statement' &&
+          this._normalizeStatementId(connector.rightID) === id
+        ) {
+          connector.rightContent = content;
+          connector.rightStatementIdentifier = statementIdentifier;
+        }
+      });
+    },
+    _getNextStatementTop() {
+      const tops = Object.values(this.allStatements)
+        .map((s) => Number(s?.top))
+        .filter((n) => Number.isFinite(n));
+      if (tops.length === 0) {
+        return 20;
+      }
+      return Math.max(...tops) + 80;
+    },
+
+    /**
+     * Sync statementElements into the current AnswerArea without wiping connectors.
+     * Preserves connector trees and statement positions when possible.
+     */
+    syncWithStatementElements(parentStatementElements) {
+      globalConsoleLog('conn', 'AnswerArea:syncWithStatementElements');
+      if (!parentStatementElements) return;
+
+      if (parentStatementElements.length === 0) {
+        this.initialiseWithStatementElements(parentStatementElements);
+        this.resetStateHistory();
+        return;
+      }
+
+      const incomingById = new Map();
+      parentStatementElements.forEach((item) => {
+        if (item && item.id !== undefined) {
+          incomingById.set(
+            this._normalizeStatementId(item.id),
+            JSON.parse(JSON.stringify(item)),
+          );
+        }
+      });
+
+      const existingIds = new Set(
+        Object.keys(this.allStatements).map((id) =>
+          this._normalizeStatementId(id),
+        ),
+      );
+      const incomingIds = new Set(incomingById.keys());
+
+      // Remove statements that no longer exist
+      for (const id of existingIds) {
+        if (!incomingIds.has(id)) {
+          this._detachStatementFromConnectors(id);
+          delete this.allStatements[id];
+          delete this.answerContent[id];
+        }
+      }
+
+      let nextTop = this._getNextStatementTop();
+
+      // Update existing statements and add new ones
+      for (const [id, incoming] of incomingById.entries()) {
+        const existing = this.allStatements[id];
+        if (existing) {
+          existing.statementType = incoming.statementType;
+          existing.statementIdentifier = incoming.statementIdentifier;
+          existing.content = incoming.content;
+          this._updateConnectorStatementContent(id, existing);
+        } else {
+          const item = incoming;
+          item.parent = -1;
+          item.position = 'absolute';
+          item.side = undefined;
+          item.top = nextTop;
+          item.left = 20;
+          nextTop += 80;
+
+          this.allStatements[id] = item;
+          this.answerContent[id] = `dummy${id}`;
+        }
+      }
+
+      // Rebuild root statements set based on current parents
+      this.rootStatementID_set = new Set();
+      Object.values(this.allStatements).forEach((stmt) => {
+        if (!stmt) return;
+        if (stmt.parent === -1 || stmt.parent === undefined) {
+          this.rootStatementID_set.add(stmt.id);
+        }
+      });
+
+      this.notifyStateChange();
+    },
+
     /**
      * Takes the list of statementElements in the parent and creates statements in the answerArea.
      * Makes a deep copy of the statementElements rather than referring back to the parent.
