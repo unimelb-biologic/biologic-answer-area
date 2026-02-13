@@ -13,7 +13,7 @@
       ref="right"
       id="right-click-menu"
       tabindex="-1"
-      v-if="viewMenu && parentID"
+      v-if="viewMenu && parentID !== null && parentID !== undefined"
       @blur="closeMenu"
       :style="{ top: top, left: left }"
       class="connectorMenuUnorderedList"
@@ -79,7 +79,13 @@ export default {
     },
 
     openMenu: function (e) {
-      console.log('openMenu at ', e.clientX, e.clientY);
+      console.log(
+        'openMenu at ',
+        e.clientX,
+        e.clientY,
+        ' parentID=',
+        this.parentID,
+      );
       this.viewMenu = true;
 
       nextTick(
