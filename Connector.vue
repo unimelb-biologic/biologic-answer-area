@@ -1411,7 +1411,7 @@ export default {
   border-radius: 6px;
   border: 1px solid rgb(230, 230, 255);
   background-color: #ffffff;
-  padding: 0px 5px;
+  padding: 10px;
   overflow: visible;
 }
 
