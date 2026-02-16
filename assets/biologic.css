@@ -1,6 +1,7 @@
 /*  variables for the BioLogic apps */
 :root {
   --biologic-green-color: rgb(20, 120, 0);
+  --biologic-error-color: rgb(209, 0, 0);
   --biologic-lightgreen-color: rgb(246, 251, 244);
   --biologic-blue-color: rgb(21, 8, 107);
   --biologic-transparent-blue-color: rgba(21, 8, 107, 0.05);
