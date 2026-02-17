@@ -22,7 +22,7 @@
         zIndex: this.statementData.zIndex,
       }"
     >
-      <div v-if="globalDebugMode">
+      <!--div v-if="globalDebugMode">
         DEPTH = {{ depth }} ACTIVE =
         {{ activeHover.id }}&nbsp;&nbsp;&nbsp;&nbsp; id={{
           statementData.id
@@ -31,8 +31,16 @@
         }}&nbsp;&nbsp;parent={{ statementData.parent }}&nbsp;&nbsp;side={{
           statementData.side
         }}
-      </div>
-      <!-- <div class="drag-handle">&nbsp;</div> -->
+      </div-->
+      <div v-if="globalDebugMode">
+        I{{
+          statementData.id
+        }}&nbsp;SI={{
+          statementData.statementIdentifier
+        }}&nbsp;&nbsp;p{{ statementData.parent }}&nbsp;s{{
+          statementData.side
+        }}
+      </div>      <!-- <div class="drag-handle">&nbsp;</div> -->
       <Statement
         :statement-class="statementProps.statementClass"
         :ref="statementProps.ref"

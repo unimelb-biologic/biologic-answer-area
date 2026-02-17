@@ -116,15 +116,15 @@
           @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
         />
       </div>
-      <div>
-        <!--pre>
+      <div v-if="globalDebugMode" style="max-width:500px; min-width:500px; text-align:left;">
+        <pre>
         {{ prettifiedAnswerContentDump }}
         {{ prettifiedStatementsDump }}
         {{ prettifiedAllStatementsDump }}
     {{ prettifiedAllConnectorsDump }}
     {{ prettifiedRootConnectorID_List_Dump }}
     {{ prettifiedRootStatementIDs_Dump }} 
-        </pre-->
+        </pre>
       </div>
     </div>
   </div>
@@ -1731,6 +1731,7 @@ export default {
       //newConn['left'] = oldConn['left'] + 100;
       newConn['top'] = relativeY;
       newConn['left'] = relativeX;
+      newConn['parent'] = -1;
       this.rootConnectorID_set.add(newConn['connectorID']);
     },
 
