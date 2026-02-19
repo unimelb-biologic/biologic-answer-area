@@ -70,6 +70,7 @@ export default {
         b: -1,
         growA: 1,
         growB: 1,
+        returnIndex: 0,
       },
     };
   },
@@ -207,71 +208,109 @@ export default {
 
     /* -------- pair fullscreen: now takes the clicked element -------- */
 
-    async requestPairFullscreen(clickedEl) {
-      const kids = this.getItems();
-      const a = kids.indexOf(clickedEl);
-      const b = a + 1;
+async requestPairFullscreen(clickedEl) {
+  const kids = this.getItems();
+  const a = kids.indexOf(clickedEl);
+  const b = a + 1;
 
-      // nothing happens if there's no adjacent item (a==-1 or last item)
-      if (a < 0 || b >= kids.length) return;
+  if (a < 0 || b >= kids.length) return;
 
-      const elA = kids[a];
-      const elB = kids[b];
+  const elA = kids[a];
+  const elB = kids[b];
 
-      const wA = elA.getBoundingClientRect().width;
-      const wB = elB.getBoundingClientRect().width;
-      const denom = Math.max(1, wA + wB);
+  // snapshot what the user was actually aligned to (more stable than "a")
+  const alignedBeforeFs = this.getAlignedIndex();
 
-      this.pairFs = {
-        active: true,
-        a,
-        b,
-        growA: wA / denom,
-        growB: wB / denom,
-      };
+  const wA = elA.getBoundingClientRect().width;
+  const wB = elB.getBoundingClientRect().width;
+  const denom = Math.max(1, wA + wB);
 
-      this.$nextTick(() => this.applyPairStyles());
+  this.pairFs = {
+    active: true,
+    a,
+    b,
+    growA: wA / denom,
+    growB: wB / denom,
+    returnIndex: alignedBeforeFs,
+  };
 
-      const fsEl = this.$refs.fsWrapperRef;
-      if (!fsEl?.requestFullscreen) {
-        this.exitPairFullscreen();
-        return;
-      }
+  this.$nextTick(() => this.applyPairStyles());
 
-      try {
-        if (!document.fullscreenElement) {
-          await fsEl.requestFullscreen();
-        }
-      } catch (e) {
-        this.exitPairFullscreen();
-      }
-    },
+  const fsEl = this.$refs.fsWrapperRef;
+  if (!fsEl?.requestFullscreen) {
+    await this.exitPairFullscreen();
+    return;
+  }
 
-    async exitPairFullscreen() {
-      try {
-        if (document.fullscreenElement) await document.exitFullscreen();
-      } catch (e) {}
+  try {
+    if (!document.fullscreenElement) {
+      await fsEl.requestFullscreen();
+    }
+  } catch (e) {
+    await this.exitPairFullscreen();
+  }
+},
 
-      this.pairFs = { active: false, a: -1, b: -1, growA: 1, growB: 1 };
 
-      this.$nextTick(() => {
-        this.applyPairStyles();
+async exitPairFullscreen() {
+  const returnIndex = this.pairFs?.returnIndex ?? 0;
+
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+  } catch (e) {}
+
+  this.pairFs = {
+    active: false,
+    a: -1,
+    b: -1,
+    growA: 1,
+    growB: 1,
+    returnIndex,
+  };
+
+  this.$nextTick(() => {
+    this.applyPairStyles();
+
+    // Let layout + scrollWidth settle before scrolling
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.scrollToIndex(returnIndex);
         this.updateScrollState();
       });
-    },
+    });
+  });
+},
 
-    onFullscreenChange() {
-      // Esc / browser UI exit
-      if (!document.fullscreenElement && this.pairFs.active) {
-        this.pairFs = { active: false, a: -1, b: -1, growA: 1, growB: 1 };
-        this.$nextTick(() => {
-          this.applyPairStyles();
+
+
+onFullscreenChange() {
+  // Esc / browser UI exit
+  if (!document.fullscreenElement && this.pairFs.active) {
+    const returnIndex = this.pairFs?.returnIndex ?? 0;
+
+    this.pairFs = {
+      active: false,
+      a: -1,
+      b: -1,
+      growA: 1,
+      growB: 1,
+      returnIndex,
+    };
+
+    this.$nextTick(() => {
+      this.applyPairStyles();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          this.scrollToIndex(returnIndex);
           this.updateScrollState();
         });
-      } else if (document.fullscreenElement && this.pairFs.active) {
-        this.$nextTick(() => this.applyPairStyles());
-      }
-    },
+      });
+    });
+  } else if (document.fullscreenElement && this.pairFs.active) {
+    this.$nextTick(() => this.applyPairStyles());
+  }
+},
+
 
     applyPairStyles() {
       const track = this.$refs.trackRef;
@@ -282,21 +321,22 @@ export default {
       kids.forEach((el, i) => {
         if (!this.pairFs.active) {
           el.style.display = '';
-          el.style.flex = '';
+          el.style.removeProperty('flex');
           return;
         }
 
         if (i === this.pairFs.a) {
           el.style.display = '';
-          el.style.flex = `${this.pairFs.growA} 1 0`;
+          el.style.setProperty('flex', `${this.pairFs.growA} 1 0`, 'important');
         } else if (i === this.pairFs.b) {
           el.style.display = '';
-          el.style.flex = `${this.pairFs.growB} 1 0`;
+          el.style.setProperty('flex', `${this.pairFs.growB} 1 0`, 'important');
         } else {
           el.style.display = 'none';
-          el.style.flex = '';
+          el.style.removeProperty('flex');
         }
       });
+
     },
   },
 };
@@ -337,9 +377,9 @@ export default {
   align-items: stretch;
   height: 100%;
 }
-.my-slide-track > * {
-  flex: 0 0 auto !important;
-  max-width: none !important;
+:deep(.my-slide-track > *) {
+  flex: 0 0 auto;
+  max-width: none;
 }
 
 .nav-arrow-btn {

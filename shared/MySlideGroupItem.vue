@@ -69,8 +69,10 @@
               </v-btn>
             </Tooltip>
           </div>
-
-          <div class="panel-controls panel-controls--right">
+          <div
+            v-if="allowFullscreen"
+            class="panel-controls panel-controls--right"
+          >
             <v-btn
               size="xx-small"
               variant="text"
@@ -82,7 +84,7 @@
             </v-btn>
 
             <v-btn
-              v-if="hasNext"
+              v-if="hasNext && allowPairedFullscreen"
               size="xx-small"
               variant="text"
               :disabled="isFullscreen || isAnyFullscreenReactive"
@@ -134,6 +136,8 @@ export default {
     margin: { type: String, default: '10px' },
 
     scrollable: { type: Boolean, default: true },
+    allowFullscreen: { type: Boolean, default: true },
+    allowPairedFullscreen: { type: Boolean, default: true },
 
     actions: {
       type: Array,

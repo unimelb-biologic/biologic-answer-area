@@ -4,11 +4,16 @@
       class="statement-box"
       id="renderStatementElement"
       :draggable="true"
+      :data-hover-id="statementData.id"
+      :data-hover-depth="depth"
       @dragstart.stop="startDrag($event, data)"
       @dragover.prevent
       @dragenter.prevent="handleDragEnteringRenderStatement"
       @dragleave.prevent="handleDragLeavingRenderStatement"
       @drop="onDrop($event)"
+      @dragend="endDrag"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
       ref="mmStatementBox"
       :style="{
         position: this.statementData.position,
@@ -17,6 +22,16 @@
         zIndex: this.statementData.zIndex,
       }"
     >
+      <div v-if="globalDebugMode">
+        DEPTH = {{ depth }} ACTIVE =
+        {{ activeHover.id }}&nbsp;&nbsp;&nbsp;&nbsp; id={{
+          statementData.id
+        }}&nbsp;st_id={{
+          statementData.statementIdentifier
+        }}&nbsp;&nbsp;parent={{ statementData.parent }}&nbsp;&nbsp;side={{
+          statementData.side
+        }}
+      </div>
       <!-- <div class="drag-handle">&nbsp;</div> -->
       <Statement
         :statement-class="statementProps.statementClass"
@@ -29,6 +44,7 @@
         "
         :free-answer="this.statementData.statementType === 3"
         :statement-data="this.statementData"
+        :dragInProgress="myDragInProgress"
         @user-choice-changed="handleUserChoiceChanged"
         @duplicate-statement="duplicateStatement"
         @delete-statement="deleteStatement"
@@ -43,6 +59,7 @@
 <script>
 import Statement from './Statement.vue';
 import { globalConsoleLog } from './util';
+import { computed } from 'vue';
 
 export default {
   name: 'RenderStatement',
@@ -62,9 +79,17 @@ export default {
   inheritAttrs: false,
   props: {
     statementData: Object,
+    depth: {
+      type: Number,
+      required: true,
+    },
   },
   inject: [
     'displayOnly', // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
+    'globalDebugMode',
+    'activeHover',
+    'setActiveHover',
+    'clearActiveHover',
   ],
   data() {
     return {
@@ -73,6 +98,7 @@ export default {
       hide_renderCollapsed: false,
       hide_renderShowPopups: true,
       remove_formats: ['.png', '.jpg', '.jpeg'], // array of formats to exclude from the answer string
+      myDragInProgress: false,
     };
   },
   computed: {
@@ -141,6 +167,30 @@ export default {
     },
   },
   methods: {
+    handleMouseEnter() {
+      console.log('mouseEnter');
+      this.setActiveHover(this.statementData.id, this.depth);
+    },
+    handleMouseLeave(e) {
+      console.log('RenderStatement:mouseLeave ', e.relatedTarget);
+      const rt = e.relatedTarget; // where the mouse went *to*
+
+      // If we moved into another hoverable (or inside one), promote hover to it
+      const next = rt && rt.closest && rt.closest('[data-hover-id]');
+      if (next) {
+        const nextId = Number(next.getAttribute('data-hover-id'));
+        const nextDepth = Number(next.getAttribute('data-hover-depth'));
+        this.setActiveHover(nextId, nextDepth);
+        return;
+      }
+      // Otherwise we really left the hoverable hierarchy -> clear
+      this.clearActiveHover(this.statementData.id);
+    },
+
+    endDrag() {
+      console.log('end Drag');
+      this.myDragInProgress = false;
+    },
     handleDoubleClick(combinedText) {
       this.renderedText = combinedText;
     },
@@ -162,7 +212,7 @@ export default {
         );
         return;
       }
-
+      this.myDragInProgress = true;
       // e.target.className = 'dragEffect';
       e.dataTransfer.dropEffect = 'move';
       e.dataTransfer.effectAllowed = 'move';
@@ -232,7 +282,6 @@ export default {
         );
         return;
       }
-
       e.stopImmediatePropagation();
       const type = e.dataTransfer.getData('type');
       //globalConsoleLog("conn", "RenderStatement:onDrop type=", type);

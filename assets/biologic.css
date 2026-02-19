@@ -1,6 +1,7 @@
 /*  variables for the BioLogic apps */
 :root {
   --biologic-green-color: rgb(20, 120, 0);
+  --biologic-error-color: rgb(209, 0, 0);
   --biologic-lightgreen-color: rgb(246, 251, 244);
   --biologic-blue-color: rgb(21, 8, 107);
   --biologic-transparent-blue-color: rgba(21, 8, 107, 0.05);
@@ -13,10 +14,12 @@
   --biologic-student-statement-color: rgb(254, 250, 211);
   --biologic-truth-statement-color: rgb(233, 255, 212);
   --biologic-freetext-statement-color: White;
+  --biologic-collapsed-statement-color: rgb(237, 236, 254);
   --biologic-button-color: rgb(196, 212, 172);
   --biologic-selected-button-color: rgb(206, 224, 209);
   --biologic-button-hover-color: rgb(201, 222, 205);
   --biologic-statement-font-size: 12px;
+  --biologic-statement-button-color: rgb(250, 250, 250);
   --biologic-default-font-family: Arial, sans-serif;
   --biologic-gothic-font-family: 'Franklin Gothic Medium', Arial, sans-serif;
   --biologic-builder-question-editor-color: rgb(0, 183, 255);
