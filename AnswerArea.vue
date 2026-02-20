@@ -25,18 +25,6 @@
             <v-icon class="answer-area-icon" size="20">mdi-redo</v-icon>
           </v-btn>
         </Tooltip>
-        <Tooltip :text="isFullscreen ? 'Exit full screen' : 'Full screen'">
-          <v-btn
-            class="answer-area-button"
-            size="small"
-            id="fullscreenBtn"
-            @click="toggleFullscreen"
-          >
-            <v-icon class="answer-area-icon" size="20">
-              {{ isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen' }}
-            </v-icon>
-          </v-btn>
-        </Tooltip>
       </div>
     </div>
     <div

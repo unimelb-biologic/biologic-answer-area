@@ -34,7 +34,7 @@ export default {
     text: { type: String, required: true },
     position: { type: String, default: 'bottom' }, // top|bottom|left|right
     offset: { type: Number, default: 8 },
-    showDelay: { type: Number, default: 300 },
+    showDelay: { type: Number, default: 2000 },
     hideDelay: { type: Number, default: 120 },
   },
   data() {
