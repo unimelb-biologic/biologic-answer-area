@@ -232,8 +232,15 @@ export default {
       statementType: this.statementData.statementType,
       id: this.statementData.id,
       originalFacts: this.statementData.content.originalFacts,
-      previousUserInput: this.statementData.content.userInput,
+      /**
+       * Given originalFacts ['a', ['c1','c2'], 'b', ['c3','c4']]:
+       * userSelected (used for radio/menu selection) format is ['', 'c1', '', 'c3']
+       * userInput (used for data storage/exFlow) format is ['c1', 'c2']
+       * That is, userSelected should be the same length as originalFacts,
+       * whereas userInput should have a length equal to the number of arrays in originalFacts.
+       */
       userSelected: [],
+      previousUserInput: this.statementData.content.userInput,
       answeredData: null,
       hide_collapsed: false,
       hide_showPopup: true,
@@ -295,14 +302,9 @@ export default {
           studentContentText += ' ';
         }
       }
-
-      let newUserInput = [];
-      for (let i = 0; i < this.userSelected.length; i++) {
-        if (this.userSelected[i] != '') {
-          newUserInput.push(this.userSelected[i]);
-        }
-      }
-      this.answeredData.content.userInput = newUserInput;
+      this.answeredData.content.userInput = this.userSelected.filter(
+        (s) => s !== '',
+      );
       this.$emit('user-choice-changed', [
         studentContentText,
         this.answeredData,
@@ -336,7 +338,8 @@ export default {
       this.freeInputText = this.freeAnswer ? this.previousUserInput : '';
       this.answeredData = this.freeAnswer ? this.statementData : null;
       console.log('init');
-      this.userSelected = this.originalFacts.map((fact, userInputID) => {
+      let userInputID = 0;
+      this.userSelected = this.originalFacts.map((fact) => {
         if (typeof fact === 'string') {
           return '';
         }
@@ -349,10 +352,10 @@ export default {
             return fact[0];
           }
         } else {
+          userInputID++;
           return prev;
         }
       });
-      console.log(this.userSelected);
       this.answeredData = this.statementData;
     },
   },
