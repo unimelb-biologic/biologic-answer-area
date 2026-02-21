@@ -1,7 +1,11 @@
 <template>
   <div
     :class="['connectorContainer', { currentHoverTarget: showButtons }]"
-    :style="{ left: connleft + 'px', top: conntop + 'px' }"
+    :style="{
+      left: connleft + 'px',
+      top: conntop + 'px',
+      padding: parent === undefined ? '1px' : '10px',
+    }"
     ref="connectorContainerRef"
     draggable="true"
     :data-hover-id="connectorID"
@@ -1411,7 +1415,7 @@ export default {
   border-radius: 6px;
   border: 1px solid rgb(230, 230, 255);
   background-color: #ffffff;
-  padding: 10px;
+  padding: 2px;
   overflow: visible;
 }
 
