@@ -1,8 +1,8 @@
 <template>
   <div class="answer-area-container" ref="answerAreaContainer">
     <div v-if="!displayOnly" class="answer-area-toolbar">
-      <ConnectorArea class="answer-area-toolbar-connectors" toolbar-mode />
       <div class="answer-area-toolbar-buttons">
+        <ConnectorArea class="answer-area-toolbar-connectors" toolbar-mode />
         <Tooltip text="Undo last change">
           <v-btn
             class="answer-area-button"
@@ -1938,6 +1938,7 @@ export default {
   position: sticky;
   top: 0;
   z-index: 5;
+  justify-content: flex-end;
 }
 
 .answer-area-toolbar-buttons {
@@ -1947,6 +1948,7 @@ export default {
 
 .answer-area-toolbar-connectors {
   flex: 1;
+  width: fit-content;
 }
 
 .answer-area-workspace {

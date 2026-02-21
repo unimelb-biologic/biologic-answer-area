@@ -215,8 +215,9 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   padding: 10px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, max-content));
   gap: 8px;
+  width: max-content;
 }
 
 .draggable-box {
