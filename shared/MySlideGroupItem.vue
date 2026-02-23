@@ -31,6 +31,19 @@
           <div v-if="leftActions.length" class="panel-actions-row">
             <Tooltip v-for="a in leftActions" :key="a.id" :text="a.tooltip">
               <v-btn
+                v-if="a.kind === 'toggle'"
+                :icon="a.icon && !a.btnText"
+                size="x-small"
+                variant="text"
+                @click="$emit('toggle', { id: a.id, value: !a.value })"
+                :class="{ 'is-toggled': a.value }"
+              >
+                <v-icon v-if="a.icon" size="16">{{ a.icon }}</v-icon>
+                <span v-if="a.btnText"> {{ a.btnText }}</span>
+              </v-btn>
+
+              <v-btn
+                v-else
                 icon
                 size="x-small"
                 variant="text"
@@ -432,5 +445,10 @@ export default {
   flex-direction: row;
   align-items: center;
   gap: 4px;
+}
+
+.is-toggled {
+  background: rgba(255, 0, 0, 0.25);
+  border-radius: 6px;
 }
 </style>
