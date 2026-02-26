@@ -208,109 +208,105 @@ export default {
 
     /* -------- pair fullscreen: now takes the clicked element -------- */
 
-async requestPairFullscreen(clickedEl) {
-  const kids = this.getItems();
-  const a = kids.indexOf(clickedEl);
-  const b = a + 1;
+    async requestPairFullscreen(clickedEl) {
+      const kids = this.getItems();
+      const a = kids.indexOf(clickedEl);
+      const b = a + 1;
 
-  if (a < 0 || b >= kids.length) return;
+      if (a < 0 || b >= kids.length) return;
 
-  const elA = kids[a];
-  const elB = kids[b];
+      const elA = kids[a];
+      const elB = kids[b];
 
-  // snapshot what the user was actually aligned to (more stable than "a")
-  const alignedBeforeFs = this.getAlignedIndex();
+      // snapshot what the user was actually aligned to (more stable than "a")
+      const alignedBeforeFs = this.getAlignedIndex();
 
-  const wA = elA.getBoundingClientRect().width;
-  const wB = elB.getBoundingClientRect().width;
-  const denom = Math.max(1, wA + wB);
+      const wA = elA.getBoundingClientRect().width;
+      const wB = elB.getBoundingClientRect().width;
+      const denom = Math.max(1, wA + wB);
 
-  this.pairFs = {
-    active: true,
-    a,
-    b,
-    growA: wA / denom,
-    growB: wB / denom,
-    returnIndex: alignedBeforeFs,
-  };
+      this.pairFs = {
+        active: true,
+        a,
+        b,
+        growA: wA / denom,
+        growB: wB / denom,
+        returnIndex: alignedBeforeFs,
+      };
 
-  this.$nextTick(() => this.applyPairStyles());
+      this.$nextTick(() => this.applyPairStyles());
 
-  const fsEl = this.$refs.fsWrapperRef;
-  if (!fsEl?.requestFullscreen) {
-    await this.exitPairFullscreen();
-    return;
-  }
+      const fsEl = this.$refs.fsWrapperRef;
+      if (!fsEl?.requestFullscreen) {
+        await this.exitPairFullscreen();
+        return;
+      }
 
-  try {
-    if (!document.fullscreenElement) {
-      await fsEl.requestFullscreen();
-    }
-  } catch (e) {
-    await this.exitPairFullscreen();
-  }
-},
+      try {
+        if (!document.fullscreenElement) {
+          await fsEl.requestFullscreen();
+        }
+      } catch (e) {
+        await this.exitPairFullscreen();
+      }
+    },
 
+    async exitPairFullscreen() {
+      const returnIndex = this.pairFs?.returnIndex ?? 0;
 
-async exitPairFullscreen() {
-  const returnIndex = this.pairFs?.returnIndex ?? 0;
+      try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+      } catch (e) {}
 
-  try {
-    if (document.fullscreenElement) await document.exitFullscreen();
-  } catch (e) {}
+      this.pairFs = {
+        active: false,
+        a: -1,
+        b: -1,
+        growA: 1,
+        growB: 1,
+        returnIndex,
+      };
 
-  this.pairFs = {
-    active: false,
-    a: -1,
-    b: -1,
-    growA: 1,
-    growB: 1,
-    returnIndex,
-  };
+      this.$nextTick(() => {
+        this.applyPairStyles();
 
-  this.$nextTick(() => {
-    this.applyPairStyles();
-
-    // Let layout + scrollWidth settle before scrolling
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        this.scrollToIndex(returnIndex);
-        this.updateScrollState();
-      });
-    });
-  });
-},
-
-
-
-onFullscreenChange() {
-  // Esc / browser UI exit
-  if (!document.fullscreenElement && this.pairFs.active) {
-    const returnIndex = this.pairFs?.returnIndex ?? 0;
-
-    this.pairFs = {
-      active: false,
-      a: -1,
-      b: -1,
-      growA: 1,
-      growB: 1,
-      returnIndex,
-    };
-
-    this.$nextTick(() => {
-      this.applyPairStyles();
-      requestAnimationFrame(() => {
+        // Let layout + scrollWidth settle before scrolling
         requestAnimationFrame(() => {
-          this.scrollToIndex(returnIndex);
-          this.updateScrollState();
+          requestAnimationFrame(() => {
+            this.scrollToIndex(returnIndex);
+            this.updateScrollState();
+          });
         });
       });
-    });
-  } else if (document.fullscreenElement && this.pairFs.active) {
-    this.$nextTick(() => this.applyPairStyles());
-  }
-},
+    },
 
+    onFullscreenChange() {
+      // Esc / browser UI exit
+      if (!document.fullscreenElement && this.pairFs.active) {
+        const returnIndex = this.pairFs?.returnIndex ?? 0;
+
+        this.pairFs = {
+          active: false,
+          a: -1,
+          b: -1,
+          growA: 1,
+          growB: 1,
+          returnIndex,
+        };
+
+        this.$nextTick(() => {
+          this.applyPairStyles();
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              this.scrollToIndex(returnIndex);
+              this.updateScrollState();
+            });
+          });
+        });
+      } else if (document.fullscreenElement && this.pairFs.active) {
+        this.$nextTick(() => this.applyPairStyles());
+      }
+    },
 
     applyPairStyles() {
       const track = this.$refs.trackRef;
@@ -336,7 +332,6 @@ onFullscreenChange() {
           el.style.removeProperty('flex');
         }
       });
-
     },
   },
 };

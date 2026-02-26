@@ -13,7 +13,7 @@
       ref="right"
       id="right-click-menu"
       tabindex="-1"
-      v-if="viewMenu && parentID !== null && parentID !== undefined"
+      v-if="viewMenu"
       @blur="closeMenu"
       :style="{ top: top, left: left }"
       class="connectorMenuUnorderedList"
@@ -118,7 +118,7 @@ h1 {
   align-items: center;
   height: 100%;
   width: 100%;
-  padding: 20px;
+  padding: 1px;
 }
 
 .connectorTextContainer p {
