@@ -1330,7 +1330,7 @@ export default {
     leftContent() {
       this.acontent =
         this.allConnectors[this.connectorID].leftContent === undefined
-          ? '[A]'
+          ? '...'
           : this.allConnectors[this.connectorID].leftContent;
       this.contentTextAll =
         (this.currConnectorContent[0] === null
@@ -1349,7 +1349,7 @@ export default {
     rightContent() {
       this.bcontent =
         this.allConnectors[this.connectorID].rightContent === undefined
-          ? '[B]'
+          ? '...'
           : this.allConnectors[this.connectorID].rightContent;
       this.contentTextAll =
         (this.currConnectorContent[0] === null

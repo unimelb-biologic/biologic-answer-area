@@ -157,13 +157,14 @@ export default {
       default: () => [],
       // [{ id, icon, tooltip, side: 'left'|'right', disableWhenFullscreen?: boolean }]
     },
+    hasNext: { type: Boolean, default: true },
   },
 
   data() {
     return {
       widths: [10, 20, 30, 40, 50, 60, 70, 80],
       currentVw: 60,
-      hasNext: true,
+      //      hasNext: true,
       isFullscreen: false,
       isAnyFullscreenReactive: false,
     };
@@ -235,12 +236,6 @@ export default {
   mounted() {
     const match = parseInt(this.width, 10);
     this.currentVw = this.widths.includes(match) ? match : 30;
-
-    this.$nextTick(() => {
-      const el = this.$refs.panelWrapperRef;
-      this.hasNext = !!(el && el.nextElementSibling);
-    });
-
     document.addEventListener('fullscreenchange', this.onFullscreenChange);
   },
 
