@@ -3,6 +3,15 @@
     <div v-if="!displayOnly" class="answer-area-toolbar">
       <div class="answer-area-toolbar-buttons">
         <ConnectorArea class="answer-area-toolbar-connectors" toolbar-mode />
+        <Tooltip text="Toggle feedback display">
+          <v-btn size="small" @click="toggleAllFeedback">
+            <v-icon>{{
+              this.showAllFeedback
+                ? 'mdi-comment-quote'
+                : 'mdi-comment-quote-outline'
+            }}</v-icon>
+          </v-btn>
+        </Tooltip>
         <Tooltip text="Undo last change">
           <v-btn
             class="answer-area-button"
