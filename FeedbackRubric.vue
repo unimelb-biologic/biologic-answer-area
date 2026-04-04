@@ -113,6 +113,7 @@ export default {
   bottom: 100%;
   height: fit-content;
   margin-bottom: 16px;
+  border-radius: 5px;
 }
 
 .feedback-icon {
