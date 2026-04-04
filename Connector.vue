@@ -53,8 +53,7 @@
 
       <Tooltip text="Show Feedback">
         <v-btn
-          icon
-          size="xx-small"
+          size="x-small"
           v-if="isFeedbackAvailable"
           @click="showFeedback = !showFeedback"
           class="connectorButton"

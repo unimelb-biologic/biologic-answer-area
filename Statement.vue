@@ -29,6 +29,17 @@
           </v-btn>
         </Tooltip>
 
+        <Tooltip text="Show Feedback">
+          <v-btn
+            size="x-small"
+            v-if="showToggle && isFeedbackAvailable"
+            @click="showFeedback = !showFeedback"
+            class="statementButton"
+          >
+            <v-icon>mdi-comment-quote</v-icon>
+          </v-btn>
+        </Tooltip>
+
         <Tooltip
           text="switch between menus and radio-buttons"
           v-if="allowSwitch"
@@ -68,18 +79,6 @@
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </Tooltip>
-
-        <button
-          v-if="showToggle && isFeedbackAvailable"
-          @click="showFeedback = !showFeedback"
-          class="statementButton"
-        >
-          <img
-            src="./assets/feedback-rubric.png"
-            alt="FeedbackStatement"
-            width="20"
-          />
-        </button>
       </div>
       <Tooltip :text="tooltipText">
         <div class="main-content">

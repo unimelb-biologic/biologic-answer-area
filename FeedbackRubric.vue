@@ -84,9 +84,9 @@ export default {
 
       switch (this.gradingInfo.rubricStatus) {
         case 'GC':
-          return 'mdi-check';
+          return 'mdi-check-circle';
         case 'GIC':
-          return 'mdi-close';
+          return 'mdi-close-circle';
         case 'GPC':
           return 'mdi-minus-circle';
         default:
