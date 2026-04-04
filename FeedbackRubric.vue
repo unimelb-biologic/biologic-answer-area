@@ -5,7 +5,7 @@
       class="tooltips active feedback-info"
       :class="getGradeColor"
     >
-      <img v-if="gradingInfo" class="feedback-icon" :src="getFeedbackIcon" />
+      <v-icon class="feedback-icon">{{ getFeedbackIcon }}</v-icon>
 
       <span v-if="gradingInfo">
         {{
@@ -20,7 +20,14 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+interface FeedbackInfo {
+  feedback?: string;
+  rubricStatus?: 'GC' | 'GIC' | 'GPC';
+  rubricScore?: number; // 0 <= rubric score <= maxRubricScore
+  maxRubricScore?: number;
+}
+
 export default {
   name: 'FeedbackRubric',
   data() {
@@ -56,7 +63,7 @@ export default {
         case 'GIC':
           return 'wrong';
         case 'GPC':
-          return 'partial-correct';
+          return 'partial';
         default:
           break;
       }
@@ -77,11 +84,11 @@ export default {
 
       switch (this.gradingInfo.rubricStatus) {
         case 'GC':
-          return './assets/correct_icon.png';
+          return 'mdi-check';
         case 'GIC':
-          return './assets/wrong_icon.png';
+          return 'mdi-close';
         case 'GPC':
-          return '';
+          return 'mdi-minus-circle';
         default:
           break;
       }
