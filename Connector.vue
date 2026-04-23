@@ -26,11 +26,6 @@
         typeof connectorID
       }}
     </p>
-    <FeedbackRubric
-      :isVisible="showFeedback"
-      :exnetID="connectorID"
-      :isConnector="true"
-    />
     <div
       v-if="this.parent !== undefined && showButtons && !dragInProgress"
       class="buttons-container"
@@ -48,18 +43,6 @@
               ? 'mdi-arrow-expand'
               : 'mdi-arrow-collapse'
           }}</v-icon>
-        </v-btn>
-      </Tooltip>
-
-      <Tooltip text="Show Feedback">
-        <v-btn
-          icon
-          size="xx-small"
-          v-if="isFeedbackAvailable"
-          @click="showFeedback = !showFeedback"
-          class="connectorButton"
-        >
-          <v-icon>mdi-comment-quote</v-icon>
         </v-btn>
       </Tooltip>
 
@@ -423,7 +406,6 @@
 <script>
 import RenderStatement from './RenderStatement.vue';
 import ConnectorContextMenu from './ConnectorContextMenu.vue';
-import FeedbackRubric from './FeedbackRubric.vue';
 import Tooltip from './shared/Tooltip.vue';
 import { globalConsoleLog } from './util';
 
@@ -432,7 +414,6 @@ export default {
   components: {
     ConnectorContextMenu,
     RenderStatement,
-    FeedbackRubric,
     Tooltip,
   },
   inject: [

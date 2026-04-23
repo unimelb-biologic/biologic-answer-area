@@ -1,6 +1,11 @@
 <template>
   <div :class="['Statement', statementClass]">
-    <FeedbackRubric :isVisible="showFeedback" :exnetID="id" />
+    <FeedbackRubric
+      :isVisible="showFeedback"
+      :exnetID="id"
+      :statementIdentifier="statementData.statementIdentifier"
+      :answerKey="feedbackAnswerKey"
+    />
     <div :class="freeAnswer ? 'free-content-wrapper' : 'content-wrapper'">
       <div
         v-show="showButtons && !dragInProgress"
@@ -69,17 +74,6 @@
           </v-btn>
         </Tooltip>
 
-        <button
-          v-if="showToggle && isFeedbackAvailable"
-          @click="showFeedback = !showFeedback"
-          class="statementButton"
-        >
-          <img
-            src="./assets/feedback-rubric.png"
-            alt="FeedbackStatement"
-            width="20"
-          />
-        </button>
       </div>
       <Tooltip :text="tooltipText">
         <div class="main-content">
@@ -182,6 +176,7 @@
 import FeedbackRubric from './FeedbackRubric.vue';
 import Tooltip from './shared/Tooltip.vue';
 import { globalConsoleLog } from './util';
+import { normalizeFeedbackAnswerKey } from '@/utils/common';
 
 export default {
   name: 'Statement',
@@ -198,7 +193,6 @@ export default {
   ],
   inject: [
     'displayOnly', // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
-    'isFeedbackAvailable',
     'showAllFeedback',
     'displayOnly',
     'activeHover',
@@ -264,6 +258,9 @@ export default {
     },
     showButtons() {
       return this.activeHover.id === this.statementData.id;
+    },
+    feedbackAnswerKey() {
+      return normalizeFeedbackAnswerKey(this.userSelected);
     },
   },
   methods: {

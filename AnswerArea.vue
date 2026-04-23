@@ -1804,6 +1804,9 @@ export default {
     toggleAllFeedback() {
       this.showAllFeedback = !this.showAllFeedback;
     },
+    setShowAllFeedback(value) {
+      this.showAllFeedback = Boolean(value);
+    },
 
     /**
      * Takes the list of statementElements in the parent and creates statements in the answerArea.

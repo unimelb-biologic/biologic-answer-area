@@ -21,6 +21,8 @@
 </template>
 
 <script>
+import { buildStatementFeedbackKey } from '@/utils/common';
+
 export default {
   name: 'FeedbackRubric',
   data() {
@@ -34,7 +36,15 @@ export default {
       default: false,
     },
     exnetID: {
-      type: Number,
+      type: [Number, String],
+    },
+    statementIdentifier: {
+      type: [Number, String],
+      default: null,
+    },
+    answerKey: {
+      type: String,
+      default: '',
     },
     isConnector: {
       type: Boolean,
@@ -42,7 +52,24 @@ export default {
     },
   },
   inject: ['feedbackRubricMap'],
-  methods: {},
+  methods: {
+    updateGradingInfo() {
+      const statementKey =
+        this.statementIdentifier != null ? String(this.statementIdentifier) : '';
+      const idKey = String(this.exnetID);
+      const key = statementKey || idKey;
+      const answerSpecificKey =
+        statementKey && this.answerKey
+          ? buildStatementFeedbackKey(statementKey, this.answerKey)
+          : null;
+
+      this.gradingInfo =
+        (answerSpecificKey && this.feedbackRubricMap?.[answerSpecificKey]) ||
+        this.feedbackRubricMap?.[idKey] ||
+        this.feedbackRubricMap?.[key] ||
+        null;
+    },
+  },
 
   mounted() {},
 
@@ -92,13 +119,16 @@ export default {
 
   watch: {
     isVisible() {
-      if (
-        this.isVisible &&
-        this.feedbackRubricMap &&
-        this.feedbackRubricMap[this.exnetID] != undefined
-      ) {
-        this.gradingInfo = this.feedbackRubricMap[this.exnetID];
-      }
+      if (this.isVisible) this.updateGradingInfo();
+    },
+    feedbackRubricMap() {
+      if (this.isVisible) this.updateGradingInfo();
+    },
+    statementIdentifier() {
+      if (this.isVisible) this.updateGradingInfo();
+    },
+    answerKey() {
+      if (this.isVisible) this.updateGradingInfo();
     },
   },
 };
