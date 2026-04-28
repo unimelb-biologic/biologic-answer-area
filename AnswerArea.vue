@@ -122,7 +122,7 @@
 import Connector from './Connector.vue';
 import RenderStatement from './RenderStatement.vue';
 import ConnectorArea from './ConnectorArea.vue';
-import uniqueId from 'lodash.uniqueid';
+import _ from 'lodash';
 import { computed } from 'vue';
 import stringify from 'json-stringify-pretty-compact';
 import { globalConsoleLog } from './util';
@@ -682,7 +682,10 @@ export default {
 
       // A new connector from the right is dropped onto a connector
       if (droppedConnectorID === undefined) {
-        droppedConnectorID = this.connectorCount;
+        droppedConnectorID = _.random(
+          100000000000000,
+          999999999999999,
+        ).toString();
         this.connectorCount++;
 
         this.allConnectors[droppedConnectorID] = info[1];
@@ -786,7 +789,10 @@ export default {
 
       // A new connector is dropped into here!
       if (droppedConnectorID === undefined) {
-        droppedConnectorID = this.connectorCount;
+        droppedConnectorID = _.random(
+          100000000000000,
+          999999999999999,
+        ).toString();
         this.connectorCount++;
 
         this.allConnectors[droppedConnectorID] = info[1];
@@ -1092,7 +1098,10 @@ export default {
       if (droppedConnectorID == undefined) {
         // brand new connector so need to create it and initialise to undefined
         // give the connector the next ID
-        droppedConnectorID = this.connectorCount;
+        droppedConnectorID = _.random(
+          100000000000000,
+          999999999999999,
+        ).toString();
         this.connectorCount++;
         // initialise the new Connector to undefined
         this.allConnectors[droppedConnectorID] = data;
@@ -1254,25 +1263,28 @@ export default {
         );
         */
         if (data.connectorID === undefined) {
-          this.allConnectors[this.connectorCount] = data;
+          const newConnectorID = _.random(
+            100000000000000,
+            999999999999999,
+          ).toString();
+          this.allConnectors[newConnectorID] = data;
 
           //console.log("answer area dropped occurred");
 
-          this.allConnectors[this.connectorCount]['connectorID'] =
-            this.connectorCount;
-          this.allConnectors[this.connectorCount]['parent'] = -1;
-          this.allConnectors[this.connectorCount]['leftID'] = undefined;
-          this.allConnectors[this.connectorCount]['leftType'] = undefined;
-          this.allConnectors[this.connectorCount]['leftContent'] = undefined;
-          this.allConnectors[this.connectorCount]['leftStatementIdentifier'] =
+          this.allConnectors[newConnectorID]['connectorID'] = newConnectorID;
+          this.allConnectors[newConnectorID]['parent'] = -1;
+          this.allConnectors[newConnectorID]['leftID'] = undefined;
+          this.allConnectors[newConnectorID]['leftType'] = undefined;
+          this.allConnectors[newConnectorID]['leftContent'] = undefined;
+          this.allConnectors[newConnectorID]['leftStatementIdentifier'] =
             undefined;
-          this.allConnectors[this.connectorCount]['rightID'] = undefined;
-          this.allConnectors[this.connectorCount]['rightType'] = undefined;
-          this.allConnectors[this.connectorCount]['rightContent'] = undefined;
-          this.allConnectors[this.connectorCount]['rightStatementIdentifier'] =
+          this.allConnectors[newConnectorID]['rightID'] = undefined;
+          this.allConnectors[newConnectorID]['rightType'] = undefined;
+          this.allConnectors[newConnectorID]['rightContent'] = undefined;
+          this.allConnectors[newConnectorID]['rightStatementIdentifier'] =
             undefined;
-          this.allConnectors[this.connectorCount]['clickCount'] = 0;
-          this.allConnectors[this.connectorCount]['orientation'] = 'row';
+          this.allConnectors[newConnectorID]['clickCount'] = 0;
+          this.allConnectors[newConnectorID]['orientation'] = 'row';
           /*
                     const answerAreaHeight =
                       document.getElementById("answerArea").offsetHeight;
@@ -1281,14 +1293,13 @@ export default {
                     const topOffset = answerAreaHeight + submitBtnHeight;
           */
           //this.allConnectors[this.connectorCount]["top"] = topWithinAnswerArea - topOffset;
-          this.allConnectors[this.connectorCount]['top'] = topWithinAnswerArea;
-          this.allConnectors[this.connectorCount]['left'] =
-            leftWithinAnswerArea;
+          this.allConnectors[newConnectorID]['top'] = topWithinAnswerArea;
+          this.allConnectors[newConnectorID]['left'] = leftWithinAnswerArea;
 
-          this.rootConnectorID_set.add(this.connectorCount);
+          this.rootConnectorID_set.add(newConnectorID);
 
           // Record content
-          this.answerContent[this.connectorCount] = transContent;
+          this.answerContent[newConnectorID] = transContent;
 
           this.connectorCount++;
         } else {
@@ -1409,28 +1420,31 @@ export default {
       if (data.connectorID === undefined) {
         // connector is new so need to add it to the list
         const oldStatementParent = this.allStatements[statementID]['parent'];
-        this.allConnectors[this.connectorCount] = data;
-        this.allConnectors[this.connectorCount]['connectorID'] =
-          this.connectorCount;
-        this.allConnectors[this.connectorCount]['parent'] = oldStatementParent;
-        this.allConnectors[this.connectorCount]['leftID'] = undefined;
-        this.allConnectors[this.connectorCount]['leftType'] = undefined;
-        this.allConnectors[this.connectorCount]['leftContent'] = undefined;
-        this.allConnectors[this.connectorCount]['leftStatementIdentifier'] =
+        const newConnectorID = _.random(
+          100000000000000,
+          999999999999999,
+        ).toString();
+        this.allConnectors[newConnectorID] = data;
+        this.allConnectors[newConnectorID]['connectorID'] = newConnectorID;
+        this.allConnectors[newConnectorID]['parent'] = oldStatementParent;
+        this.allConnectors[newConnectorID]['leftID'] = undefined;
+        this.allConnectors[newConnectorID]['leftType'] = undefined;
+        this.allConnectors[newConnectorID]['leftContent'] = undefined;
+        this.allConnectors[newConnectorID]['leftStatementIdentifier'] =
           undefined;
-        this.allConnectors[this.connectorCount]['rightID'] = undefined;
-        this.allConnectors[this.connectorCount]['rightType'] = undefined;
-        this.allConnectors[this.connectorCount]['rightContent'] = undefined;
-        this.allConnectors[this.connectorCount]['rightStatementIdentifier'] =
+        this.allConnectors[newConnectorID]['rightID'] = undefined;
+        this.allConnectors[newConnectorID]['rightType'] = undefined;
+        this.allConnectors[newConnectorID]['rightContent'] = undefined;
+        this.allConnectors[newConnectorID]['rightStatementIdentifier'] =
           undefined;
-        this.allConnectors[this.connectorCount]['clickCount'] = 0;
-        this.allConnectors[this.connectorCount]['orientation'] = 'row';
-        this.allConnectors[this.connectorCount]['top'] =
+        this.allConnectors[newConnectorID]['clickCount'] = 0;
+        this.allConnectors[newConnectorID]['orientation'] = 'row';
+        this.allConnectors[newConnectorID]['top'] =
           this.allStatements[statementID]['top'];
-        this.allConnectors[this.connectorCount]['left'] =
+        this.allConnectors[newConnectorID]['left'] =
           this.allStatements[statementID]['left'];
-        this.rootConnectorID_set.add(this.connectorCount);
-        this.answerContent[this.connectorCount] = transContent;
+        this.rootConnectorID_set.add(newConnectorID);
+        this.answerContent[newConnectorID] = transContent;
         this.connectorCount++;
         globalConsoleLog(
           'net',
@@ -1600,7 +1614,10 @@ export default {
 
       const theStatement = this.allStatements[payload.id];
       const duplicatedStatement = JSON.parse(JSON.stringify(theStatement)); // Create a copy of the last element
-      duplicatedStatement.id = uniqueId(); //just need a new unique number
+      duplicatedStatement.id = _.random(
+        100000000000000,
+        999999999999999,
+      ).toString(); //just need a new unique number
       duplicatedStatement['visible'] = true;
       duplicatedStatement['parent'] = -1;
       duplicatedStatement['position'] = 'absolute';
@@ -1629,8 +1646,12 @@ export default {
         oldConn,
       );
       const newConn = JSON.parse(JSON.stringify(oldConn)); // make a deep copy
-      this.allConnectors[this.connectorCount] = newConn; // add it to our collection
-      newConn['connectorID'] = this.connectorCount;
+      const newConnectorID = _.random(
+        100000000000000,
+        999999999999999,
+      ).toString();
+      newConn['connectorID'] = newConnectorID;
+      this.allConnectors[newConnectorID] = newConn; // add it to our collection
       this.connectorCount++;
       globalConsoleLog('conn', 'AnswerArea:cloneConnector newConn=', newConn);
 
@@ -1645,7 +1666,10 @@ export default {
         const newLeftStatement = JSON.parse(
           JSON.stringify(this.allStatements[oldConn['leftID']]),
         );
-        newLeftStatement['id'] = uniqueId();
+        newLeftStatement['id'] = _.random(
+          100000000000000,
+          999999999999999,
+        ).toString();
         this.allStatements[newLeftStatement['id']] = newLeftStatement;
         newLeftStatement['parent'] = newConn.connectorID;
         newConn['leftID'] = newLeftStatement['id'];
@@ -1673,7 +1697,10 @@ export default {
         const newRightStatement = JSON.parse(
           JSON.stringify(this.allStatements[oldConn['rightID']]),
         );
-        newRightStatement['id'] = uniqueId();
+        newRightStatement['id'] = _.random(
+          100000000000000,
+          999999999999999,
+        ).toString();
         this.allStatements[newRightStatement['id']] = newRightStatement;
         newRightStatement['parent'] = newConn.connectorID;
         newConn['rightID'] = newRightStatement['id'];

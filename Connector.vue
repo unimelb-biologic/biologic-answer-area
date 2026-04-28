@@ -16,16 +16,7 @@
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   >
-    <p v-if="globalDebugMode">
-      DEPTH = {{ depth }} Active.id = {{ activeHover.id }} activeDepth=
-      {{ activeHover.depth }} CONNECTOR_ID =
-      {{ connectorID }}&nbsp;&nbsp;&nbsp;parent={{ parent }} showButtons={{
-        showButtons
-      }}
-      activeHover.id type={{ typeof activeHover.id }} connectorID type={{
-        typeof connectorID
-      }}
-    </p>
+    <p v-if="globalDebugMode">conn_ID = {{ connectorID }}</p>
     <FeedbackRubric
       :isVisible="showFeedback"
       :exnetID="connectorID"
@@ -117,7 +108,7 @@
       <!-- TODO: implement connector -->
       <div class="tooltip">
         <!-- TODO: implement delete -->
-        <div v-if="globalDebugMode">LEFT = {{ leftID }}</div>
+        <!--div v-if="globalDebugMode">LEFT = {{ leftID }}</div-->
         <div
           class="connector-sections"
           v-if="this.leftType === undefined"
@@ -289,7 +280,7 @@
       <!-- TODO: implement connector -->
       <div class="tooltip">
         <!-- TODO: implement delete -->
-        <div v-if="globalDebugMode">RIGHT = {{ rightID }}</div>
+        <!--div v-if="globalDebugMode">RIGHT = {{ rightID }}</div-->
 
         <div
           class="connector-sections"

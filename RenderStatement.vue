@@ -23,14 +23,7 @@
       }"
     >
       <div v-if="globalDebugMode">
-        DEPTH = {{ depth }} ACTIVE =
-        {{ activeHover.id }}&nbsp;&nbsp;&nbsp;&nbsp; id={{
-          statementData.id
-        }}&nbsp;st_id={{
-          statementData.statementIdentifier
-        }}&nbsp;&nbsp;parent={{ statementData.parent }}&nbsp;&nbsp;side={{
-          statementData.side
-        }}
+        id={{ statementData.id }} st_id={{ statementData.statementIdentifier }}
       </div>
       <!-- <div class="drag-handle">&nbsp;</div> -->
       <Statement
