@@ -1863,15 +1863,19 @@ export default {
       let i = 0;
       this.answerContent = {};
       while (i < statementCount) {
+        // initialise to the generic information for this archetypal statement
         const item = JSON.parse(JSON.stringify(parentStatementElements[i]));
+        // now add fields specific to an instance of that statement in the answerarea
+        item.id = _.random(100000000000000, 999999999999999).toString();
+        item.content.userInput = [];
+        item.parent = -1;
+        item.position = 'absolute';
+        item.top = i * 100;
+        item.left = 20;
+        item.side = undefined;
+        this.answerContent[item.id] = 'dummy' + i;
         this.allStatements[item.id] = item;
         this.rootStatementID_set.add(item.id);
-        this.allStatements[item.id]['parent'] = -1;
-        this.allStatements[item.id]['position'] = 'absolute';
-        this.allStatements[item.id]['top'] = i * 100;
-        this.allStatements[item.id]['left'] = 20;
-        this.allStatements[item.id]['side'] = undefined;
-        this.answerContent[item.id] = 'dummy' + i;
         i++;
       }
       //now we need to wait for the DOM to be rendered and then reposition things based on size.
