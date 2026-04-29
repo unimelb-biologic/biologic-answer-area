@@ -1901,6 +1901,25 @@ export default {
         }
       });
     },
+    /**
+     * Takes the list of statementElements in the parent and updates the contents of statements in the answerArea that have the same statementIdentifier
+     */
+    syncWithStatementElements(parentStatementElements) {
+      globalConsoleLog('conn', 'AnswerArea:syncWithStatementElements');
+
+      const stArr = Object.values(this.allStatements);
+
+      for (const st of stArr) {
+        const match = parentStatementElements.find(
+          (s) => s.statementIdentifier === st.statementIdentifier,
+        );
+
+        if (match) {
+          st.content.originalFacts = match.content.originalFacts;
+          st.statementType = match.statementType;
+        }
+      }
+    },
   },
 
   mounted() {
