@@ -70,7 +70,7 @@
         </Tooltip>
 
         <button
-          v-if="showToggle && isFeedbackAvailable"
+          v-if="showToggle && feedbackIsAvailable"
           @click="showFeedback = !showFeedback"
           class="statementButton"
         >
@@ -181,7 +181,6 @@
 <script>
 import FeedbackRubric from './FeedbackRubric.vue';
 import Tooltip from './shared/Tooltip.vue';
-import { globalConsoleLog } from './util';
 
 export default {
   name: 'Statement',
@@ -198,7 +197,7 @@ export default {
   ],
   inject: [
     'displayOnly', // this means no editing of popups or dragging etc. Like it's readonly. But we do allow collapsing/uncollapsing
-    'isFeedbackAvailable',
+    'feedbackIsAvailable',
     'showAllFeedback',
     'displayOnly',
     'activeHover',
@@ -246,7 +245,6 @@ export default {
       hide_showPopup: true,
       showFeedback: false,
       freeInputText: '',
-      showButtons: false,
     };
   },
   computed: {
@@ -275,19 +273,12 @@ export default {
         fact.endsWith('.jpg') ||
         fact.endsWith('.png') ||
         fact.endsWith('.jpeg');
-      //console.log("testing if fact<",fact," is an image - result is ",isImg);
       return isImg;
     },
     toggleCollapsedStatement() {
-      //this.collapsed = !this.collapsed;
-      console.log('Statement:toggleCollapsedStatement');
       this.$emit('toggle-collapsed-statement', this.id);
     },
     toggleShowPopup() {
-      //this.showPopup = !this.showPopup;
-      console.log(
-        'Statement:toggleShowPopup emitting toggle-showPopup-fromstatement',
-      );
       this.$emit('toggle-showPopup-fromstatement', [this.id]);
     },
     handleSelectChange() {
@@ -311,13 +302,6 @@ export default {
       ]);
     },
     duplicateMe(event, theID) {
-      globalConsoleLog(
-        'conn',
-        'Statement:duplicateMe ',
-        theID,
-        event.clientX,
-        event.clientY,
-      );
       this.$emit('duplicate-statement', {
         id: theID,
         posX: event.clientX,
@@ -337,7 +321,6 @@ export default {
       this.previousUserInput = this.statementData.content.userInput;
       this.freeInputText = this.freeAnswer ? this.previousUserInput : '';
       this.answeredData = this.freeAnswer ? this.statementData : null;
-      console.log('init');
       let userInputID = 0;
       this.userSelected = this.originalFacts.map((fact) => {
         if (typeof fact === 'string') {

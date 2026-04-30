@@ -44,7 +44,6 @@
         @toggle-collapsed-statement="toggleCollapsedStatement"
         @toggle-showPopup-fromstatement="toggleShowPopupStatement"
       />
-      <div v-if="renderedText">{{ renderedText }}</div>
     </div>
   </Transition>
 </template>
@@ -161,11 +160,9 @@ export default {
   },
   methods: {
     handleMouseEnter() {
-      console.log('mouseEnter');
       this.setActiveHover(this.statementData.id, this.depth);
     },
     handleMouseLeave(e) {
-      console.log('RenderStatement:mouseLeave ', e.relatedTarget);
       const rt = e.relatedTarget; // where the mouse went *to*
 
       // If we moved into another hoverable (or inside one), promote hover to it
@@ -181,28 +178,11 @@ export default {
     },
 
     endDrag() {
-      console.log('end Drag');
       this.myDragInProgress = false;
-    },
-    handleDoubleClick(combinedText) {
-      this.renderedText = combinedText;
-    },
-    handleDragOveringRenderStatement() {
-      //globalConsoleLog("any", "render over event");
-    },
-    handleDragEnteringRenderStatement() {
-      //globalConsoleLog("any", "render enter event");
-    },
-    handleDragLeavingRenderStatement() {
-      //globalConsoleLog("any", "render leave event");
     },
 
     startDrag(e, data) {
       if (this.displayOnly) {
-        globalConsoleLog(
-          'any',
-          '\n\nCANT DRAG RENDERSTATEMENT BECAUSE WERE IN DISPLAYONLY MODE\n\n',
-        );
         return;
       }
       this.myDragInProgress = true;
@@ -219,15 +199,6 @@ export default {
       var rect = mmBox.getBoundingClientRect();
       const grabOffsetLeft = e.clientX - rect.left;
       const grabOffsetTop = e.clientY - rect.top;
-      /*
-      globalConsoleLog("geom", "---START DRAG e.client (X,Y)---", e.clientX, e.clientY);
-      globalConsoleLog("geom", "---START DRAG rect position=---", rect.left, rect.top);
-      globalConsoleLog("geom"
-        "---START DRAG grabOffset is diff---",
-        grabOffsetLeft,
-        grabOffsetTop
-      );
-      */
       e.dataTransfer.setData('grabOffsetLeft', grabOffsetLeft.toString());
       e.dataTransfer.setData('grabOffsetTop', grabOffsetTop.toString());
 
@@ -256,38 +227,22 @@ export default {
         connectorIDTypeStr,
         0 /* i.e. the zero is a dummy value*/,
       );
-
-      globalConsoleLog(
-        'geom',
-        ' SET UP DATA TRANSFER:',
-        widthTypeStr,
-        heightTypeStr,
-        typeTypeStr,
-        connectorIDTypeStr,
-      );
     },
 
     onDrop(e) {
       if (this.displayOnly) {
-        globalConsoleLog(
-          'conn',
-          'RenderStatement:onDrop but display only so return ',
-        );
         return;
       }
       e.stopImmediatePropagation();
       const type = e.dataTransfer.getData('type');
-      //globalConsoleLog("conn", "RenderStatement:onDrop type=", type);
       if (type == 'connector') {
         // ignore if it was statement droopped on statement
-        //globalConsoleLog("conn", " emitting connector-dropped-on-statement");
         this.$emit('connector-dropped-on-statement', [
           this.statementData.id,
           undefined,
           e,
         ]); // let the Parent deal with it
       } else if (type == 'statement') {
-        globalConsoleLog('conn', ' emitting statement-dropped-on-statement');
         this.$emit('statement-dropped-on-statement', [
           this.statementData.id,
           e,
@@ -299,7 +254,6 @@ export default {
       this.contentText = info[0];
       this.answeredStat = info[1];
       const statementID = info[1]['id'];
-      //globalConsoleLog("conn", "RenderStatement::emitting update-statement-content ",this.contentText,this.answeredStat);
       this.$emit(
         'update-statement-content',
         [this.contentText, this.answeredStat],
@@ -320,33 +274,17 @@ export default {
 
     duplicateStatement(payload) {
       if (this.displayOnly) return;
-
-      globalConsoleLog(
-        'conn',
-        'RenderStatement:duplicateStatement - calling emit duplicate-statement',
-        payload,
-      );
       this.$emit('duplicate-statement', payload); // pass it on up the chain
     },
 
     deleteStatement(id) {
       if (this.displayOnly) return;
-
-      console.log(
-        'RenderStatement:deleteStatement - calling emit delete-statement',
-      );
       this.$emit('delete-statement', id); // pass it on up the chain
     },
     toggleCollapsedStatement(id) {
-      console.log(
-        'RenderStatement:toggleCollapsedStatement - calling emit toggle-collapsed-renderstatement',
-      );
       this.$emit('toggle-collapsed-renderstatement', id); // pass it on up the chain
     },
     toggleShowPopupStatement(id) {
-      console.log(
-        'RenderStatement:toggleShowPopupStatement - calling emit toggle-showPopup-fromrenderstatement',
-      );
       this.$emit('toggle-showPopup-fromrenderstatement', id); // pass it on up the chain
     },
     initContent() {
@@ -369,20 +307,12 @@ export default {
     data() {
       this.initContent();
     },
-    // Pass the changed statement content
-    // contentText(newStatementContent) {
-    //     this.$emit('update-statement-content', newStatementContent);
-    //     // console.log(this.contentText);
-    // }
   },
 
   created() {
-    // this.answeredStat = this.statementData;
     this.initContent();
   },
-  mounted() {
-    //globalConsoleLog("conn", "RenderStatement mounted with injected displayOnly=",this.displayOnly);
-  },
+  mounted() {},
 };
 </script>
 

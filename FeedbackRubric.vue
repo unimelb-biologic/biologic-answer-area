@@ -34,7 +34,7 @@ export default {
       default: false,
     },
     exnetID: {
-      type: Number,
+      type: String,
     },
     isConnector: {
       type: Boolean,
