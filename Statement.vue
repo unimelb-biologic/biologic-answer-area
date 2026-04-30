@@ -69,17 +69,16 @@
           </v-btn>
         </Tooltip>
 
-        <button
-          v-if="showToggle && feedbackIsAvailable"
-          @click="showFeedback = !showFeedback"
-          class="statementButton"
-        >
-          <img
-            src="./assets/feedback-rubric.png"
-            alt="FeedbackStatement"
-            width="20"
-          />
-        </button>
+        <Tooltip text="Show feedback">
+          <v-btn
+            size="x-small"
+            v-if="showToggle && feedbackIsAvailable"
+            @click="showFeedback = !showFeedback"
+            class="statementButton"
+          >
+            <v-icon>mdi-comment-quote</v-icon>
+          </v-btn>
+        </Tooltip>
       </div>
       <Tooltip :text="tooltipText">
         <div class="main-content">

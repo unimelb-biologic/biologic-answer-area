@@ -167,7 +167,6 @@ export default {
       moveY: 0,
       data_Object: {},
       answerContent: {}, // {ID: Content} record the element ID and its content
-      showAllFeedback: false, // flag used to toggle all the feedback elements at once
 
       undoStack: [],
       redoStack: [],
@@ -184,7 +183,6 @@ export default {
   },
   provide() {
     return {
-      showAllFeedback: computed(() => this.showAllFeedback),
       displayOnly: this.displayOnly,
       globalTooltipState: this.globalTooltipState,
 
@@ -193,7 +191,12 @@ export default {
       clearActiveHover: this.clearActiveHover,
     };
   },
-  inject: ['feedbackIsAvailable', 'showDataStructures', 'globalDebugMode'],
+  inject: [
+    'feedbackIsAvailable',
+    'showDataStructures',
+    'globalDebugMode',
+    'showAllFeedback',
+  ],
   computed: {
     prettifiedAnswerContentDump() {
       return (
