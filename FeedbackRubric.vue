@@ -5,7 +5,9 @@
       class="tooltips active feedback-info"
       :class="getGradeColor"
     >
-      <img v-if="gradingInfo" class="feedback-icon" :src="getFeedbackIcon" />
+      <v-icon size="xx-large" v-if="gradingInfo">
+        {{ getFeedbackIcon }}
+      </v-icon>
 
       <span v-if="gradingInfo">
         {{
@@ -13,6 +15,7 @@
             ? gradingInfo.feedback + ' - ' + getScore
             : 'No Feedback'
         }}
+        {{ gradingInfo.message }}
       </span>
 
       <span v-if="!gradingInfo"> No feedback provided </span>
@@ -77,16 +80,14 @@ export default {
 
       switch (this.gradingInfo.rubricStatus) {
         case 'GC':
-          return './assets/correct_icon.png';
+          return 'mdi-check-circle';
         case 'GIC':
-          return './assets/wrong_icon.png';
+          return 'mdi-close-circle';
         case 'GPC':
-          return '';
+          return 'mdi-alert-circle';
         default:
-          break;
+          return '';
       }
-
-      return '';
     },
   },
 
