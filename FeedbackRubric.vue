@@ -8,15 +8,13 @@
       <v-icon size="xx-large" v-if="gradingInfo">
         {{ getFeedbackIcon }}
       </v-icon>
-
-      <span v-if="gradingInfo">
-        {{
-          gradingInfo.feedback
-            ? gradingInfo.feedback + ' - ' + getScore
-            : 'No Feedback'
-        }}
+      <h1>{{ getScore }}</h1>
+      <p v-if="gradingInfo">
+        {{ gradingInfo.feedback ? gradingInfo.feedback : 'No Feedback' }}
+      </p>
+      <p v-if="gradingInfo">
         {{ gradingInfo.message }}
-      </span>
+      </p>
 
       <span v-if="!gradingInfo"> No feedback provided </span>
     </div>
@@ -108,9 +106,7 @@ export default {
 <style scoped>
 .feedback-info {
   position: absolute;
-  /* background-color: lightskyblue; */
-  padding: 24px;
-  color: black;
+  padding: 4px;
   bottom: 100%;
   height: fit-content;
   margin-bottom: 16px;
