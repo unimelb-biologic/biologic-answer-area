@@ -46,7 +46,7 @@
         <v-btn
           icon
           size="xx-small"
-          v-if="isFeedbackAvailable"
+          v-if="feedbackIsAvailable"
           @click="showFeedback = !showFeedback"
           class="connectorButton"
         >
@@ -427,7 +427,7 @@ export default {
     Tooltip,
   },
   inject: [
-    'isFeedbackAvailable',
+    'feedbackIsAvailable',
     'showAllFeedback',
     'globalTooltipState',
     'globalDebugMode',
@@ -444,6 +444,7 @@ export default {
     'droppedAconn',
     'droppedBconn',
     'update-connector-content',
+    'update-click-count',
     'linkWordChanged',
     'update-stat-data',
     'delDroppedItem',
@@ -530,11 +531,9 @@ export default {
   },
   methods: {
     handleMouseEnter() {
-      console.log('Connector:mouseEnter');
       this.setActiveHover(this.connectorID, this.depth);
     },
     handleMouseLeave(e) {
-      console.log('Connector:mouseLeave ', e.relatedTarget);
       const rt = e.relatedTarget; // where the mouse went *to*
 
       // If we moved into another hoverable (or inside one), promote hover to it
@@ -551,70 +550,38 @@ export default {
     duplicateStatement(payload) {
       // emission from either a child RenderStatement or a Connector.
       // just pass this on up the tree for the AnswerArea to deal with
-      globalConsoleLog('conn', 'Connector:duplicateStatement', payload);
       this.$emit('duplicate-statement', payload);
     },
     deleteStatement(id) {
       // emission from either a child RenderStatement or a Connector.
       // just pass this on up the tree for the AnswerArea to deal with
-      globalConsoleLog('conn', 'Connector:deleteStatement');
       this.$emit('delete-statement', id);
     },
     toggleCollapsedRenderStatement(id) {
       // emission from  a child RenderStatement.
       // just pass this on up the tree for the AnswerArea to deal with
-      globalConsoleLog(
-        'conn',
-        'Connector:toggleCollapsedRenderStatementFromRenderStatement',
-      );
       this.$emit('toggle-collapsed-renderstatement-from-connector', id);
     },
     toggleCollapsedRenderStatementFromConnector(id) {
       // emission from  a child Connector.
       // just pass this on up the tree for the AnswerArea to deal with
-      globalConsoleLog(
-        'conn',
-        'Connector:toggleCollapsedRenderStatementFromConnector',
-      );
       this.$emit('toggle-collapsed-renderstatement-from-connector', id);
     },
     toggleShowPopupFromRenderStatement(id) {
       // emission from  a child RenderStatement .
       // just pass this on up the tree for the parent Connector OR AnswerArea to deal with
-      globalConsoleLog(
-        'conn',
-        'Connector:toggleShowPopupFromRenderStatement emitting toggle-showPopup-fromconnector',
-      );
       this.$emit('toggle-showPopup-fromconnector', id);
     },
     toggleShowPopupFromConnector(id) {
       // emission from  a child Connector .
       // just pass this on up the tree for the parent Connector OR AnswerArea to deal with
-      globalConsoleLog(
-        'conn',
-        'Connector:toggleShowPopupFromConnector emitting toggle-showPopup-fromconnector',
-      );
       this.$emit('toggle-showPopup-fromconnector', id);
     },
     connector1IsInTreeOfconnector2(conn1, conn2) {
       // if left OR right side is a connector call recursively
       let inLeftTree = false;
-      globalConsoleLog(
-        'conn',
-        'connector1IsInTreeOfconnector2: is conn1=',
-        conn1,
-        '  in the tree of conn2=',
-        conn2,
-      );
       if (this.allConnectors[conn2]['leftType'] == 'connector') {
         const leftConnID = this.allConnectors[conn2]['leftID'];
-        globalConsoleLog(
-          'conn',
-          'leftside type=',
-          this.allConnectors[conn2]['leftType'],
-          ' connID=',
-          leftConnID,
-        );
         inLeftTree =
           leftConnID !== undefined &&
           (conn1 === leftConnID ||
@@ -623,55 +590,28 @@ export default {
       let inRightTree = false;
       if (this.allConnectors[conn2]['rightType'] == 'connector') {
         const rightConnID = this.allConnectors[conn2]['rightID'];
-        globalConsoleLog(
-          'conn',
-          'rightside type=',
-          this.allConnectors[conn2]['rightType'],
-          ' connID=',
-          rightConnID,
-        );
         inRightTree =
           rightConnID !== undefined &&
           (conn1 === rightConnID ||
             this.connector1IsInTreeOfconnector2(conn1, rightConnID));
       }
       const finalResult = inLeftTree || inRightTree;
-      globalConsoleLog(
-        'conn',
-        ' FINAL result = inLeftTree=',
-        inLeftTree,
-        ' || inRightTree=',
-        inRightTree,
-        ' =>',
-        finalResult,
-      );
       return finalResult;
     },
     dropIsPermissible(connectorBeingDroppedOn, connectorBeingDropped) {
-      globalConsoleLog(
-        'conn',
-        'checking if ',
-        connectorBeingDropped,
-        ' can be dropped on ',
-        connectorBeingDroppedOn,
-      );
       if (Number(connectorBeingDroppedOn) === Number(connectorBeingDropped)) {
-        globalConsoleLog('conn', 'theyre the same, so NO');
         return false;
       } else {
-        globalConsoleLog('conn', 'check inTree');
         const inTree =
           this.connectorBeingDropped !== undefined &&
           this.connector1IsInTreeOfconnector2(
             connectorBeingDroppedOn,
             connectorBeingDropped,
           );
-        globalConsoleLog('conn', 'inTree = ', inTree);
         return !inTree;
       }
     },
     connectorDroppedOnStatement(info) {
-      globalConsoleLog('conn', 'Connector:connectorDroppedOnStatement');
       // pass it up the chain and let the AnswerArea deal with it
       this.$emit('connector-dropped-on-statement', info);
     },
@@ -679,7 +619,6 @@ export default {
       //  the DnD spec says that during a drag, the drag data store mode is protected mode.
       // this means you can see the types but not the values. So the workaround is to encode the values into the type names.
       const types = Array.from(event.dataTransfer.types);
-      globalConsoleLog('conn', 'TYPES = ', types);
       const widthType = types.find((type) => type.startsWith('draggedwidth'));
       const heightType = types.find((type) => type.startsWith('draggedheight'));
       const typeType = types.find((type) => type.startsWith('draggedtype'));
@@ -692,15 +631,6 @@ export default {
       const dragConnectorIDStr = connectorIDType
         ? connectorIDType.split('/')[1]
         : null;
-
-      globalConsoleLog(
-        'conn',
-        'DRAG DATA = ',
-        dragWidthStr,
-        dragHeightStr,
-        dragTypeStr,
-        dragConnectorIDStr,
-      );
 
       const dragInformation = {
         draggedWidth: dragWidthStr,
@@ -715,11 +645,6 @@ export default {
       event.preventDefault(); // Allow drop
     },
     handleDragEnterTargetBoxLeft(event) {
-      globalConsoleLog(
-        'conn',
-        'Connector:handleDragEnterTargetBoxLeft----------event=',
-        event,
-      );
       const dragInformation = this.decodeDragInformation(event);
       if (dragInformation.drageeType === 'connector') {
         if (
@@ -728,13 +653,10 @@ export default {
             dragInformation.drageeConnectorID,
           )
         ) {
-          globalConsoleLog('conn', 'DROP IS PERMISSIBLE');
         } else {
-          globalConsoleLog('conn', 'DROP IS NOT PERMISSIBLE');
           return;
         }
       }
-      //      globalConsoleLog("conn","EVENT=",event);
       event.preventDefault();
       const targetRef = this.$refs.targetBoxRefLeft;
       // Set the size of the dragged element
@@ -748,10 +670,6 @@ export default {
       //      connectorContainer.classList.add('drag-over');
     },
     handleDragLeaveTargetBoxLeft(event) {
-      globalConsoleLog(
-        'conn',
-        'Connector:handleDragLeaveTargetBoxLeft***********',
-      );
       event.preventDefault();
       const targetRef = this.$refs.targetBoxRefLeft;
       targetRef.style.width = 20 + 'px';
@@ -759,16 +677,7 @@ export default {
       targetRef.style.border = '';
     },
     handleDragEnterTargetBoxRight(event) {
-      globalConsoleLog(
-        'conn',
-        'Connector:handleDragEnterTargetBoxRight----------event=',
-        event,
-      );
-
       const dragInformation = this.decodeDragInformation(event);
-
-      globalConsoleLog('conn', 'Draginformation:', dragInformation);
-
       if (dragInformation.drageeType === 'connector') {
         if (
           this.dropIsPermissible(
@@ -776,14 +685,11 @@ export default {
             dragInformation.drageeConnectorID,
           )
         ) {
-          globalConsoleLog('conn', 'DROP IS PERMISSIBLE');
         } else {
-          globalConsoleLog('conn', 'DROP IS NOT PERMISSIBLE');
           return;
         }
       }
 
-      //      globalConsoleLog("conn","EVENT=",event);
       event.preventDefault();
 
       const targetRef = this.$refs.targetBoxRefRight;
@@ -797,10 +703,6 @@ export default {
       //      connectorContainer.classList.add('drag-over');
     },
     handleDragLeaveTargetBoxRight(event) {
-      globalConsoleLog(
-        'conn',
-        'Connector:handleDragLeaveTargetBoxRight***********',
-      );
       event.preventDefault();
       const targetRef = this.$refs.targetBoxRefRight;
       targetRef.style.width = 20 + 'px';
@@ -849,36 +751,19 @@ export default {
           ? ''
           : this.currConnectorContent[2]);
 
-      // DEBUG
-      // globalConsoleLog("conn",this.contentTextAll)
-
       this.$emit('linkWordChanged', info);
     },
     handleChildLinkWordChange(info) {
       this.$emit('linkWordChanged', info);
     },
     startDragConnector(e) {
-      globalConsoleLog(
-        'geom',
-        'Connector:startDragConnector left=',
-        this.connleft,
-        ' top=',
-        this.conntop,
-      );
-
       if (this.displayOnly) {
-        globalConsoleLog(
-          'conn',
-          "can't drag connectors in a read only AnswerArea",
-        );
         return;
       }
       this.dragInProgress = true;
-      //globalConsoleLog("conn","globalTooltipState = ",this.globalTooltipState);
       this.globalTooltipState.showTooltips = false;
       this.globalTooltipState.animal = 'cat';
 
-      //globalConsoleLog("conn","Connector:startDragConnector");
       e.stopImmediatePropagation();
       e.dataTransfer.dropEffect = 'move';
       e.dataTransfer.effectAllowed = 'move';
@@ -928,24 +813,9 @@ export default {
         connectorIDTypeStr,
         0 /* i.e. the zero is a dummy value*/,
       );
-
-      globalConsoleLog(
-        'geom',
-        ' SET UP DATA TRANSFER:',
-        widthTypeStr,
-        heightTypeStr,
-        typeTypeStr,
-        connectorIDTypeStr,
-      );
     },
 
     endDragConnector() {
-      globalConsoleLog(
-        'conn',
-        '\n\n\n\n\n\nConnector::endDragConnector globalTooltipState = ',
-        this.globalTooltipState,
-        '\n\n\n\n\n\n\n\n\n',
-      );
       this.globalTooltipState.showTooltips = true;
       this.globalTooltipState.animal = 'mouse';
       this.dragInProgress = false;
@@ -969,25 +839,12 @@ export default {
 
       const type = e.dataTransfer.getData('type');
       const data = JSON.parse(e.dataTransfer.getData('data'));
-      globalConsoleLog(
-        'conn',
-        'Connector:onDrop  side:',
-        side,
-        '  dropped data: ',
-        data,
-      );
+
       // Receive the content text from the dropped object
       const transContent = e.dataTransfer.getData('content');
 
       var elementWidthStr = e.dataTransfer.getData('fredWidth');
       var elementHeightStr = e.dataTransfer.getData('fredWidth');
-      globalConsoleLog(
-        'conn',
-        'Element Size Str:',
-        elementWidthStr,
-        'x',
-        elementHeightStr,
-      );
 
       this.$el.classList.remove('drag-over-happening');
 
@@ -997,11 +854,6 @@ export default {
         this.acontent = transContent;
         // this.leftContent = transContent
         this.updateContentTextAll();
-        globalConsoleLog(
-          'conn',
-          'Connector:onDrop  emitting SIGNAL droppedAstat',
-        );
-
         this.$emit('droppedAstat', [
           this.connectorID,
           statementID,
@@ -1039,7 +891,6 @@ export default {
         // 2. a top level connector (i.e. one with a parentID of -1, is being moved a bit and
         //    has been dropped within it's own area - i.e. onto itself or one of it's children.
         //    in this instance we just pass a signal up the tree.
-        globalConsoleLog('conn', 'emit new-connector-dropped-on-connector');
         this.$emit('new-connector-dropped-on-connector', [
           undefined,
           this.connectorID,
@@ -1048,46 +899,21 @@ export default {
       }
     },
     handleAStatementDrop(info) {
-      globalConsoleLog(
-        'conn',
-        'Connector:handleAStatementDrop:  emitting signal droppedAstat',
-      );
       this.$emit('droppedAstat', info);
     },
     handleBStatementDrop(info) {
-      globalConsoleLog(
-        'conn',
-        'Connector:handleBStatementDrop:  passing data up',
-      );
       this.$emit('droppedBstat', info);
     },
     handleAConnectorDrop(info) {
-      globalConsoleLog(
-        'conn',
-        'Connector:handleAConnectorDrop:  passing data up',
-      );
       this.$emit('droppedAconn', info);
     },
     handleNewConnectorDroppedOnConnector(info) {
-      globalConsoleLog(
-        'conn',
-        'Connector:handleAConnectorDrop:  passing data up',
-      );
       this.$emit('new-connector-dropped-on-connector', info);
     },
     handleBConnectorDrop(info) {
-      globalConsoleLog(
-        'conn',
-        'Connector:handleBConnectorDrop:  passing data up',
-      );
       this.$emit('droppedBconn', info);
     },
     showInfo() {
-      globalConsoleLog('conn', 'connectorID', this.connectorID);
-      globalConsoleLog('conn', 'leftType', this.leftType);
-      globalConsoleLog('conn', 'leftID', this.leftID);
-      globalConsoleLog('conn', 'rightType', this.rightType);
-      globalConsoleLog('conn', 'rightID', this.rightID);
       this.$forceUpdate();
     },
     handleUpdateStatContentA(info) {
@@ -1260,9 +1086,6 @@ export default {
             : this.currConnectorContent[2]);
         this.word = this.connectorContent[this.selectedPhrase].join('');
       }
-
-      // this.clickCountInConn = this.clickCount === undefined ? 0 : this.clickCount
-      // globalConsoleLog("conn",this.currConnectorContent.length)
     },
     deleteChildConnector({ id, parentId, position = '' }) {
       // Emit an event to the parent component indicating that this connector should be deleted
@@ -1270,13 +1093,6 @@ export default {
     },
 
     onDuplicateConnectorClick(event, theID) {
-      globalConsoleLog(
-        'conn',
-        'Connector:onDuplicateConnectorClick ',
-        theID,
-        event.clientX,
-        event.clientY,
-      );
       this.$emit('duplicate-connector', {
         id: theID,
         posX: event.clientX,
@@ -1285,7 +1101,6 @@ export default {
     },
 
     duplicateConnector(payload) {
-      globalConsoleLog('conn', 'Connector:duplicateConnector ', payload);
       this.$emit('duplicate-connector', payload);
     },
 
@@ -1297,22 +1112,11 @@ export default {
   watch: {
     // Pass new content texts once there are changes
     contentTextAll(newConnectorContent) {
-      //globalConsoleLog("conn","Content changed");
       this.$emit('update-connector-content', [
         this.connectorID,
         newConnectorContent,
       ]);
     },
-    //
-    // leftID(newID) {
-    //     globalConsoleLog("conn","LHS has been updated! Connector ID: ", this.connectorID)
-    //     globalConsoleLog("conn","New LHS data: ", newID)
-    // },
-    //
-    // rightID(newID) {
-    //     globalConsoleLog("conn","RHS has been updated! Connector ID: ", this.connectorID)
-    //     globalConsoleLog("conn","New RHS data: ", newID)
-    // },
 
     connectorID() {
       this.initContent();
@@ -1361,7 +1165,6 @@ export default {
   },
   created() {
     // this.currConnectorContent = JSON.parse(JSON.stringify(this.connectorContent[this.selectedPhrase]));
-    // // globalConsoleLog("conn","test current connector content", this.connectorContent)
     // // this.acontent = this.allConnectors[this.connectorID].leftContent
     // // this.acontent = (this.allConnectors[this.connectorID].leftContent === undefined ?
     // //                 "" : this.allConnectors[this.connectorID].leftContent)
