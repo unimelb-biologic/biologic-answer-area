@@ -121,7 +121,7 @@ export default {
             statementClass: 'StatementRoot',
             ref: 'statementRootRef',
             tooltipText:
-              'Blue statements are called ROOT statements. They will usually form the first or last statement of your answer.',
+              'Blue statements are called CONCLUSION statements. They will usually form the first or last statement of your answer.',
           };
         }
         case 1: {
@@ -129,7 +129,7 @@ export default {
             statementClass: 'StatementTruth',
             ref: 'statementTruthRef',
             tooltipText:
-              'Green statements are TRUTHs. i.e. a provided fact that you can use in your answer',
+              'Green statements are called GIVEN statements. i.e. a provided fact that you can use in your answer',
           };
         }
         case 2: {
@@ -137,7 +137,7 @@ export default {
             statementClass: 'StatementStudent',
             ref: 'statementStudentRef',
             tooltipText:
-              'Yellow statements are called STUDENT statements. Choose the menu/radiobutton options to modify the statement.',
+              'Yellow statements are called CHOICE statements. Choose the menu/radiobutton options to modify the statement.',
           };
         }
         case 3: {
