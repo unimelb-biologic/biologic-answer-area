@@ -496,6 +496,11 @@ export default {
       ) {
         return false;
       } else {
+        const inTree = this.thingIsInTreeOfconnector(
+          objectTypeString,
+          thingBeingDroppedOnID,
+          connectorBeingDroppedID,
+        );
         return !inTree;
       }
     },
