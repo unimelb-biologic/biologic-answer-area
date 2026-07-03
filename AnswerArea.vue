@@ -127,6 +127,7 @@ import { computed } from 'vue';
 import stringify from 'json-stringify-pretty-compact';
 import isEqual from 'lodash/isEqual';
 import Tooltip from './shared/Tooltip.vue';
+import { newElementId } from './util.ts';
 
 export default {
   name: 'AnswerArea',
@@ -560,10 +561,7 @@ export default {
 
       // A new connector from the right is dropped onto a connector
       if (droppedConnectorID === undefined) {
-        droppedConnectorID = _.random(
-          100000000000000,
-          999999999999999,
-        ).toString();
+        droppedConnectorID = newElementId();
         this.connectorCount++;
 
         this.allConnectors[droppedConnectorID] = info[1];
@@ -650,10 +648,7 @@ export default {
 
       // A new connector is dropped into here!
       if (droppedConnectorID === undefined) {
-        droppedConnectorID = _.random(
-          100000000000000,
-          999999999999999,
-        ).toString();
+        droppedConnectorID = newElementId();
         this.connectorCount++;
 
         this.allConnectors[droppedConnectorID] = info[1];
@@ -921,10 +916,7 @@ export default {
       if (droppedConnectorID == undefined) {
         // brand new connector so need to create it and initialise to undefined
         // give the connector the next ID
-        droppedConnectorID = _.random(
-          100000000000000,
-          999999999999999,
-        ).toString();
+        droppedConnectorID = newElementId();
         this.connectorCount++;
         // initialise the new Connector to undefined
         this.allConnectors[droppedConnectorID] = data;
@@ -1055,10 +1047,7 @@ export default {
       // Deal with the dropped type is 'Connector' and with no child
       if (type === 'connector') {
         if (data.connectorID === undefined) {
-          const newConnectorID = _.random(
-            100000000000000,
-            999999999999999,
-          ).toString();
+          const newConnectorID = newElementId();
           this.allConnectors[newConnectorID] = data;
           this.allConnectors[newConnectorID]['connectorID'] = newConnectorID;
           this.allConnectors[newConnectorID]['parent'] = -1;
@@ -1188,10 +1177,7 @@ export default {
       if (data.connectorID === undefined) {
         // connector is new so need to add it to the list
         const oldStatementParent = this.allStatements[statementID]['parent'];
-        const newConnectorID = _.random(
-          100000000000000,
-          999999999999999,
-        ).toString();
+        const newConnectorID = newElementId();
         this.allConnectors[newConnectorID] = data;
         this.allConnectors[newConnectorID]['connectorID'] = newConnectorID;
         this.allConnectors[newConnectorID]['parent'] = oldStatementParent;
@@ -1360,10 +1346,7 @@ export default {
     duplicateStatement(payload) {
       const theStatement = this.allStatements[payload.id];
       const duplicatedStatement = JSON.parse(JSON.stringify(theStatement)); // Create a copy of the last element
-      duplicatedStatement.id = _.random(
-        100000000000000,
-        999999999999999,
-      ).toString(); //just need a new unique number
+      duplicatedStatement.id = newElementId();
       duplicatedStatement['visible'] = true;
       duplicatedStatement['parent'] = -1;
       duplicatedStatement['position'] = 'absolute';
@@ -1385,10 +1368,7 @@ export default {
     cloneConnector(oldConnectorID) {
       const oldConn = this.allConnectors[oldConnectorID];
       const newConn = JSON.parse(JSON.stringify(oldConn)); // make a deep copy
-      const newConnectorID = _.random(
-        100000000000000,
-        999999999999999,
-      ).toString();
+      const newConnectorID = newElementId();
       newConn['connectorID'] = newConnectorID;
       this.allConnectors[newConnectorID] = newConn; // add it to our collection
       this.connectorCount++;
@@ -1399,10 +1379,7 @@ export default {
         const newLeftStatement = JSON.parse(
           JSON.stringify(this.allStatements[oldConn['leftID']]),
         );
-        newLeftStatement['id'] = _.random(
-          100000000000000,
-          999999999999999,
-        ).toString();
+        newLeftStatement['id'] = newElementId();
         this.allStatements[newLeftStatement['id']] = newLeftStatement;
         newLeftStatement['parent'] = newConn.connectorID;
         newConn['leftID'] = newLeftStatement['id'];
@@ -1415,10 +1392,7 @@ export default {
         const newRightStatement = JSON.parse(
           JSON.stringify(this.allStatements[oldConn['rightID']]),
         );
-        newRightStatement['id'] = _.random(
-          100000000000000,
-          999999999999999,
-        ).toString();
+        newRightStatement['id'] = newElementId();
         this.allStatements[newRightStatement['id']] = newRightStatement;
         newRightStatement['parent'] = newConn.connectorID;
         newConn['rightID'] = newRightStatement['id'];
@@ -1532,7 +1506,7 @@ export default {
         // initialise to the generic information for this archetypal statement
         const item = JSON.parse(JSON.stringify(parentStatementElements[i]));
         // now add fields specific to an instance of that statement in the answerarea
-        item.id = _.random(100000000000000, 999999999999999).toString();
+        item.id = newElementId();
         item.content.userInput = [];
         item.parent = -1;
         item.position = 'absolute';
