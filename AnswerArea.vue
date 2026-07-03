@@ -125,7 +125,6 @@ import ConnectorArea from './ConnectorArea.vue';
 import _ from 'lodash';
 import { computed } from 'vue';
 import stringify from 'json-stringify-pretty-compact';
-import { globalConsoleLog } from './util';
 import isEqual from 'lodash/isEqual';
 import Tooltip from './shared/Tooltip.vue';
 
@@ -1568,8 +1567,6 @@ export default {
      * Takes the list of statementElements in the parent and updates the contents of statements in the answerArea that have the same statementIdentifier
      */
     syncWithStatementElements(parentStatementElements) {
-      globalConsoleLog('conn', 'AnswerArea:syncWithStatementElements');
-
       const stArr = Object.values(this.allStatements);
 
       for (const st of stArr) {

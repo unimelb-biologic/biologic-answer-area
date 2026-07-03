@@ -50,7 +50,6 @@
 
 <script>
 import Statement from './Statement.vue';
-import { globalConsoleLog } from './util';
 import { computed } from 'vue';
 
 export default {
