@@ -58,7 +58,10 @@ export default {
   methods: {
     handleContentSelect(choice) {
       console.log(choice);
-      this.$emit('changeLinkWord', [this.connectorID, choice]);
+      this.$emit('changeLinkWord', {
+        connectorID: this.connectorID,
+        selectedPhrase: choice,
+      });
       this.viewMenu = false;
     },
 

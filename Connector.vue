@@ -463,13 +463,13 @@ export default {
     connectorContent: Object,
     selectedPhrase: Number,
 
-    rootConnectorID: Number,
-    connectorID: Number,
-    parent: Number,
-    leftID: Number,
+    rootConnectorID: String,
+    connectorID: String,
+    parent: String,
+    leftID: String,
     leftType: String,
     leftContent: String,
-    rightID: Number,
+    rightID: String,
     rightType: String,
     rightContent: String,
     conntop: Number,
@@ -732,7 +732,7 @@ export default {
       return resultString;
     },
     handleLinkWordChange(info) {
-      const newChoice = info[1];
+      const newChoice = info['selectedPhrase'];
       this.currConnectorContent = JSON.parse(
         JSON.stringify(this.connectorContent[newChoice]),
       );
@@ -846,36 +846,33 @@ export default {
       var elementHeightStr = e.dataTransfer.getData('fredWidth');
 
       this.$el.classList.remove('drag-over-happening');
+      const ret = {
+        connectorID: this.connectorID,
+        statementID: data?.id || undefined,
+        content: transContent,
+        event: e,
+        data: data,
+      };
 
       if (side === 'a' && type === 'statement') {
-        const statementID = data.id;
         // Update content
         this.acontent = transContent;
         // this.leftContent = transContent
         this.updateContentTextAll();
-        this.$emit('droppedAstat', [
-          this.connectorID,
-          statementID,
-          transContent,
-        ]);
+        this.$emit('droppedAstat', ret);
       } else if (side === 'b' && type === 'statement') {
-        const statementID = data.id;
-        this.$emit('droppedBstat', [
-          this.connectorID,
-          statementID,
-          transContent,
-        ]);
+        this.$emit('droppedBstat', ret);
         // Update Connector content
         this.bcontent = transContent;
         this.updateContentTextAll();
       } else if (side === 'a' && type === 'connector') {
         this.acontent = transContent;
         this.updateContentTextAll();
-        this.$emit('droppedAconn', [this.connectorID, data, transContent, e]);
+        this.$emit('droppedAconn', ret);
       } else if (side === 'b' && type === 'connector') {
         this.bcontent = transContent;
         this.updateContentTextAll();
-        this.$emit('droppedBconn', [this.connectorID, data, transContent, e]);
+        this.$emit('droppedBconn', ret);
       } else if (side === 'x' && type === 'connector') {
         // a connector has been dropped on the body of a connector.
         //
@@ -890,11 +887,7 @@ export default {
         // 2. a top level connector (i.e. one with a parentID of -1, is being moved a bit and
         //    has been dropped within it's own area - i.e. onto itself or one of it's children.
         //    in this instance we just pass a signal up the tree.
-        this.$emit('new-connector-dropped-on-connector', [
-          undefined,
-          this.connectorID,
-          e,
-        ]);
+        this.$emit('new-connector-dropped-on-connector', ret);
       }
     },
     handleAStatementDrop(info) {
@@ -916,7 +909,7 @@ export default {
       this.$forceUpdate();
     },
     handleUpdateStatContentA(info) {
-      this.acontent = info[0];
+      this.acontent = [info['content'], info['statement']];
       this.contentTextAll =
         (this.currConnectorContent[0] === null
           ? ''
@@ -930,16 +923,16 @@ export default {
           ? ''
           : this.currConnectorContent[2]);
 
-      const newStatData = info[1];
+      const newStatData = info['statementID'];
       this.$emit('update-stat-data', newStatData);
-      this.$emit('update-child-stat', [
-        this.connectorID,
-        this.acontent,
-        'left',
-      ]);
+      this.$emit('update-child-stat', {
+        connectorID: this.connectorID,
+        content: this.acontent,
+        direction: 'left',
+      });
     },
     handleUpdateStatContentB(info) {
-      this.bcontent = info[0];
+      this.bcontent = [info['content'], info['statement']];
       this.contentTextAll =
         (this.currConnectorContent[0] === null
           ? ''
@@ -953,13 +946,13 @@ export default {
           ? ''
           : this.currConnectorContent[2]);
 
-      const newStatData = info[1];
+      const newStatData = info['statementID'];
       this.$emit('update-stat-data', newStatData);
-      this.$emit('update-child-stat', [
-        this.connectorID,
-        this.bcontent,
-        'right',
-      ]);
+      this.$emit('update-child-stat', {
+        connectorID: this.connectorID,
+        content: this.bcontent,
+        direction: 'right',
+      });
     },
     handleStatDataChange(info) {
       this.$emit('update-stat-data', info);
@@ -968,8 +961,8 @@ export default {
       this.$emit('update-child-stat', info);
     },
     handleUpdateConnectorContentA(info) {
-      const currConnectID = info[0];
-      this.acontent = info[1];
+      // const currConnectID = info[0];
+      this.acontent = info['content'];
 
       this.contentTextAll =
         (this.currConnectorContent[0] === null
@@ -984,16 +977,16 @@ export default {
           ? ''
           : this.currConnectorContent[2]);
 
-      this.$emit('update-child-connector-content', [
-        currConnectID,
-        this.acontent,
-        this.connectorID,
-        'left',
-      ]);
+      this.$emit('update-child-connector-content', {
+        // currConnectID,
+        content: this.acontent,
+        connectorID: this.connectorID,
+        direction: 'left',
+      });
     },
     handleUpdateConnectorContentB(info) {
-      const currConnectID = info[0];
-      this.bcontent = info[1];
+      // const currConnectID = info[0];
+      this.bcontent = info['content'];
       this.contentTextAll =
         (this.currConnectorContent[0] === null
           ? ''
@@ -1007,12 +1000,12 @@ export default {
           ? ''
           : this.currConnectorContent[2]);
 
-      this.$emit('update-child-connector-content', [
-        currConnectID,
-        this.bcontent,
-        this.connectorID,
-        'right',
-      ]);
+      this.$emit('update-child-connector-content', {
+        // currConnectID,
+        content: this.bcontent,
+        connectorID: this.connectorID,
+        direction: 'right',
+      });
     },
     handleUpdateChildClickCount(info) {
       this.$emit('update-click-count', info);
@@ -1111,10 +1104,10 @@ export default {
   watch: {
     // Pass new content texts once there are changes
     contentTextAll(newConnectorContent) {
-      this.$emit('update-connector-content', [
-        this.connectorID,
-        newConnectorContent,
-      ]);
+      this.$emit('update-connector-content', {
+        connectorID: this.connectorID,
+        content: newConnectorContent,
+      });
     },
 
     connectorID() {

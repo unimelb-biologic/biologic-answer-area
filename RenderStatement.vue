@@ -253,22 +253,22 @@ export default {
       this.contentText = info[0];
       this.answeredStat = info[1];
       const statementID = info[1]['id'];
-      this.$emit(
-        'update-statement-content',
-        [this.contentText, this.answeredStat],
-        statementID,
-      );
+      this.$emit('update-statement-content', {
+        content: this.contentText,
+        statement: this.answeredStat,
+        statementID: statementID,
+      });
     },
 
     handleUserInputChanged(info) {
       this.contentText = info[0];
       this.answeredStat = info[1];
       const statementID = info[1]['id'];
-      this.$emit(
-        'update-statement-content',
-        [this.contentText, this.answeredStat],
-        statementID,
-      );
+      this.$emit('update-statement-content', {
+        content: this.contentText,
+        statement: this.answeredStat,
+        statementID: statementID,
+      });
     },
 
     duplicateStatement(payload) {
