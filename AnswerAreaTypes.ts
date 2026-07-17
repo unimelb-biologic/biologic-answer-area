@@ -1,8 +1,11 @@
+import { newElementId } from './util';
+
 export type ConnectorID_T = string;
 export type StatementID_T = string;
 export type ElementID_T = ConnectorID_T | StatementID_T;
 export type ElementTypes_T = 'statement' | 'connector';
-export type Directions_T = 'left' | 'right';
+export type Direction_T = 'left' | 'right';
+export type Orientation_T = 'row' | 'column';
 export type AnswerContent_T = { [key: ElementID_T]: string };
 
 export interface AnswerAreaData_T {
@@ -53,18 +56,39 @@ export interface Connector_T {
   rightType?: ElementTypes_T;
   rightContent?: string;
   parent: string; // can also be -1...
-  connectorID: string;
+  connectorID: ConnectorID_T;
   clickCount: number;
   orientation: 'row' | 'column';
   top?: number;
   left?: number;
   // leftStatementIdentifier: string // not really relevant - can just query the element itself
+  // constructor(parent: string) {
+  //   this.connectorContentID = 0;
+  //   this.connectorContent = [];
+  //   this.selectedPhrase = 0;
+  //   this.parent = parent;
+  //   this.connectorID = newElementId();
+  //   this.clickCount = 0;
+  //   this.orientation = 'row';
+  // }
+  // public deleteLeftChild() {
+  //   this.deleteChild('left');
+  // }
+  // public deleteRightChild() {
+  //   this.deleteChild('right');
+  // }
+  // public deleteChild(direction: Directions_T) {
+  //   this[`${direction}ID`] = undefined;
+  //   this[`${direction}Type`] = undefined;
+  //   this[`${direction}Content`] = undefined;
+  //   // con[`${direction}StatementIdentifier`] = undefined;
+  // }
 }
 
 export interface Statement_T {
   statementType: string; // unique per statement
-  id: string;
-  statementIdentifier: string; // may be shared between statements
+  id: StatementID_T;
+  statementIdentifier: StatementID_T; // may be shared between statements
   content: {
     originalFacts: Array<string>;
     // statement_free stores userInput as a string.
@@ -72,7 +96,7 @@ export interface Statement_T {
     userInput: Array<string> | string;
   };
   parent: ConnectorID_T;
-  side: Directions_T;
+  side: Direction_T;
   position?: string;
   top?: number;
   left?: number;
@@ -107,7 +131,7 @@ export interface ConnectorEmittedInfo_T {
   event: DragEvent;
   data: any;
   selectedPhrase: number;
-  direction: Directions_T;
+  direction: Direction_T;
   statement: Statement_T;
 }
 
