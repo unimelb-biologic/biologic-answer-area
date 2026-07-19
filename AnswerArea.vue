@@ -102,6 +102,7 @@
             toggleCollapsedRenderStatementFromConnector
           "
           @toggle-showPopup-fromconnector="toggleShowPopupFromConnector"
+          @rotate-tree="handleTreeRotation"
         />
       </div>
       <div>
@@ -128,6 +129,7 @@ import stringify from 'json-stringify-pretty-compact';
 import { globalConsoleLog } from './util';
 import isEqual from 'lodash/isEqual';
 import Tooltip from './shared/Tooltip.vue';
+import { rotateAnswerTree } from './answerTree.js';
 
 export default {
   name: 'AnswerArea',
@@ -1284,6 +1286,24 @@ export default {
       const current = this.allConnectors[id]['orientation'];
       this.allConnectors[id]['orientation'] =
         current === 'row' ? 'column' : 'row';
+    },
+
+    async handleTreeRotation({ connectorID, direction }) {
+      const previousDepth = this.activeHover.depth;
+      const result = rotateAnswerTree(
+        this.getCurrentState(),
+        connectorID,
+        direction,
+      );
+
+      if (!result.ok) {
+        globalConsoleLog('conn', `Tree rotation rejected: ${result.reason}`);
+        return;
+      }
+
+      await this.loadPreviousAnswer(result.answer);
+      this.setActiveHover(result.promotedConnectorID, previousDepth);
+      this.notifyStateChange();
     },
 
     clearWorkspace() {

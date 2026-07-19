@@ -23,63 +23,111 @@
       :isConnector="true"
     />
     <div
-      v-if="this.parent !== undefined && showButtons && !dragInProgress"
+      v-if="
+        showButtons &&
+        !dragInProgress &&
+        (this.parent !== undefined || !displayOnly)
+      "
       class="buttons-container"
     >
-      <Tooltip :text="this.clickCount % 2 === 1 ? 'expand' : 'collapse'">
-        <v-btn
-          icon
-          size="xx-small"
-          @click="displayFormChanged"
-          class="connectorButton"
-          :aria-label="this.clickCount % 2 === 1 ? 'Expand' : 'Collapse'"
-        >
-          <v-icon>{{
-            this.clickCount % 2 === 1
-              ? 'mdi-arrow-expand'
-              : 'mdi-arrow-collapse'
-          }}</v-icon>
-        </v-btn>
-      </Tooltip>
+      <template v-if="this.parent !== undefined">
+        <Tooltip :text="this.clickCount % 2 === 1 ? 'expand' : 'collapse'">
+          <v-btn
+            icon
+            size="xx-small"
+            @click="displayFormChanged"
+            class="connectorButton"
+            :aria-label="this.clickCount % 2 === 1 ? 'Expand' : 'Collapse'"
+          >
+            <v-icon>{{
+              this.clickCount % 2 === 1
+                ? 'mdi-arrow-expand'
+                : 'mdi-arrow-collapse'
+            }}</v-icon>
+          </v-btn>
+        </Tooltip>
+      </template>
 
-      <Tooltip text="Show Feedback">
+      <Tooltip
+        :text="
+          rotateLeftCapability.allowed
+            ? 'Rotate left — promote the right connector'
+            : rotateLeftCapability.reason
+        "
+      >
         <v-btn
+          v-if="!displayOnly"
           icon
           size="xx-small"
-          v-if="feedbackIsAvailable"
-          @click="showFeedback = !showFeedback"
+          :disabled="!rotateLeftCapability.allowed"
+          aria-label="Rotate left — promote the right connector"
           class="connectorButton"
+          @click.stop="requestTreeRotation('left')"
         >
-          <v-icon>mdi-comment-quote</v-icon>
+          <v-icon>mdi-rotate-left</v-icon>
         </v-btn>
       </Tooltip>
 
       <Tooltip
-        text="duplicate this connector and all the sub-connectors/statements"
+        :text="
+          rotateRightCapability.allowed
+            ? 'Rotate right — promote the left connector'
+            : rotateRightCapability.reason
+        "
       >
         <v-btn
-          size="x-small"
           v-if="!displayOnly"
-          @click="onDuplicateConnectorClick($event, connectorID)"
+          icon
+          size="xx-small"
+          :disabled="!rotateRightCapability.allowed"
+          aria-label="Rotate right — promote the left connector"
           class="connectorButton"
+          @click.stop="requestTreeRotation('right')"
         >
-          <!--img class="statementButtonImage" src="../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
-          <v-icon>mdi-content-duplicate</v-icon>
+          <v-icon>mdi-rotate-right</v-icon>
         </v-btn>
       </Tooltip>
 
-      <Tooltip :text="deleteButtonTooltipText">
-        <v-btn
-          v-if="!displayOnly"
-          :disabled="!hasNoChildren"
-          icon
-          size="xx-small"
-          @click="deleteConnector({ id: connectorID })"
-          class="connectorButton"
+      <template v-if="this.parent !== undefined">
+        <Tooltip text="Show Feedback">
+          <v-btn
+            icon
+            size="xx-small"
+            v-if="feedbackIsAvailable"
+            @click="showFeedback = !showFeedback"
+            class="connectorButton"
+          >
+            <v-icon>mdi-comment-quote</v-icon>
+          </v-btn>
+        </Tooltip>
+
+        <Tooltip
+          text="duplicate this connector and all the sub-connectors/statements"
         >
-          <v-icon>mdi-delete</v-icon>
-        </v-btn>
-      </Tooltip>
+          <v-btn
+            size="x-small"
+            v-if="!displayOnly"
+            @click="onDuplicateConnectorClick($event, connectorID)"
+            class="connectorButton"
+          >
+            <!--img class="statementButtonImage" src="../assets/duplicate_icon.png" alt="DuplicateStatement" /-->
+            <v-icon>mdi-content-duplicate</v-icon>
+          </v-btn>
+        </Tooltip>
+
+        <Tooltip :text="deleteButtonTooltipText">
+          <v-btn
+            v-if="!displayOnly"
+            :disabled="!hasNoChildren"
+            icon
+            size="xx-small"
+            @click="deleteConnector({ id: connectorID })"
+            class="connectorButton"
+          >
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
+        </Tooltip>
+      </template>
     </div>
 
     <div class="onlyText" v-if="clickCount % 2 === 1">
@@ -241,6 +289,7 @@
             @toggle-collapsed-renderstatement-from-connector="
               toggleCollapsedRenderStatementFromConnector
             "
+            @rotate-tree="forwardTreeRotation"
           />
         </div>
       </div>
@@ -390,6 +439,7 @@
             @toggle-collapsed-renderstatement-from-connector="
               toggleCollapsedRenderStatementFromConnector
             "
+            @rotate-tree="forwardTreeRotation"
           />
         </div>
       </div>
@@ -417,6 +467,7 @@ import ConnectorContextMenu from './ConnectorContextMenu.vue';
 import FeedbackRubric from './FeedbackRubric.vue';
 import Tooltip from './shared/Tooltip.vue';
 import { globalConsoleLog } from './util';
+import { canRotateAnswerTree } from './answerTree.js';
 
 export default {
   name: 'Connector',
@@ -458,6 +509,7 @@ export default {
     'toggle-collapsed-renderstatement-from-connector',
     'toggle-showPopup-fromconnector',
     'connector-dropped-on-statement',
+    'rotate-tree',
   ],
   props: {
     connectorContentID: Number,
@@ -528,8 +580,36 @@ export default {
     showButtons() {
       return this.activeHover.id === this.connectorID;
     },
+    rotationAnswer() {
+      return {
+        allConnectors: this.allConnectors,
+        allStatements: this.allStatements,
+        answerContent: {},
+        rootConnectorID_set: [],
+        rootStatementID_set: [],
+      };
+    },
+    rotateLeftCapability() {
+      return canRotateAnswerTree(this.rotationAnswer, this.connectorID, 'left');
+    },
+    rotateRightCapability() {
+      return canRotateAnswerTree(
+        this.rotationAnswer,
+        this.connectorID,
+        'right',
+      );
+    },
   },
   methods: {
+    requestTreeRotation(direction) {
+      this.$emit('rotate-tree', {
+        connectorID: this.connectorID,
+        direction,
+      });
+    },
+    forwardTreeRotation(payload) {
+      this.$emit('rotate-tree', payload);
+    },
     handleMouseEnter() {
       this.setActiveHover(this.connectorID, this.depth);
     },
