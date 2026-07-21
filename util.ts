@@ -20,9 +20,9 @@ export function newElementId(): string {
  *
  * @returns True if the id is valid
  */
-export function validParentID(id: string | number | null): boolean {
-  return id !== null && id !== -1;
-}
+// export function validParentID(id: string | number | null): boolean {
+//   return id !== null && id !== -1;
+// }
 
 /**
  *
