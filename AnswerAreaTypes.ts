@@ -73,6 +73,18 @@ export class AnswerAreaData_T {
   public deleteRootConnectorID(id: StatementID_T) {
     this.rootConnectorIDs.delete(id);
   }
+  public hasRootConnectorID(id: ConnectorID_T): boolean {
+    return this.rootConnectorIDs.has(id);
+  }
+  public hasRootStatementID(id: StatementID_T): boolean {
+    return this.rootStatementIDs.has(id);
+  }
+  public addRootConnectorID(id: ConnectorID_T) {
+    this.rootConnectorIDs.add(id);
+  }
+  public addRootStatementID(id: StatementID_T) {
+    this.rootStatementIDs.add(id);
+  }
   /**
    * If the new connector has the same id as an existing connector,
    * the existing connector will be written over.
@@ -80,8 +92,31 @@ export class AnswerAreaData_T {
   public addConnector(connector: Connector_T) {
     this.allConnectors[connector.Id] = connector;
   }
-  public hasRootConnectorID(id: ConnectorID_T): boolean {
-    return this.rootConnectorIDs.has(id);
+  public deleteConnector(id: ConnectorID_T) {
+    delete this.allConnectors[id];
+  }
+  /**
+   * If the new statement has the same id as an existing statement,
+   * the existing statement will be written over.
+   */
+  public addStatement(statement: Statement_T) {
+    this.allStatements[statement.Id] = statement;
+  }
+  public deleteStatement(id: StatementID_T) {
+    delete this.allStatements[id];
+  }
+  public ignoreStateChanges() {
+    this.#ignoreStateChanges = true;
+  }
+  public unignoreStateChanges() {
+    this.#ignoreStateChanges = false;
+  }
+  public loadFromPreviousAnswer(snapshot: AnswerAreaState_T) {
+    this.#rootConnectorID_set = new Set(snapshot.rootConnectorID_set || []);
+    this.#rootStatementID_set = new Set(snapshot.rootStatementID_set || []);
+    this.#allConnectors = snapshot.allConnectors || {};
+    this.#allStatements = snapshot.allStatements || {};
+    this.#answerContent = snapshot.answerContent || {};
   }
   get allStatements() {
     return this.#allStatements;
@@ -111,15 +146,34 @@ export class AnswerAreaData_T {
   get redoStack() {
     return this.#redoStack;
   }
-  get state() {
-    return new AnswerAreaState_T(
-      // this.connectorCount,
-      Array.from(this.rootConnectorIDs),
-      Array.from(this.rootStatementIDs),
-      this.allConnectors,
-      this.allStatements,
-      this.answerContent,
+  public saveState() {
+    this.#currentState = this.state;
+  }
+  set currentState(state: AnswerAreaState_T) {
+    this.#currentState = state;
+  }
+  /**
+   * Return a deep copy of the current state.
+   */
+  get state(): AnswerAreaState_T {
+    return JSON.parse(
+      JSON.stringify(
+        new AnswerAreaState_T(
+          // this.connectorCount,
+          Array.from(this.rootConnectorIDs),
+          Array.from(this.rootStatementIDs),
+          this.allConnectors,
+          this.allStatements,
+          this.answerContent,
+        ),
+      ),
     );
+  }
+  get currentState() {
+    return this.#currentState;
+  }
+  get ignoringStateChanges() {
+    return this.#ignoreStateChanges;
   }
 
   // #connectorCount: number = 0;
@@ -189,7 +243,7 @@ export abstract class Element_T {
   public hasParent() {
     return this.parent !== -1;
   }
-  public removeParent() {
+  public deleteParent() {
     this.parent = -1;
   }
   get parent() {
@@ -198,6 +252,13 @@ export abstract class Element_T {
   set parent(parent: ConnectorID_T) {
     this.#parent = parent;
   }
+  public resetExNetPosition() {
+    this.left = undefined;
+    this.top = undefined;
+  }
+  /**
+   * @param pos Of the form [left, top]
+   */
   set exNetPosition(pos: number[]) {
     if (pos.length !== 2) {
       console.error('Invalid position array');
@@ -240,6 +301,10 @@ export class Connector_T extends Element_T {
       structuredClone(connector),
     );
   }
+  public toJSON() {
+    // todo
+    return this;
+  }
   public deleteLeftChild() {
     this.deleteChild('left');
   }
@@ -270,8 +335,14 @@ export class Connector_T extends Element_T {
   public resetClickCount() {
     this.clickCount = 0;
   }
+  public incrementClickCount() {
+    this.clickCount++;
+  }
   public resetOrientation() {
     this.orientation = 'row';
+  }
+  public toggleOrientation() {
+    this.orientation = this.orientation === 'column' ? 'row' : 'column';
   }
   get Id() {
     return this.connectorID;
@@ -312,6 +383,12 @@ export class Statement_T extends Element_T {
       new Statement_T(statement.parent),
       structuredClone(statement),
     );
+  }
+  public toggleCollapsed() {
+    this.collapsed = !this.collapsed;
+  }
+  public toggleShowPopup() {
+    this.showPopup = !this.showPopup;
   }
   get Id() {
     return this.id;
