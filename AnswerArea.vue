@@ -64,8 +64,8 @@
           :connector-content="
             data.getConnector(rootConnectorID).connectorContent
           "
-          :all-statements="data.allStatements"
-          :all-connectors="data.allConnectors"
+          :all-statements="data.statements"
+          :all-connectors="data.connectors"
           :parent="data.getConnector(rootConnectorID).parent"
           :left-i-d="data.getConnector(rootConnectorID).leftID"
           :left-type="data.getConnector(rootConnectorID).leftType"
@@ -134,7 +134,6 @@ import {
   Connector_T,
   StatementID_T,
   Statement_T,
-  AnswerAreaState_T,
   ElementID_T,
   ConnectorEmittedInfo_T,
   ElementTypes_T,
@@ -175,7 +174,7 @@ export default {
       displayOnly: this.displayOnly,
       // globalTooltipState: this.globalTooltipState,
 
-      activeHover: this.data.activeHover,
+      activeHover: this.data.hoverInfo,
       setActiveHover: this.setActiveHover,
       clearActiveHover: this.clearActiveHover,
     };
@@ -190,7 +189,7 @@ export default {
     prettifiedAnswerContentDump() {
       return (
         '-----------this.answerContent--------------\n' +
-        stringify(this.data.answerContent)
+        stringify(this.data.allAnswerContent)
       );
     },
     /*
@@ -204,13 +203,13 @@ export default {
     prettifiedAllStatementsDump() {
       return (
         '-----------this.allstatements--------------\n' +
-        stringify(this.data.allStatements)
+        stringify(this.data.statements)
       );
     },
     prettifiedAllConnectorsDump() {
       return (
         '-----------this.allConnectors--------------\n' +
-        stringify(this.data.allConnectors)
+        stringify(this.data.connectors)
       );
     },
     prettifiedRootConnectorID_List_Dump() {
@@ -238,7 +237,7 @@ export default {
 
   methods: {
     setActiveHover(id: ElementID_T | null, depth: number) {
-      this.data.activeHover = { id: id, depth: depth };
+      this.data.hoverInfo = { id: id, depth: depth };
     },
     clearActiveHover(id: ElementID_T) {
       // only clear if you're the current active target
@@ -502,7 +501,7 @@ export default {
         .addChild(dir, droppedConnectorID, 'connector', info['content']);
 
       // Record content
-      this.data.answerContent[droppedConnectorID] = info['content'];
+      this.data.allAnswerContent[droppedConnectorID] = info['content'];
 
       this.notifyStateChange();
     },
@@ -826,7 +825,7 @@ export default {
           this.data.addConnector(con);
           this.data.addRootConnectorID(newConnectorID);
           // Record content
-          this.data.answerContent[newConnectorID] = transContent;
+          this.data.allAnswerContent[newConnectorID] = transContent;
           /*
                     const answerAreaHeight =
                       document.getElementById("answerArea").offsetHeight;
@@ -840,7 +839,7 @@ export default {
           const con = this.data.getConnector(data.connectorID);
           con.deleteParent();
           this.data.addRootConnectorID(data.connectorID);
-          this.data.answerContent[data.connectorID] = transContent;
+          this.data.allAnswerContent[data.connectorID] = transContent;
 
           const oldParentID = data.parentID;
           con.exNetPosition = exNetPosition;
@@ -893,7 +892,7 @@ export default {
             console.error('The dropped statement has a wrong parent ID.');
           }
         }
-        this.data.answerContent[statementID] = transContent;
+        this.data.allAnswerContent[statementID] = transContent;
       }
       this.data.unignoreStateChanges();
 
@@ -919,7 +918,7 @@ export default {
         newCon.top = statement.top;
         newCon.left = statement.left;
         this.data.addRootConnectorID(newConnectorID);
-        this.data.answerContent[newConnectorID] = transContent;
+        this.data.allAnswerContent[newConnectorID] = transContent;
         this.handleStatementDrop(
           {
             // connectorID: this.connectorCount - 1,
@@ -939,7 +938,7 @@ export default {
 
     handleConnectContentChange(info: ConnectorEmittedInfo_T) {
       const currConnectID = info['connectorID'];
-      this.data.answerContent[currConnectID] = info['content'];
+      this.data.allAnswerContent[currConnectID] = info['content'];
     },
 
     handleUpdateChildStat(info: ConnectorEmittedInfo_T) {
@@ -960,7 +959,7 @@ export default {
     // update the answer string area
     handleUpdateStatementContent(info: ConnectorEmittedInfo_T) {
       const statementID = info['statementID'];
-      this.data.answerContent[statementID] = info['content'];
+      this.data.allAnswerContent[statementID] = info['content'];
       this.data.getStatement(statementID).content.userInput =
         info['statement'].content.userInput;
       this.notifyStateChange();
@@ -1040,8 +1039,10 @@ export default {
       this.data.deleteRootConnectorID(id);
 
       // deleting the connector text from string area upon deletion
-      if (Object.prototype.hasOwnProperty.call(this.data.answerContent, id)) {
-        delete this.data.answerContent[id];
+      if (
+        Object.prototype.hasOwnProperty.call(this.data.allAnswerContent, id)
+      ) {
+        delete this.data.allAnswerContent[id];
       }
       this.$emit('connector-deleted', id);
       this.notifyStateChange();
@@ -1205,7 +1206,7 @@ export default {
         item.top = i * 100;
         item.left = 20;
         item.side = undefined;
-        this.data.answerContent[item.id] = 'dummy' + i;
+        this.data.allAnswerContent[item.id] = 'dummy' + i;
         this.data.addStatement(item);
         this.data.addRootStatementID(item.id);
         i++;
@@ -1223,7 +1224,7 @@ export default {
         });
         let lastTop = 20;
         let i = 0;
-        for (const key in this.data.allStatements) {
+        for (const key in this.data.statements) {
           this.data.getStatement(key).top = lastTop;
           lastTop += heights[i];
           i++;
@@ -1234,7 +1235,7 @@ export default {
      * Takes the list of statementElements in the parent and updates the contents of statements in the answerArea that have the same statementIdentifier
      */
     syncWithStatementElements(parentStatementElements: Array<Statement_T>) {
-      const stArr = Object.values(this.data.allStatements);
+      const stArr = Object.values(this.data.statements);
 
       for (const st of stArr) {
         const match = parentStatementElements.find(

@@ -10,62 +10,89 @@ export type Orientation_T = 'row' | 'column';
 export type AnswerContent_T = { [key: ElementID_T]: string };
 
 export class AnswerAreaData_T {
-  #rootConnectorID_set: Set<ConnectorID_T> = new Set();
-  #rootStatementID_set: Set<StatementID_T> = new Set();
+  private stateStack: StateStack_T = {
+    undoStack: [],
+    redoStack: [],
+    currentState: {
+      rootConnectorID_set: [],
+      rootStatementID_set: [],
+      allConnectors: {},
+      allStatements: {},
+      answerContent: {},
+      // connectorCount: 0,
+      // rootConnectorID: null,
+      // left: number;
+      // top: number;
+    },
+    ignoreStateChanges: false,
+  };
+  private rootConnectorID_set: Set<ConnectorID_T> = new Set();
+  private rootStatementID_set: Set<StatementID_T> = new Set();
 
-  #allConnectors: { [key: ConnectorID_T]: Connector_T } = {};
-  #allStatements: { [key: StatementID_T]: Statement_T } = {};
+  allConnectors: { [key: ConnectorID_T]: Connector_T } = {};
+  allStatements: { [key: StatementID_T]: Statement_T } = {};
 
   // This maps two things:
   // - Element IDs to their content - strangely, this is using numbers rather than strings. I think it should be using strings.
   // - Sequential numbers to each concatenation of the answers.
-  #answerContent: { [key: ElementID_T]: string } = {};
+  answerContent: { [key: ElementID_T]: string } = {};
 
-  #undoStack: AnswerAreaState_T[] = [];
-  #redoStack: AnswerAreaState_T[] = [];
-  #currentState: AnswerAreaState_T = {
-    rootConnectorID_set: [],
-    rootStatementID_set: [],
-    allConnectors: {},
-    allStatements: {},
-    answerContent: {},
-    // connectorCount: 0,
-    // rootConnectorID: null,
-    // left: number;
-    // top: number;
-  };
-  #ignoreStateChanges: boolean = false;
-  #activeHover: { id: ElementID_T | null; depth: number } = {
+  activeHover: { id: ElementID_T | null; depth: number } = {
     id: null,
     depth: -1,
   };
 
   static fromJSON(data: AnswerAreaData_T): AnswerAreaData_T {
+    const convertedConnectors: { [key: ConnectorID_T]: Connector_T } = {};
+    Object.keys(data.allConnectors).forEach(
+      (id) =>
+        (convertedConnectors[id] = Connector_T.fromJSON(
+          data.allConnectors[id],
+        )),
+    );
+    const convertedStatements: { [key: StatementID_T]: Statement_T } = {};
+    Object.keys(data.allStatements).forEach(
+      (id) =>
+        (convertedStatements[id] = Statement_T.fromJSON(
+          data.allStatements[id],
+        )),
+    );
     return Object.assign(new AnswerAreaData_T(), {
       ...data,
-      allConnectors: Object.entries(data.allConnectors).map(([_, connector]) =>
-        Connector_T.fromJSON(connector),
+      allConnectors: Object.fromEntries(
+        Object.entries(data.allConnectors).map(([id, connector]) => [
+          id,
+          Connector_T.fromJSON(connector),
+        ]),
       ),
-      allStatements: Object.entries(data.allStatements).map(([_, statement]) =>
-        Statement_T.fromJSON(statement),
+      allStatements: Object.fromEntries(
+        Object.entries(data.allStatements).map(([id, statement]) => [
+          id,
+          Statement_T.fromJSON(statement),
+        ]),
       ),
+    });
+    return Object.assign(new AnswerAreaData_T(), {
+      ...data,
+      allConnectors: convertedConnectors,
+      allStatements: convertedStatements,
     });
   }
   public getConnector(id: ConnectorID_T): Connector_T {
-    return this.allConnectors[id];
+    return this.connectors[id];
   }
   public getStatement(id: StatementID_T): Statement_T {
-    return this.allStatements[id];
+    return this.statements[id];
   }
   public resetUndoStack() {
-    this.#undoStack = [];
+    this.stateStack.undoStack = [];
   }
   public resetRedoStack() {
-    this.#redoStack = [];
+    this.stateStack.redoStack = [];
   }
   public clearActiveHover() {
-    this.#activeHover.id = null;
-    this.#activeHover.depth = -1;
+    this.activeHover.id = null;
+    this.activeHover.depth = -1;
   }
   public deleteRootStatementID(id: StatementID_T) {
     this.rootStatementIDs.delete(id);
@@ -90,67 +117,70 @@ export class AnswerAreaData_T {
    * the existing connector will be written over.
    */
   public addConnector(connector: Connector_T) {
-    this.allConnectors[connector.Id] = connector;
+    this.connectors[connector.Id] = connector;
   }
   public deleteConnector(id: ConnectorID_T) {
-    delete this.allConnectors[id];
+    delete this.connectors[id];
   }
   /**
    * If the new statement has the same id as an existing statement,
    * the existing statement will be written over.
    */
   public addStatement(statement: Statement_T) {
-    this.allStatements[statement.Id] = statement;
+    this.statements[statement.Id] = statement;
   }
   public deleteStatement(id: StatementID_T) {
-    delete this.allStatements[id];
+    delete this.statements[id];
   }
   public ignoreStateChanges() {
-    this.#ignoreStateChanges = true;
+    this.stateStack.ignoreStateChanges = true;
   }
   public unignoreStateChanges() {
-    this.#ignoreStateChanges = false;
+    this.stateStack.ignoreStateChanges = false;
   }
   public loadFromPreviousAnswer(snapshot: AnswerAreaState_T) {
-    this.#rootConnectorID_set = new Set(snapshot.rootConnectorID_set || []);
-    this.#rootStatementID_set = new Set(snapshot.rootStatementID_set || []);
-    this.#allConnectors = snapshot.allConnectors || {};
-    this.#allStatements = snapshot.allStatements || {};
-    this.#answerContent = snapshot.answerContent || {};
+    this.rootConnectorID_set = new Set(snapshot.rootConnectorID_set || []);
+    this.rootStatementID_set = new Set(snapshot.rootStatementID_set || []);
+    this.allConnectors = snapshot.allConnectors || {};
+    this.allStatements = snapshot.allStatements || {};
+    this.answerContent = snapshot.answerContent || {};
   }
-  get allStatements() {
-    return this.#allStatements;
+  get statements() {
+    return this.allStatements;
   }
-  get allConnectors() {
-    return this.#allConnectors;
+  get connectors() {
+    return this.allConnectors;
   }
   get rootConnectorIDs() {
-    return this.#rootConnectorID_set;
+    return this.rootConnectorID_set;
   }
   get rootStatementIDs() {
-    return this.#rootStatementID_set;
+    return this.rootStatementID_set;
   }
-  set activeHover({ id, depth }: { id: ElementID_T | null; depth: number }) {
-    this.#activeHover.id = id;
-    this.#activeHover.depth = depth;
+  set hoverInfo({ id, depth }: { id: ElementID_T | null; depth: number }) {
+    this.activeHover.id = id;
+    this.activeHover.depth = depth;
   }
+  /**
+   * The ID of the element being hovered over.
+   */
   get activeHoverID() {
-    return this.#activeHover.id;
+    return this.activeHover.id;
   }
-  get answerContent() {
-    return this.#answerContent;
+  get allAnswerContent() {
+    return this.answerContent;
   }
   get undoStack() {
-    return this.#undoStack;
+    return this.stateStack.undoStack;
   }
   get redoStack() {
-    return this.#redoStack;
+    return this.stateStack.redoStack;
   }
   public saveState() {
-    this.#currentState = this.state;
+    this.stateStack.currentState = this.state;
   }
   set currentState(state: AnswerAreaState_T) {
-    this.#currentState = state;
+    this.stateStack.currentState = state;
   }
   /**
    * Return a deep copy of the current state.
@@ -162,18 +192,18 @@ export class AnswerAreaData_T {
           // this.connectorCount,
           Array.from(this.rootConnectorIDs),
           Array.from(this.rootStatementIDs),
-          this.allConnectors,
-          this.allStatements,
-          this.answerContent,
+          this.connectors,
+          this.statements,
+          this.allAnswerContent,
         ),
       ),
     );
   }
   get currentState() {
-    return this.#currentState;
+    return this.stateStack.currentState;
   }
   get ignoringStateChanges() {
-    return this.#ignoreStateChanges;
+    return this.stateStack.ignoreStateChanges;
   }
 
   // #connectorCount: number = 0;
@@ -200,31 +230,48 @@ export class ExNetPackage_T {
   exnet_working_answer_json: ExNet_T = {};
   exnet_correct_answer_json: ExNet_T = {};
   exflow_working_answer_json: ExFlow_T = {};
-  static fromJSON(exNetPackage: ExNetPackage_T) {
-    return Object.assign(new ExNetPackage_T(), { ...exNetPackage, ExNet_T });
+  // Actually expects an object where all values are strings.
+  static fromJSON(exNetPackage: ExNetPackage_T): ExNetPackage_T {
+    const c = Object.assign(new ExNetPackage_T(), {
+      ...exNetPackage,
+      exnet_working_answer_json: ExNet_T.fromJSON(
+        JSON.parse(exNetPackage.exnet_correct_answer_json),
+      ),
+      exnet_correct_answer_json: ExNet_T.fromJSON(
+        JSON.parse(exNetPackage.exnet_correct_answer_json),
+      ),
+      exflow_working_answer_json: JSON.parse(
+        exNetPackage.exflow_working_answer_json,
+      ),
+    });
+    console.log('LOADED-------------', c);
+    return c;
   }
 }
 
 export class ExNet_T {
-  activeExNetQuestionPack?: { prompt_text: AnswerAreaData_T[] } = {
-    prompt_text: [],
+  activeExNetQuestionPack?: { promptText: AnswerAreaData_T[] } = {
+    promptText: [],
   };
   static fromJSON(exNet: ExNet_T) {
     if (!exNet.activeExNetQuestionPack) {
       return new ExNet_T();
     }
     if (
-      !Array.isArray(exNet.activeExNetQuestionPack.prompt_text) ||
-      exNet.activeExNetQuestionPack.prompt_text.length != 2
+      !Array.isArray(exNet.activeExNetQuestionPack.promptText) ||
+      exNet.activeExNetQuestionPack.promptText.length != 2
     ) {
       return Object.assign(new ExNet_T(), exNet);
     }
     return Object.assign(new ExNet_T(), {
       ...exNet,
       activeExNetQuestionPack: {
+        ...exNet.activeExNetQuestionPack,
         prompt_text: [
-          exNet.activeExNetQuestionPack.prompt_text[0],
-          exNet.activeExNetQuestionPack.prompt_text[1],
+          exNet.activeExNetQuestionPack.promptText[0],
+          AnswerAreaData_T.fromJSON(
+            exNet.activeExNetQuestionPack.promptText[1],
+          ),
         ],
       },
     });
@@ -397,7 +444,15 @@ export class Statement_T extends Element_T {
     this.id = id;
   }
 }
-export class AnswerAreaState_T {
+
+interface StateStack_T {
+  undoStack: AnswerAreaState_T[];
+  redoStack: AnswerAreaState_T[];
+  currentState: AnswerAreaState_T;
+  ignoreStateChanges: boolean;
+}
+
+class AnswerAreaState_T {
   constructor(
     public rootConnectorID_set: ConnectorID_T[],
     public rootStatementID_set: StatementID_T[],
