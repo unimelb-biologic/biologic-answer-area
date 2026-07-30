@@ -17,11 +17,6 @@
     @mouseleave="handleMouseLeave"
   >
     <p v-if="globalDebugMode">conn_ID = {{ connectorID }}</p>
-    <FeedbackRubric
-      :isVisible="showFeedback"
-      :exnetID="connectorID"
-      :isConnector="true"
-    />
     <div
       v-if="this.parent !== undefined && showButtons && !dragInProgress"
       class="buttons-container"
@@ -47,7 +42,7 @@
           icon
           size="xx-small"
           v-if="feedbackIsAvailable"
-          @click="showFeedback = !showFeedback"
+          @click="showThisFeedback = !showThisFeedback"
           class="connectorButton"
         >
           <v-icon>mdi-comment-quote</v-icon>
@@ -262,7 +257,10 @@
           </v-btn>
         </Tooltip>
         <!--p class="connectorText">{{ connectorContent[selectedPhrase][1] }}</p-->
-        <div class="connectorMenu" v-if="connectorContent[selectedPhrase][1]">
+        <div
+          :class="['connectorMenu', rubricBorderClass]"
+          v-if="connectorContent[selectedPhrase][1]"
+        >
           <ConnectorContextMenu
             v-if="!displayOnly"
             :choice="selectedPhrase"
@@ -274,6 +272,12 @@
           />
         </div>
       </div>
+      <FeedbackRubric
+        :isVisible="showAllFeedback || showThisFeedback"
+        :exnetID="connectorID"
+        :isConnector="true"
+        @feedback-visibility-changed="handleFeedbackVisibility"
+      />
 
       <!-- the right section -->
       <!-- in the order of empty, statement, connector -->
@@ -496,11 +500,16 @@ export default {
       word: null,
       contentTextAll: null, // Record the contents in children and in itself
       // clickCountInConn: 0,
-      showFeedback: false,
+      showThisFeedback: false,
       dragInProgress: false,
+      rubricBorderStatus: null,
     };
   },
   computed: {
+    rubricBorderClass() {
+      return 'rubric-border--' + this.rubricBorderStatus;
+    },
+
     depthPlusOne() {
       return this.depth + 1;
     },
@@ -530,6 +539,18 @@ export default {
     },
   },
   methods: {
+    handleFeedbackVisibility({ isVisible, gradingInfo }) {
+      console.log(
+        'Statement:handleFeedbackVisibility vis=',
+        isVisible,
+        ' info=',
+        gradingInfo,
+      );
+      this.rubricBorderStatus = isVisible
+        ? (gradingInfo?.matchType ?? null)
+        : null;
+    },
+
     handleMouseEnter() {
       this.setActiveHover(this.connectorID, this.depth);
     },
@@ -1159,9 +1180,6 @@ export default {
           ? ''
           : this.currConnectorContent[2]);
     },
-    showAllFeedback() {
-      this.showFeedback = this.showAllFeedback;
-    },
   },
   created() {
     // this.currConnectorContent = JSON.parse(JSON.stringify(this.connectorContent[this.selectedPhrase]));
@@ -1342,5 +1360,26 @@ export default {
 
 .image-target-icon {
   pointer-events: none;
+}
+
+.rubric-border--direct {
+  outline: 10px solid #16a34a;
+  outline-offset: 2px;
+}
+.rubric-border--target {
+  outline: 2px solid #16a34a;
+  outline-offset: 2px;
+}
+.rubric-border--matching {
+  outline: 2px solid #16a34a;
+  outline-offset: 2px;
+}
+.rubric-border--missing {
+  outline: 2px solid #dc2626;
+  outline-offset: 2px;
+}
+.rubric-border--extra {
+  outline: 2px solid #d97706;
+  outline-offset: 2px;
 }
 </style>

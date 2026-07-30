@@ -1499,10 +1499,6 @@ export default {
       this.notifyStateChange();
     },
 
-    toggleAllFeedback() {
-      this.showAllFeedback = !this.showAllFeedback;
-    },
-
     /**
      * Takes the list of statementElements in the parent and creates statements in the answerArea.
      * Makes a deep copy of the statementElements rather than referring back to the parent.

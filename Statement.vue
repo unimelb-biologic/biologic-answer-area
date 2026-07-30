@@ -1,6 +1,10 @@
 <template>
-  <div :class="['Statement', statementClass]">
-    <FeedbackRubric :isVisible="showFeedback" :exnetID="id" />
+  <div :class="['Statement', statementClass, rubricBorderClass]">
+    <FeedbackRubric
+      :isVisible="showAllFeedback || showThisFeedback"
+      :exnetID="id"
+      @feedback-visibility-changed="handleFeedbackVisibility"
+    />
     <div :class="freeAnswer ? 'free-content-wrapper' : 'content-wrapper'">
       <div
         v-show="showButtons && !dragInProgress"
@@ -73,7 +77,7 @@
           <v-btn
             size="x-small"
             v-if="showToggle && feedbackIsAvailable"
-            @click="showFeedback = !showFeedback"
+            @click="showThisFeedback = !showThisFeedback"
             class="statementButton"
           >
             <v-icon>mdi-comment-quote</v-icon>
@@ -242,11 +246,16 @@ export default {
       answeredData: null,
       hide_collapsed: false,
       hide_showPopup: true,
-      showFeedback: false,
+      showThisFeedback: false,
       freeInputText: '',
+      rubricBorderStatus: null,
     };
   },
   computed: {
+    rubricBorderClass() {
+      return 'rubric-border--' + this.rubricBorderStatus;
+    },
+
     concatenatedStatement() {
       if (this.freeAnswer) return this.freeInputText;
       return this.statementData.content.originalFacts
@@ -264,6 +273,18 @@ export default {
     },
   },
   methods: {
+    handleFeedbackVisibility({ isVisible, gradingInfo }) {
+      console.log(
+        'Statement:handleFeedbackVisibility vis=',
+        isVisible,
+        ' info=',
+        gradingInfo,
+      );
+      this.rubricBorderStatus = isVisible
+        ? (gradingInfo?.matchType ?? null)
+        : null;
+    },
+
     isPlaceHolderOption(option) {
       return option.startsWith('--');
     },
@@ -352,9 +373,6 @@ export default {
     },
     data() {
       this.initContent();
-    },
-    showAllFeedback() {
-      this.showFeedback = this.showAllFeedback;
     },
     freeInputText(newUserInput) {
       this.answeredData.content.userInput = newUserInput;
@@ -507,5 +525,26 @@ button {
 
 .textarea {
   height: 6vw;
+}
+
+.rubric-border--direct {
+  outline: 10px solid #16a34a;
+  outline-offset: 2px;
+}
+.rubric-border--target {
+  outline: 2px solid #16a34a;
+  outline-offset: 2px;
+}
+.rubric-border--matching {
+  outline: 2px solid #16a34a;
+  outline-offset: 2px;
+}
+.rubric-border--missing {
+  outline: 2px solid #dc2626;
+  outline-offset: 2px;
+}
+.rubric-border--extra {
+  outline: 2px solid #d97706;
+  outline-offset: 2px;
 }
 </style>
