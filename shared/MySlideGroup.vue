@@ -211,14 +211,21 @@ export default {
     async requestPairFullscreen(clickedEl) {
       const kids = this.getItems();
       const a = kids.indexOf(clickedEl);
-      const b = a + 1;
 
-      if (a < 0 || b >= kids.length) return;
+      if (a < 0) return;
+
+      // Skip any collapsed panels after the clicked panel.
+      const b = kids.findIndex(
+        (item, index) =>
+          index > a && !item.classList.contains('my-slide-item--collapsed'),
+      );
+
+      // No expanded panel exists to the right.
+      if (b < 0) return;
 
       const elA = kids[a];
       const elB = kids[b];
 
-      // snapshot what the user was actually aligned to (more stable than "a")
       const alignedBeforeFs = this.getAlignedIndex();
 
       const wA = elA.getBoundingClientRect().width;
@@ -237,6 +244,7 @@ export default {
       this.$nextTick(() => this.applyPairStyles());
 
       const fsEl = this.$refs.fsWrapperRef;
+
       if (!fsEl?.requestFullscreen) {
         await this.exitPairFullscreen();
         return;
@@ -246,7 +254,7 @@ export default {
         if (!document.fullscreenElement) {
           await fsEl.requestFullscreen();
         }
-      } catch (e) {
+      } catch (error) {
         await this.exitPairFullscreen();
       }
     },
