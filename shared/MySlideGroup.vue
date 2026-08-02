@@ -9,7 +9,7 @@
       <v-btn
         class="nav-arrow-btn"
         variant="text"
-        :disabled="!canScrollLeft || pairFs.active"
+        :disabled="pairFs.active"
         :style="{ width: navBtnSizePx + 'px', height: navBtnSizePx + 'px' }"
         @click="scrollLeft"
       >
@@ -35,7 +35,7 @@
       <v-btn
         class="nav-arrow-btn"
         variant="text"
-        :disabled="!canScrollRight || pairFs.active"
+        :disabled="pairFs.active"
         :style="{ width: navBtnSizePx + 'px', height: navBtnSizePx + 'px' }"
         @click="scrollRight"
       >

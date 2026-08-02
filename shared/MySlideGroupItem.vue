@@ -7,7 +7,7 @@
   >
     <!-- Collapsed appearance -->
     <button
-      v-if="isCollapsed"
+      v-show="isCollapsed"
       type="button"
       class="collapsed-panel"
       :style="collapsedPanelStyle"
@@ -22,7 +22,7 @@
     </button>
 
     <!-- Normal expanded appearance -->
-    <div v-else class="panel-content" :style="panelStyle">
+    <div v-show="!isCollapsed" class="panel-content" :style="panelStyle">
       <!-- Header -->
       <div class="panel-header">
         <!-- Left cluster: resize controls + optional left actions -->
