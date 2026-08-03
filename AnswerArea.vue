@@ -125,7 +125,11 @@ import ConnectorArea from './ConnectorArea.vue';
 import _ from 'lodash';
 import { computed } from 'vue';
 import stringify from 'json-stringify-pretty-compact';
-import { globalConsoleLog } from './util';
+import {
+  generateChoiceDisplayOrder,
+  globalConsoleLog,
+  isValidChoiceDisplayOrder,
+} from './util';
 import isEqual from 'lodash/isEqual';
 import Tooltip from './shared/Tooltip.vue';
 
@@ -148,6 +152,9 @@ export default {
     // July 2025 - realised we can do without this coupling with the parent by just passing the list in when calling initialise.
     // So commented it out throughout. Remove all these commented bits out later if no issues found.
     displayOnly: Boolean,
+    shuffleChoices: {
+      default: true,
+    },
     testProp: Number,
   },
   data() {
@@ -184,6 +191,7 @@ export default {
   provide() {
     return {
       displayOnly: this.displayOnly,
+      shuffleChoices: computed(() => this.shuffleChoices),
       globalTooltipState: this.globalTooltipState,
 
       activeHover: this.activeHover,
@@ -268,6 +276,48 @@ export default {
         this.$refs.answer_area_ref?.parentElement ||
         null
       );
+    },
+
+    // This method normalise choice display order for one given statement.
+    // it returns true if the statement has a choiceDisplayOrder that is valid for its originalFacts, false otherwise.
+    normaliseChoiceDisplayOrder(statement, retainExistingOrder = true) {
+      const originalFacts = statement?.content?.originalFacts;
+      const hasChoiceList =
+        Array.isArray(originalFacts) && originalFacts.some(Array.isArray);
+
+      if (this.shuffleChoices === false || !hasChoiceList) {
+        delete statement.choiceDisplayOrder;
+        return;
+      }
+
+      if (typeof this.shuffleChoices !== 'boolean') {
+        console.warn(
+          'Invalid shuffleChoices value; shuffling remains enabled.',
+          {
+            statementInstanceId: statement.id,
+            statementIdentifier: statement.statementIdentifier,
+            receivedValue: this.shuffleChoices,
+          },
+        );
+      }
+      // If shuffling is enabled, use the display order. Generate a new one if there is no valid existing order
+      if (
+        !retainExistingOrder ||
+        !isValidChoiceDisplayOrder(
+          originalFacts,
+          statement.choiceDisplayOrder,
+        )
+      ) {
+        statement.choiceDisplayOrder =
+          generateChoiceDisplayOrder(originalFacts);
+      }
+    },
+
+    // This method normalises the choice display orders for all statements in the answer area.
+    normaliseChoiceDisplayOrders() {
+      for (const statement of Object.values(this.allStatements)) {
+        this.normaliseChoiceDisplayOrder(statement);
+      }
     },
 
     getCurrentState() {
@@ -1303,6 +1353,7 @@ export default {
       this.rootConnectorID = snapshot.rootConnectorID;
       this.allConnectors = snapshot.allConnectors || {};
       this.allStatements = snapshot.allStatements || {};
+      this.normaliseChoiceDisplayOrders();
       this.left = parseInt(snapshot.left ?? 0);
       this.top = parseInt(snapshot.top ?? 0);
       this.moveItem = snapshot.moveItem;
@@ -1540,6 +1591,7 @@ export default {
         item.top = i * 100;
         item.left = 20;
         item.side = undefined;
+        this.normaliseChoiceDisplayOrder(item, false);
         this.answerContent[item.id] = 'dummy' + i;
         this.allStatements[item.id] = item;
         this.rootStatementID_set.add(item.id);
@@ -1580,6 +1632,7 @@ export default {
         if (match) {
           st.content.originalFacts = match.content.originalFacts;
           st.statementType = match.statementType;
+          this.normaliseChoiceDisplayOrder(st);
         }
       }
     },

@@ -120,16 +120,19 @@
                 </div>
               </div>
               <div v-else class="statementRadioButtons">
-                <div v-for="item in segment">
-                  <div v-if="!isPlaceHolderOption(item)">
+                <div
+                  v-for="choice in getDisplayedChoices(segment, index)"
+                  :key="choice.originalIndex"
+                >
+                  <div v-if="!isPlaceHolderOption(choice.value)">
                     <input
                       :disabled="displayOnly"
                       type="radio"
-                      :id="item"
-                      :value="item"
+                      :id="choice.value"
+                      :value="choice.value"
                       v-model="userSelected[index]"
                     />
-                    <label>{{ item }}</label
+                    <label>{{ choice.value }}</label
                     ><br />
                   </div>
                 </div>
@@ -164,8 +167,12 @@
                   v-model="userSelected[index]"
                   class="dropdown-shadow"
                 >
-                  <option v-for="item in segment" :value="item" :key="item">
-                    {{ item }}
+                  <option
+                    v-for="choice in getDisplayedChoices(segment, index)"
+                    :value="choice.value"
+                    :key="choice.originalIndex"
+                  >
+                    {{ choice.value }}
                   </option>
                 </select>
               </div>
@@ -199,6 +206,7 @@ export default {
     'feedbackIsAvailable',
     'showAllFeedback',
     'displayOnly',
+    'shuffleChoices',
     'activeHover',
     'setActiveHover',
     'clearActiveHover',
@@ -264,6 +272,24 @@ export default {
     },
   },
   methods: {
+
+    //returns the choices in the order they should be displayed, based on the statementData.choiceDisplayOrder and the shuffleChoices prop
+    getDisplayedChoices(choiceList, segmentIndex) {
+      const canonicalOrder = choiceList.map((_, originalIndex) => originalIndex);
+      const shuffleChoices =
+        this.shuffleChoices?.value ?? this.shuffleChoices;
+      const displayOrder =
+        shuffleChoices === false
+          ? canonicalOrder
+          : (this.statementData.choiceDisplayOrder?.[segmentIndex] ??
+            canonicalOrder);
+
+      return displayOrder.map((originalIndex) => ({
+        originalIndex,
+        value: choiceList[originalIndex],
+      }));
+    },
+
     isPlaceHolderOption(option) {
       return option.startsWith('--');
     },
