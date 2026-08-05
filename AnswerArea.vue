@@ -57,7 +57,7 @@
         <Connector
           v-for="rootConnectorID in data.rootConnectorIDs"
           :key="rootConnectorID"
-          :connector-i-d="data.getConnector(rootConnectorID).Id"
+          :connector-i-d="rootConnectorID"
           :connector-content-i-d="
             data.getConnector(rootConnectorID).connectorContentID
           "
@@ -164,6 +164,11 @@ export default {
     displayOnly: Boolean,
     testProp: Number,
   },
+  setup() {
+    return {
+      Connector_T,
+    };
+  },
   data() {
     return {
       data: new AnswerAreaData_T(),
@@ -245,7 +250,9 @@ export default {
         this.data.clearActiveHover();
       }
     },
-
+    getCurrentState() {
+      return this.data.state;
+    },
     getScrollableWorkspace(element: HTMLElement) {
       if (!element) return null;
       return (
@@ -470,7 +477,7 @@ export default {
       // A new connector from the right is dropped onto a connector
       if (droppedConnectorID === undefined) {
         droppedConnectorID = newElementId();
-        let newCon: Connector_T = info['data'];
+        let newCon: Connector_T = Connector_T.fromJSON(info['data']);
         newCon.deleteLeftChild();
         newCon.deleteRightChild();
         newCon.Id = droppedConnectorID;
@@ -699,7 +706,7 @@ export default {
         // brand new connector so need to create it and initialise to undefined
         // give the connector the next ID
         droppedConnectorID = newElementId();
-        const con: Connector_T = data;
+        const con: Connector_T = Connector_T.fromJSON(data);
         con.Id = droppedConnectorID;
         con.deleteLeftChild();
         con.deleteRightChild();
@@ -814,7 +821,7 @@ export default {
       if (type === 'connector') {
         if (data.connectorID === undefined) {
           const newConnectorID = newElementId();
-          const con = data;
+          const con = Connector_T.fromJSON(data);
           con.Id = newConnectorID;
           con.deleteParent();
           con.deleteLeftChild();
@@ -837,6 +844,8 @@ export default {
         } else {
           // A connector is already in answerArea.
           const con = this.data.getConnector(data.connectorID);
+          console.log(con, 'isconclass', con instanceof Connector_T);
+
           con.deleteParent();
           this.data.addRootConnectorID(data.connectorID);
           this.data.allAnswerContent[data.connectorID] = transContent;
@@ -908,7 +917,7 @@ export default {
         // connector is new so need to add it to the list
         const oldStatementParent = statement.parent;
         const newConnectorID = newElementId();
-        const newCon = data;
+        const newCon = Connector_T.fromJSON(data);
         newCon.Id = newConnectorID;
         newCon.parent = oldStatementParent;
         newCon.deleteLeftChild();
@@ -918,6 +927,7 @@ export default {
         newCon.top = statement.top;
         newCon.left = statement.left;
         this.data.addRootConnectorID(newConnectorID);
+        this.data.addConnector(newCon);
         this.data.allAnswerContent[newConnectorID] = transContent;
         this.handleStatementDrop(
           {
@@ -973,12 +983,6 @@ export default {
       ]);
     },
 
-    // This function will be invoked when option in student statement is changed.
-    // TODO: fix this.
-    handleStatDataChange(newStatData: Statement_T) {
-      this.data.addStatement(newStatData);
-    },
-
     handleUpdateClickCount(transID: ConnectorID_T) {
       this.data.getConnector(transID).incrementClickCount();
     },
@@ -998,7 +1002,7 @@ export default {
         typeof parameter === 'string'
           ? JSON.parse(parameter)
           : JSON.parse(JSON.stringify(parameter));
-      this.data.loadFromPreviousAnswer(snapshot);
+      this.data.loadFromPreviousAnswer(AnswerAreaData_T.fromJSON(snapshot));
 
       await this.$nextTick();
     },
@@ -1054,14 +1058,14 @@ export default {
       posY: number;
     }) {
       const theStatement = this.data.getStatement(payload.id);
-      const duplicatedStatement = JSON.parse(JSON.stringify(theStatement)); // Create a copy of the last element
+      const duplicatedStatement = Statement_T.fromJSON(theStatement); // Create a copy of the last element
       duplicatedStatement.id = newElementId();
-      duplicatedStatement['visible'] = true;
-      duplicatedStatement['parent'] = -1;
-      duplicatedStatement['position'] = 'absolute';
-      duplicatedStatement['showPopup'] = theStatement['showPopup'];
-      duplicatedStatement['collapsed'] = theStatement['collapsed'];
-      duplicatedStatement['zIndex'] = 6;
+      duplicatedStatement.visible = true;
+      duplicatedStatement.deleteParent();
+      duplicatedStatement.position = 'absolute';
+      duplicatedStatement.showPopup = theStatement.showPopup;
+      duplicatedStatement.collapsed = theStatement.collapsed;
+      duplicatedStatement.zIndex = 6;
 
       // place it at the mouseclick
       const box = (
@@ -1078,7 +1082,7 @@ export default {
 
     cloneConnector(oldConnectorID: ConnectorID_T): Connector_T {
       const oldConn = this.data.getConnector(oldConnectorID);
-      const newConn: Connector_T = JSON.parse(JSON.stringify(oldConn)); // make a deep copy
+      const newConn: Connector_T = Connector_T.fromJSON(oldConn); // make a deep copy
       const newConnectorID = newElementId();
       newConn['connectorID'] = newConnectorID;
       this.data.addConnector(newConn);
@@ -1086,8 +1090,8 @@ export default {
       // now recursively create new connectors and statements in the tree
 
       if (oldConn['leftType'] == 'statement') {
-        const newLeftStatement = JSON.parse(
-          JSON.stringify(this.data.getStatement(oldConn.leftID!)),
+        const newLeftStatement = Statement_T.fromJSON(
+          this.data.getStatement(oldConn.leftID!),
         );
         newLeftStatement.Id = newElementId();
         this.data.addStatement(newLeftStatement);
@@ -1099,8 +1103,8 @@ export default {
         newLeftConn['parent'] = newConn.Id;
       }
       if (oldConn['rightType'] == 'statement') {
-        const newRightStatement = JSON.parse(
-          JSON.stringify(this.data.getStatement(oldConn.rightID!)),
+        const newRightStatement = Statement_T.fromJSON(
+          this.data.getStatement(oldConn.rightID!),
         );
         newRightStatement.Id = newElementId();
         this.data.addStatement(newRightStatement);
@@ -1197,11 +1201,11 @@ export default {
       let i = 0;
       while (i < statementCount) {
         // initialise to the generic information for this archetypal statement
-        const item = JSON.parse(JSON.stringify(parentStatementElements[i]));
+        const item = Statement_T.fromJSON(parentStatementElements[i]);
         // now add fields specific to an instance of that statement in the answerarea
         item.id = newElementId();
         item.content.userInput = [];
-        item.parent = -1;
+        item.deleteParent();
         item.position = 'absolute';
         item.top = i * 100;
         item.left = 20;

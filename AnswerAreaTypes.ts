@@ -1,4 +1,3 @@
-import { id } from 'vuetify/locale';
 import { newElementId } from './util';
 
 export type ConnectorID_T = string;
@@ -29,35 +28,21 @@ export class AnswerAreaData_T {
   private rootConnectorID_set: Set<ConnectorID_T> = new Set();
   private rootStatementID_set: Set<StatementID_T> = new Set();
 
-  allConnectors: { [key: ConnectorID_T]: Connector_T } = {};
-  allStatements: { [key: StatementID_T]: Statement_T } = {};
+  private allConnectors: { [key: ConnectorID_T]: Connector_T } = {};
+  private allStatements: { [key: StatementID_T]: Statement_T } = {};
 
   // This maps two things:
   // - Element IDs to their content - strangely, this is using numbers rather than strings. I think it should be using strings.
   // - Sequential numbers to each concatenation of the answers.
-  answerContent: { [key: ElementID_T]: string } = {};
+  private answerContent: { [key: ElementID_T]: string } = {};
 
-  activeHover: { id: ElementID_T | null; depth: number } = {
+  private activeHover: { id: ElementID_T | null; depth: number } = {
     id: null,
     depth: -1,
   };
 
   static fromJSON(data: AnswerAreaData_T): AnswerAreaData_T {
-    const convertedConnectors: { [key: ConnectorID_T]: Connector_T } = {};
-    Object.keys(data.allConnectors).forEach(
-      (id) =>
-        (convertedConnectors[id] = Connector_T.fromJSON(
-          data.allConnectors[id],
-        )),
-    );
-    const convertedStatements: { [key: StatementID_T]: Statement_T } = {};
-    Object.keys(data.allStatements).forEach(
-      (id) =>
-        (convertedStatements[id] = Statement_T.fromJSON(
-          data.allStatements[id],
-        )),
-    );
-    return Object.assign(new AnswerAreaData_T(), {
+    const d: AnswerAreaData_T = Object.assign(new AnswerAreaData_T(), {
       ...data,
       allConnectors: Object.fromEntries(
         Object.entries(data.allConnectors).map(([id, connector]) => [
@@ -72,11 +57,7 @@ export class AnswerAreaData_T {
         ]),
       ),
     });
-    return Object.assign(new AnswerAreaData_T(), {
-      ...data,
-      allConnectors: convertedConnectors,
-      allStatements: convertedStatements,
-    });
+    return d;
   }
   public getConnector(id: ConnectorID_T): Connector_T {
     return this.connectors[id];
@@ -156,6 +137,9 @@ export class AnswerAreaData_T {
   }
   get rootStatementIDs() {
     return this.rootStatementID_set;
+  }
+  get hoverInfo() {
+    return this.activeHover;
   }
   set hoverInfo({ id, depth }: { id: ElementID_T | null; depth: number }) {
     this.activeHover.id = id;
@@ -250,7 +234,14 @@ export class ExNetPackage_T {
 }
 
 export class ExNet_T {
-  activeExNetQuestionPack?: { promptText: AnswerAreaData_T[] } = {
+  activeExNetQuestionPack?: {
+    assignmentName?: string;
+    exNetName?: string;
+    exNetRelativePath?: string;
+    statementElements?: Statement_T[];
+    subjectName?: string;
+    promptText?: AnswerAreaData_T[];
+  } = {
     promptText: [],
   };
   static fromJSON(exNet: ExNet_T) {
@@ -267,12 +258,13 @@ export class ExNet_T {
       ...exNet,
       activeExNetQuestionPack: {
         ...exNet.activeExNetQuestionPack,
-        prompt_text: [
+        promptText: [
           exNet.activeExNetQuestionPack.promptText[0],
           AnswerAreaData_T.fromJSON(
             exNet.activeExNetQuestionPack.promptText[1],
           ),
         ],
+        flagShowingConversionwWorked: true,
       },
     });
   }
@@ -281,11 +273,11 @@ export class ExNet_T {
 export class ExFlow_T {}
 
 export abstract class Element_T {
-  #parent: ConnectorID_T;
+  parent: ConnectorID_T;
   top?: number;
   left?: number;
   constructor(parent: ConnectorID_T) {
-    this.#parent = parent;
+    this.parent = parent;
   }
   public hasParent() {
     return this.parent !== -1;
@@ -293,12 +285,12 @@ export abstract class Element_T {
   public deleteParent() {
     this.parent = -1;
   }
-  get parent() {
-    return this.#parent;
-  }
-  set parent(parent: ConnectorID_T) {
-    this.#parent = parent;
-  }
+  // get parent() {
+  //   return this.#parent;
+  // }
+  // set parent(parent: ConnectorID_T) {
+  //   this.#parent = parent;
+  // }
   public resetExNetPosition() {
     this.left = undefined;
     this.top = undefined;
@@ -350,7 +342,7 @@ export class Connector_T extends Element_T {
   }
   public toJSON() {
     // todo
-    return this;
+    return { ...this, parent: this.parent };
   }
   public deleteLeftChild() {
     this.deleteChild('left');
@@ -413,6 +405,8 @@ export class Statement_T extends Element_T {
   position?: string;
   showPopup: boolean;
   collapsed: boolean;
+  zIndex?: number;
+  visible?: boolean;
   constructor(
     parent: ConnectorID_T,
     statementIdentifier: StatementID_T | null = null,
@@ -430,6 +424,9 @@ export class Statement_T extends Element_T {
       new Statement_T(statement.parent),
       structuredClone(statement),
     );
+  }
+  public toJSON() {
+    return { ...this, parent: this.parent };
   }
   public toggleCollapsed() {
     this.collapsed = !this.collapsed;
@@ -460,6 +457,7 @@ class AnswerAreaState_T {
     public allStatements: { [key: StatementID_T]: Statement_T },
     public answerContent: AnswerContent_T,
   ) {}
+  static fromJSON() {}
 
   //! Unused
   // public connectorCount: number,

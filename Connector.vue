@@ -1046,8 +1046,6 @@ export default {
       }
     },
     initContent() {
-      console.log(this.allConnectors);
-      console.log(this.connectorID);
       this.currConnectorContent = JSON.parse(
         JSON.stringify(this.connectorContent[this.selectedPhrase]),
       );
