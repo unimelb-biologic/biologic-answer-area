@@ -28,10 +28,7 @@
         <!-- Left cluster: resize controls + optional left actions -->
         <div class="panel-left-cluster">
           <div class="panel-controls panel-controls--left">
-            <Tooltip
-              text="Decrease the width of this panel"
-              :disabled="isAnyFullscreenReactive"
-            >
+            <Tooltip text="Decrease the width of this panel">
               <v-btn
                 size="xx-small"
                 variant="text"
@@ -43,10 +40,7 @@
               </v-btn>
             </Tooltip>
 
-            <Tooltip
-              text="Increase the width of this panel"
-              :disabled="isAnyFullscreenReactive"
-            >
+            <Tooltip text="Increase the width of this panel">
               <v-btn
                 size="xx-small"
                 variant="text"
@@ -65,7 +59,6 @@
               v-for="action in leftActions"
               :key="action.id"
               :text="action.tooltip || ''"
-              :disabled="actionDisabled(action)"
             >
               <!-- Toggle action -->
               <v-btn
@@ -115,11 +108,7 @@
 
         <!-- Title -->
         <div class="panel-title-wrap">
-          <Tooltip
-            v-if="titleTooltip"
-            :text="titleTooltip"
-            :disabled="isAnyFullscreenReactive"
-          >
+          <Tooltip v-if="titleTooltip" :text="titleTooltip">
             <div class="panel-title">{{ title }}</div>
           </Tooltip>
 
@@ -136,7 +125,6 @@
               v-for="action in rightActions"
               :key="action.id"
               :text="action.tooltip || ''"
-              :disabled="actionDisabled(action)"
             >
               <!-- Toggle action -->
               <v-btn
@@ -185,11 +173,7 @@
 
           <div class="panel-controls panel-controls--right">
             <!-- Collapse -->
-            <Tooltip
-              v-if="allowCollapse"
-              text="Collapse this panel"
-              :disabled="isAnyFullscreenReactive"
-            >
+            <Tooltip v-if="allowCollapse" text="Collapse this panel">
               <v-btn
                 size="xx-small"
                 variant="text"
@@ -207,7 +191,6 @@
               :text="
                 isFullscreen ? 'Exit fullscreen' : 'Show this panel fullscreen'
               "
-              :disabled="isAnyFullscreenReactive && !isFullscreen"
             >
               <v-btn
                 size="xx-small"
@@ -229,7 +212,6 @@
             <Tooltip
               v-if="hasNext && allowPairedFullscreen"
               text="Show this panel and the next panel fullscreen"
-              :disabled="isFullscreen || isAnyFullscreenReactive"
             >
               <v-btn
                 size="xx-small"

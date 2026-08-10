@@ -528,23 +528,23 @@ button {
 }
 
 .rubric-border--direct {
-  outline: 10px solid #16a34a;
-  outline-offset: 2px;
+  outline: var(--hl-stroke-width) solid var(--hl-matching_item);
+  outline-offset: var(--hl-stroke-width);
 }
 .rubric-border--target {
-  outline: 2px solid #16a34a;
-  outline-offset: 2px;
+  outline: var(--hl-stroke-width) solid var(--hl_target_conclusion);
+  outline-offset: var(--hl-stroke-width);
 }
 .rubric-border--matching {
-  outline: 2px solid #16a34a;
-  outline-offset: 2px;
+  outline: var(--hl-stroke-width) solid var(--hl_matching_reason);
+  outline-offset: var(--hl-stroke-width);
 }
 .rubric-border--missing {
-  outline: 2px solid #dc2626;
-  outline-offset: 2px;
+  outline: var(--hl-stroke-width) solid var(--hl_missing_reason);
+  outline-offset: var(--hl-stroke-width);
 }
 .rubric-border--extra {
-  outline: 2px solid #d97706;
-  outline-offset: 2px;
+  outline: var(--hl-stroke-width) solid var(--hl_extra_reason);
+  outline-offset: var(--hl-stroke-width);
 }
 </style>

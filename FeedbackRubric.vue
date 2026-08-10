@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import { isRef } from 'vue';
 /**
  * FeedbackRubric
  *
@@ -40,7 +41,7 @@
  * appropriate feedback styling and messaging.
  *
  * Match types (in priority order):
- *   "direct"    — exnetID === rubric.pairedStudentExFlowID
+ *   "direct"    — exnetID === rubric.paired_itemStudentExFlowID
  *                 Shows the rubric's own feedback/score as before.
  *
  *   "target"    — exnetID === rubric.matchingStudentTargetID
@@ -77,13 +78,14 @@ export default {
 
   // Replaces the old feedbackRubricMap injection.
   // The parent provides a single Rubric object (or null/undefined if none).
-  inject: {
-    rubric: {
-      from: 'highlightedRubric',
-      default: null,
-    },
-  },
+  inject: ['highlightedRubric'],
+
   emits: ['feedback-visibility-changed'],
+
+  mounted() {
+    console.log('highlightedRubric:', this.highlightedRubric);
+    console.log('is it a ref?:', isRef(this.highlightedRubric));
+  },
 
   computed: {
     /**
@@ -96,10 +98,10 @@ export default {
      * Returns null if there is no rubric or no match of any kind.
      */
     resolvedGradingInfo() {
-      console.log('resolvedGradingInfo isConnector=', this.isConnector);
-      const rubric = this.rubric;
+      //      console.log('resolvedGradingInfo isConnector=', this.isConnector);
+      const rubric = this.highlightedRubric;
       if (!rubric || this.exnetID == null) return null;
-      console.log('id=', this.exnetID, ' RUBRIC = ', rubric);
+      //      console.log('id=', this.exnetID, ' RUBRIC = ', rubric);
 
       const id = String(this.exnetID);
 
@@ -107,24 +109,24 @@ export default {
       const directMatchId = this.isConnector
         ? String(rubric.exNetConnectorID).replace(/c$/, '')
         : String(rubric.pairedStudentExFlowID);
-      console.log('directMatchId=', directMatchId);
+      //      console.log('directMatchId=', directMatchId);
 
       if (directMatchId === id) {
-        console.log('MATCHED - returning result of direct');
+        //        console.log('MATCHED - returning result of direct');
         return {
           ...rubric,
           matchType: 'direct',
           feedback: rubric.feedback ?? 'No feedback',
         };
       }
-      console.log('DIDNT MATCH');
+      //      console.log('DIDNT MATCH');
       if (this.isConnector) {
         return null; // since the rest are all statements.
       }
 
       // 2. Target match — this element is what the rubric was targeting
       if (String(rubric.matchingStudentTargetID) === id) {
-        console.log('TARGET');
+        //        console.log('TARGET');
         return {
           ...rubric,
           matchType: 'target',
@@ -134,7 +136,7 @@ export default {
 
       // 3. Matching statement — found and matched correctly
       if ((rubric.matchingStatementIDs ?? []).map(String).includes(id)) {
-        console.log('MATCHING');
+        //        console.log('MATCHING');
         return {
           ...rubric,
           matchType: 'matching',
@@ -144,7 +146,7 @@ export default {
 
       // 4. Missing statement — expected but not present in the answer
       if ((rubric.missingStatementIDs ?? []).map(String).includes(id)) {
-        console.log('MISSING');
+        //        console.log('MISSING');
         return {
           ...rubric,
           matchType: 'missing',
@@ -155,7 +157,7 @@ export default {
 
       // 5. Extra statement — present but not expected
       if ((rubric.extraStatementIDs ?? []).map(String).includes(id)) {
-        console.log('EXTRA');
+        //        console.log('EXTRA');
         return {
           ...rubric,
           matchType: 'extra',
@@ -259,17 +261,20 @@ export default {
   },
 
   watch: {
+    highlightedRubric(val) {
+      console.log('Watching highlightedRubric CHANGED:', val);
+      const resolvedVal = this.resolvedGradingInfo;
+      console.log('FeedbackRubric EMIT:', resolvedVal);
+      this.$emit('feedback-visibility-changed', {
+        isVisible: this.isVisible,
+        gradingInfo: resolvedVal,
+      });
+    },
     isVisible(val) {
+      console.log('Watching isVisible CHANGED:', val);
       this.$emit('feedback-visibility-changed', {
         isVisible: val,
         rubricStatus: this.resolvedGradingInfo?.rubricStatus ?? null,
-      });
-    },
-    resolvedGradingInfo(val) {
-      if (!this.isVisible) return;
-      this.$emit('feedback-visibility-changed', {
-        isVisible: this.isVisible,
-        gradingInfo: val,
       });
     },
   },
