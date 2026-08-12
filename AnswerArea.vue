@@ -123,7 +123,7 @@
 import Connector from './Connector.vue';
 import RenderStatement from './RenderStatement.vue';
 import ConnectorArea from './ConnectorArea.vue';
-import _ from 'lodash';
+import _, { cloneDeep } from 'lodash';
 import stringify from 'json-stringify-pretty-compact';
 import isEqual from 'lodash/isEqual';
 import Tooltip from './shared/Tooltip.vue';
@@ -1199,7 +1199,11 @@ export default {
       let i = 0;
       while (i < statementCount) {
         // initialise to the generic information for this archetypal statement
-        const item = Statement_T.fromJSON(parentStatementElements[i]);
+        // Needs to use lodash's cloneDeep, because multiple choice statements
+        // contain nested proxy objects
+        const item = Statement_T.fromJSON(
+          cloneDeep(parentStatementElements[i]),
+        );
         // now add fields specific to an instance of that statement in the answerarea
         item.id = newElementId();
         item.content.userInput = [];

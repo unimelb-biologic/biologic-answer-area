@@ -220,7 +220,7 @@ export class ExNetPackage_T {
     const c = Object.assign(new ExNetPackage_T(), {
       ...exNetPackage,
       exnet_working_answer_json: ExNet_T.fromJSON(
-        JSON.parse(exNetPackage.exnet_correct_answer_json),
+        JSON.parse(exNetPackage.exnet_working_answer_json),
       ),
       exnet_correct_answer_json: ExNet_T.fromJSON(
         JSON.parse(exNetPackage.exnet_correct_answer_json),
@@ -429,7 +429,7 @@ export class Statement_T extends Element_T {
   static fromJSON(statement: Statement_T) {
     return Object.assign(
       new Statement_T(statement.parent),
-      structuredClone(toRaw(statement)),
+      structuredClone(statement),
     );
   }
   public toJSON() {
