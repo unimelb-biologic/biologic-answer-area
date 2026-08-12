@@ -139,6 +139,7 @@ import {
   ElementTypes_T,
   Direction_T,
   AnswerContent_T,
+  Element_T,
 } from './AnswerAreaTypes.js';
 
 export default {
@@ -342,7 +343,7 @@ export default {
 
       if (statementOldParent === undefined) {
         this.$emit('statement-used', statementID);
-      } else if (!statementDropped.hasParent()) {
+      } else if (!Element_T.validParentId(statementOldParent)) {
         this.data.deleteRootStatementID(statementID);
       } else {
         this.data
@@ -454,9 +455,9 @@ export default {
     handleConnectorDrop(info: ConnectorEmittedInfo_T, dir: Direction_T) {
       // info: [connectorID, data, transContent,evt]
       const connectorID = info['connectorID']; // this is the connectorID of the connector that was dropped on.
-      const data = info['data'];
+      const con = Connector_T.fromJSON(info['data']);
       const evt = info['event'];
-      let droppedConnectorID = data.connectorID;
+      const droppedConnectorID = con.connectorID || newElementId();
 
       // if it is a connector from the palette it won't have an ID yet.
       // so dropping those is obviously fine.
@@ -476,16 +477,14 @@ export default {
 
       // A new connector from the right is dropped onto a connector
       if (droppedConnectorID === undefined) {
-        droppedConnectorID = newElementId();
-        let newCon: Connector_T = Connector_T.fromJSON(info['data']);
-        newCon.deleteLeftChild();
-        newCon.deleteRightChild();
-        newCon.Id = droppedConnectorID;
-        newCon.parent = connectorID;
-        newCon.resetClickCount();
-        newCon.resetOrientation();
-        this.data.addConnector(newCon);
-      } else if (!data.hasParent()) {
+        con.deleteLeftChild();
+        con.deleteRightChild();
+        con.Id = droppedConnectorID;
+        con.parent = connectorID;
+        con.resetClickCount();
+        con.resetOrientation();
+        this.data.addConnector(con);
+      } else if (!con.hasParent()) {
         // Dragged from answerArea to a
         if (this.data.hasRootConnectorID(droppedConnectorID)) {
           this.data.deleteRootConnectorID(droppedConnectorID);
@@ -493,7 +492,7 @@ export default {
         this.data.getConnector(droppedConnectorID).parent = connectorID;
       } else {
         // Dragged from a connector to a
-        const parent = this.data.getConnector(data.parentID);
+        const parent = this.data.getConnector(con.parent);
         if (parent['leftID'] === droppedConnectorID) {
           parent.deleteLeftChild();
         } else if (parent['rightID'] === droppedConnectorID) {
@@ -844,7 +843,6 @@ export default {
         } else {
           // A connector is already in answerArea.
           const con = this.data.getConnector(data.connectorID);
-          console.log(con, 'isconclass', con instanceof Connector_T);
 
           con.deleteParent();
           this.data.addRootConnectorID(data.connectorID);

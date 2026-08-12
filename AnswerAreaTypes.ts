@@ -279,8 +279,11 @@ export abstract class Element_T {
   constructor(parent: ConnectorID_T) {
     this.parent = parent;
   }
+  public static validParentId(id: any) {
+    return id !== -1;
+  }
   public hasParent() {
-    return this.parent !== -1;
+    return Element_T.validParentId(this.parent);
   }
   public deleteParent() {
     this.parent = -1;
@@ -336,7 +339,10 @@ export class Connector_T extends Element_T {
   }
   static fromJSON(connector: Connector_T) {
     return Object.assign(
-      new Connector_T(connector.parent),
+      // Sometimes we have to handle old data forms
+      new Connector_T(
+        connector.parent || connector.parentID || connector.parentId,
+      ),
       structuredClone(connector),
     );
   }
