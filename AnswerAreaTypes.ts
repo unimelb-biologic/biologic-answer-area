@@ -1,3 +1,4 @@
+import { toRaw } from 'vue';
 import { newElementId } from './util';
 
 export type ConnectorID_T = string;
@@ -428,7 +429,7 @@ export class Statement_T extends Element_T {
   static fromJSON(statement: Statement_T) {
     return Object.assign(
       new Statement_T(statement.parent),
-      structuredClone(statement),
+      structuredClone(toRaw(statement)),
     );
   }
   public toJSON() {
