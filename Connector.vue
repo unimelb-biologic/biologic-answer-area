@@ -16,7 +16,6 @@
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   >
-    <p v-if="globalDebugMode">conn_ID = {{ connectorID }}</p>
     <div
       v-if="this.parent !== undefined && showButtons && !dragInProgress"
       class="buttons-container"
@@ -172,6 +171,7 @@
             :statement-data="this.allStatements[this.leftID]"
             :showToggle="true"
             :depth="depthPlusOne"
+            :exnetType="exnetType"
             @update-statement-content="handleUpdateStatContentA"
             @mousedown="onMousedown('leftType')"
             @duplicate-statement="duplicateStatement"
@@ -207,6 +207,7 @@
             :orientation="allConnectors[this.leftID].orientation"
             :selected-phrase="allConnectors[this.leftID].selectedPhrase"
             :depth="depthPlusOne"
+            :exnetType="exnetType"
             @delete-connector="
               deleteChildConnector({
                 id: this.leftID,
@@ -270,11 +271,13 @@
             :index="1"
             @change-link-word="handleLinkWordChange"
           />
+          <span v-if="globalDebugMode">{{ connectorID }}</span>
         </div>
       </div>
       <FeedbackRubric
         :isVisible="showAllFeedback || showThisFeedback"
         :exnetID="connectorID"
+        :exnetType="exnetType"
         :isConnector="true"
         @feedback-visibility-changed="handleFeedbackVisibility"
       />
@@ -330,6 +333,7 @@
             :statement-data="this.allStatements[this.rightID]"
             :showToggle="true"
             :depth="depthPlusOne"
+            :exnetType="exnetType"
             @update-statement-content="handleUpdateStatContentB"
             @mousedown="onMousedown('rightType')"
             @connector-dropped-on-statement="connectorDroppedOnStatement"
@@ -365,6 +369,7 @@
             :selected-phrase="allConnectors[this.rightID].selectedPhrase"
             :rootConnectorID="rootConnectorID"
             :depth="depthPlusOne"
+            :exnetType="exnetType"
             @delete-connector="
               deleteChildConnector({
                 id: this.rightID,
@@ -487,6 +492,10 @@ export default {
     depth: {
       type: Number,
       required: true,
+    },
+    exnetType: {
+      type: String,
+      default: 'student', // "correct" | "student"
     },
   },
   data() {

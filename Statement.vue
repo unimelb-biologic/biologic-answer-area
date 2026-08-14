@@ -3,6 +3,7 @@
     <FeedbackRubric
       :isVisible="showAllFeedback || showThisFeedback"
       :exnetID="id"
+      :exnetType="exnetType"
       @feedback-visibility-changed="handleFeedbackVisibility"
     />
     <div :class="freeAnswer ? 'free-content-wrapper' : 'content-wrapper'">
@@ -227,6 +228,10 @@ export default {
     dragInProgress: {
       type: Boolean,
       default: false,
+    },
+    exnetType: {
+      type: String,
+      default: 'student', // "academic" | "student"
     },
   },
   data() {

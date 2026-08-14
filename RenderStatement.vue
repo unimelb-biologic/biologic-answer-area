@@ -38,6 +38,7 @@
         :free-answer="this.statementData.statementType === 3"
         :statement-data="this.statementData"
         :dragInProgress="myDragInProgress"
+        :exnetType="exnetType"
         @user-choice-changed="handleUserChoiceChanged"
         @duplicate-statement="duplicateStatement"
         @delete-statement="deleteStatement"
@@ -74,6 +75,10 @@ export default {
     depth: {
       type: Number,
       required: true,
+    },
+    exnetType: {
+      type: String,
+      default: 'student', // "academic" | "student"
     },
   },
   inject: [
