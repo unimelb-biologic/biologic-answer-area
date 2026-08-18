@@ -311,6 +311,7 @@ export default {
       // Concat all the texts
       for (let i = 0; i < this.originalFacts.length; i++) {
         if (typeof this.originalFacts[i] === 'string') {
+          if (this.isImage(this.originalFacts[i])) continue;
           studentContentText += this.originalFacts[i];
           studentContentText += ' ';
         } else {
