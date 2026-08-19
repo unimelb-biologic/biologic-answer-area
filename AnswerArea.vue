@@ -457,12 +457,13 @@ export default {
       const connectorID = info['connectorID']; // this is the connectorID of the connector that was dropped on.
       const con = Connector_T.fromJSON(info['data']);
       const evt = info['event'];
+      const connectorIsNew = !!con.connectorID;
       const droppedConnectorID = con.connectorID || newElementId();
 
       // if it is a connector from the palette it won't have an ID yet.
       // so dropping those is obviously fine.
       if (
-        droppedConnectorID !== undefined &&
+        !connectorIsNew &&
         !this.dropIsPermissible('connector', connectorID, droppedConnectorID)
       ) {
         evt.preventDefault();
@@ -476,7 +477,7 @@ export default {
       }
 
       // A new connector from the right is dropped onto a connector
-      if (droppedConnectorID === undefined) {
+      if (connectorIsNew) {
         con.deleteLeftChild();
         con.deleteRightChild();
         con.Id = droppedConnectorID;
