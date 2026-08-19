@@ -457,9 +457,8 @@ export default {
       const connectorID = info['connectorID']; // this is the connectorID of the connector that was dropped on.
       const con = Connector_T.fromJSON(info['data']);
       const evt = info['event'];
-      const connectorIsNew = !!con.connectorID;
-      const droppedConnectorID = con.connectorID || newElementId();
-
+      const connectorIsNew = !info['data'].connectorID; // Connector is new if it doesn't have an id
+      const droppedConnectorID = connectorIsNew ? newElementId() : con.Id;
       // if it is a connector from the palette it won't have an ID yet.
       // so dropping those is obviously fine.
       if (
