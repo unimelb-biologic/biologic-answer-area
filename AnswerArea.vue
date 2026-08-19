@@ -1201,9 +1201,7 @@ export default {
         // initialise to the generic information for this archetypal statement
         // Needs to use lodash's cloneDeep, because multiple choice statements
         // contain nested proxy objects
-        const item = Statement_T.fromJSON(
-          cloneDeep(parentStatementElements[i]),
-        );
+        const item = Statement_T.fromJSON(parentStatementElements[i]);
         // now add fields specific to an instance of that statement in the answerarea
         item.id = newElementId();
         item.content.userInput = [];

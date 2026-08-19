@@ -1,5 +1,6 @@
 import { toRaw } from 'vue';
 import { newElementId } from './util';
+import _ from 'lodash';
 
 export type ConnectorID_T = string;
 export type StatementID_T = string;
@@ -344,7 +345,7 @@ export class Connector_T extends Element_T {
       new Connector_T(
         connector.parent || connector.parentID || connector.parentId,
       ),
-      structuredClone(connector),
+      _.cloneDeep(connector),
     );
   }
   public toJSON() {
@@ -429,7 +430,7 @@ export class Statement_T extends Element_T {
   static fromJSON(statement: Statement_T) {
     return Object.assign(
       new Statement_T(statement.parent),
-      structuredClone(statement),
+      _.cloneDeep(statement),
     );
   }
   public toJSON() {
