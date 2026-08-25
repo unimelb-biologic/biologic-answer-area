@@ -735,10 +735,11 @@ export default {
       if (droppedOn_is_Statement) {
         // we dropped the connector onto a statement
         const statement = this.data.getStatement(droppedOnStatementID);
+        const hasParent = statement.hasParent();
         parentConnID = statement.parent;
         statement.parent = droppedConnectorID;
         statement.side = targetStr;
-        if (!this.data.getStatement(droppedOnStatementID).hasParent()) {
+        if (!hasParent) {
           // the statement was at the top level
           // remove the statement from the root statementID set
           if (this.data.hasRootStatementID(droppedOnStatementID)) {
@@ -755,23 +756,24 @@ export default {
         } else {
           // we need to make the parent of the droppedOnStatement
           // replace its left or right child with the droppedConnector
-          const parent = this.data.getConnector(parentConnID);
-          if (parent.leftID == droppedOnStatementID) {
-            parent.leftID = droppedConnectorID;
-            parent.leftType = 'connector';
+          const originalParent = this.data.getConnector(parentConnID);
+          if (originalParent.leftID == droppedOnStatementID) {
+            originalParent.leftID = droppedConnectorID;
+            originalParent.leftType = 'connector';
           } else {
             // must be the right side.
-            parent.rightID = droppedConnectorID;
-            parent.rightType = 'connector';
+            originalParent.rightID = droppedConnectorID;
+            originalParent.rightType = 'connector';
           }
           droppedCon.parent = parentConnID; // finally the droppedConnector needs to know its new parent.
         }
       } else {
         // we dropped the connector onto a connector
         const droppedOnCon = this.data.getConnector(droppedOnConnectorID);
+        const hasParent = droppedOnCon.hasParent();
         parentConnID = droppedOnCon.parent;
         droppedOnCon.parent = droppedConnectorID;
-        if (!droppedOnCon.hasParent()) {
+        if (!hasParent) {
           // the connector was at the top level so the new connector replaces it in the root ID list
           if (this.data.hasRootConnectorID(droppedOnConnectorID))
             this.data.deleteRootConnectorID(droppedOnConnectorID);
