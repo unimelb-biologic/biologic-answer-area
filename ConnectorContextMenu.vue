@@ -41,10 +41,10 @@ export default {
 
   props: {
     index: Number,
-    connectorID: Number,
+    connectorID: String,
     choice: Number,
     options: Object,
-    parentID: Number,
+    parentID: String,
   },
 
   data() {
