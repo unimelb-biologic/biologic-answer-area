@@ -236,16 +236,16 @@ export default {
       const type = e.dataTransfer.getData('type');
       if (type == 'connector') {
         // ignore if it was statement droopped on statement
-        this.$emit('connector-dropped-on-statement', [
-          this.statementData.id,
-          undefined,
-          e,
-        ]); // let the Parent deal with it
+        this.$emit('connector-dropped-on-statement', {
+          statementID: this.statementData.id,
+          connectorID: undefined,
+          event: e,
+        }); // let the Parent deal with it
       } else if (type == 'statement') {
-        this.$emit('statement-dropped-on-statement', [
-          this.statementData.id,
-          e,
-        ]); // let the Parent deal with it
+        this.$emit('statement-dropped-on-statement', {
+          statementID: this.statementData.id,
+          event: e,
+        }); // let the Parent deal with it
       }
     },
 
