@@ -291,7 +291,7 @@ export default {
     },
 
     isPlaceHolderOption(option) {
-      return option.startsWith('--');
+      return typeof option === 'string' && option.startsWith('--');
     },
     isImage(fact) {
       const isImg =
@@ -304,6 +304,20 @@ export default {
       this.$emit('toggle-collapsed-statement', this.id);
     },
     toggleShowPopup() {
+      //normalize the userSelected array before notify parent
+      //first real choice is selected when switching to radio button format
+      if (this.statementData.showPopup) {
+        this.userSelected = this.userSelected.map((selection, index) => {
+        const choiceList = this.originalFacts[index];
+        if (!this.isPlaceHolderOption(selection)) {
+          return selection;
+        }
+        return (
+          choiceList.find((choice) => !this.isPlaceHolderOption(choice)) ?? selection
+        );
+      });
+
+      }
       this.$emit('toggle-showPopup-fromstatement', [this.id]);
     },
     handleSelectChange() {
