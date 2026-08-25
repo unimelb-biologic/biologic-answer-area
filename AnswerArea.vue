@@ -738,7 +738,7 @@ export default {
         parentConnID = statement.parent;
         statement.parent = droppedConnectorID;
         statement.side = targetStr;
-        if (!this.data.getConnector(droppedOnStatementID).hasParent()) {
+        if (!this.data.getStatement(droppedOnStatementID).hasParent()) {
           // the statement was at the top level
           // remove the statement from the root statementID set
           if (this.data.hasRootStatementID(droppedOnStatementID)) {
