@@ -78,7 +78,7 @@
 
     <div class="onlyText" v-if="clickCount % 2 === 1">
       <!-- TODO: The drag function need polish(or just drop this function) -->
-      {{ this.contentTextAll }}
+      {{ formattedAnswerText }}
     </div>
     <div
       class="connectorBox"
@@ -425,6 +425,7 @@ import RenderStatement from './RenderStatement.vue';
 import ConnectorContextMenu from './ConnectorContextMenu.vue';
 import FeedbackRubric from './FeedbackRubric.vue';
 import Tooltip from './shared/Tooltip.vue';
+import { formatAnswerText } from './answerText';
 import { globalConsoleLog } from './util';
 
 export default {
@@ -515,6 +516,9 @@ export default {
     };
   },
   computed: {
+    formattedAnswerText() {
+      return formatAnswerText(this.contentTextAll);
+    },
     rubricBorderClass() {
       return 'rubric-border--' + this.rubricBorderStatus;
     },
