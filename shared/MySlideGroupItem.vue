@@ -14,7 +14,7 @@
       :aria-label="`Expand ${title || 'panel'}`"
       @click="expandPanel"
     >
-      <v-icon size="16">mdi-chevron-right</v-icon>
+      <v-icon size="24">mdi-chevron-right</v-icon>
 
       <span class="collapsed-panel__title">
         {{ title }}
@@ -36,7 +36,7 @@
                 :class="{ 'panel-btn--inactive': isAnyFullscreenReactive }"
                 @click="decreaseWidth"
               >
-                <v-icon size="16">mdi-minus</v-icon>
+                <v-icon size="24">mdi-minus</v-icon>
               </v-btn>
             </Tooltip>
 
@@ -48,7 +48,7 @@
                 :class="{ 'panel-btn--inactive': isAnyFullscreenReactive }"
                 @click="increaseWidth"
               >
-                <v-icon size="16">mdi-plus</v-icon>
+                <v-icon size="24">mdi-plus</v-icon>
               </v-btn>
             </Tooltip>
           </div>
@@ -73,7 +73,7 @@
                 }"
                 @click="emitToggle(action)"
               >
-                <v-icon v-if="toggleIcon(action)" size="16">
+                <v-icon v-if="toggleIcon(action)" size="48">
                   {{ toggleIcon(action) }}
                 </v-icon>
 
@@ -94,7 +94,7 @@
                 }"
                 @click="emitAction(action)"
               >
-                <v-icon v-if="action.icon" size="16">
+                <v-icon v-if="action.icon" size="48">
                   {{ action.icon }}
                 </v-icon>
 
@@ -139,7 +139,7 @@
                 }"
                 @click="emitToggle(action)"
               >
-                <v-icon v-if="toggleIcon(action)" size="16">
+                <v-icon v-if="toggleIcon(action)" size="48">
                   {{ toggleIcon(action) }}
                 </v-icon>
 
@@ -160,7 +160,7 @@
                 }"
                 @click="emitAction(action)"
               >
-                <v-icon v-if="action.icon" size="16">
+                <v-icon v-if="action.icon" size="48">
                   {{ action.icon }}
                 </v-icon>
 
@@ -181,7 +181,7 @@
                 :class="{ 'panel-btn--inactive': isAnyFullscreenReactive }"
                 @click="collapsePanel"
               >
-                <v-icon size="16">mdi-chevron-left</v-icon>
+                <v-icon size="24">mdi-chevron-left</v-icon>
               </v-btn>
             </Tooltip>
 
@@ -202,7 +202,7 @@
                 }"
                 @click="toggleSingleFullscreen"
               >
-                <v-icon size="16">
+                <v-icon size="24">
                   {{ isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen' }}
                 </v-icon>
               </v-btn>
@@ -223,7 +223,7 @@
                 }"
                 @click="pairFullscreen"
               >
-                <v-icon size="16">mdi-arrow-expand-horizontal</v-icon>
+                <v-icon size="24">mdi-arrow-expand-horizontal</v-icon>
               </v-btn>
             </Tooltip>
           </div>
@@ -251,6 +251,16 @@ export default {
   inject: {
     requestPairFs: {
       from: 'mySlideGroupRequestPairFullscreen',
+      default: null,
+    },
+
+    // NEW: injected flag & notifier
+    mySlideGroupFitAllAuto: {
+      from: 'mySlideGroupFitAllAuto',
+      default: null,
+    },
+    mySlideGroupNotifyCollapseChanged: {
+      from: 'mySlideGroupNotifyCollapseChanged',
       default: null,
     },
   },
@@ -347,36 +357,6 @@ export default {
     actions: {
       type: Array,
       default: () => [],
-      /*
-       * Button:
-       * {
-       *   id,
-       *   kind: 'button',       // optional; button is the default
-       *   icon,
-       *   btnText,
-       *   tooltip,
-       *   side: 'left'|'right',
-       *   disabled,
-       *   disableWhenFullscreen
-       * }
-       *
-       * Toggle:
-       * {
-       *   id,
-       *   kind: 'toggle',
-       *   value,
-       *   icon,
-       *   iconOn,
-       *   iconOff,
-       *   btnText,
-       *   btnTextOn,
-       *   btnTextOff,
-       *   tooltip,
-       *   side: 'left'|'right',
-       *   disabled,
-       *   disableWhenFullscreen
-       * }
-       */
     },
 
     hasNext: {
@@ -420,8 +400,21 @@ export default {
     },
 
     itemStyle() {
+      // Determine if group fit-all is active
+      const fitAll =
+        typeof this.mySlideGroupFitAllAuto === 'function'
+          ? this.mySlideGroupFitAllAuto()
+          : this.mySlideGroupFitAllAuto;
+
       if (this.isFullscreen) {
         return {};
+      }
+
+      if (fitAll) {
+        // Let the group manage sizing via flex; avoid writing width here.
+        return {
+          height: this.height,
+        };
       }
 
       return {
@@ -490,10 +483,26 @@ export default {
     this.currentVw = this.widths.includes(initialWidth) ? initialWidth : 30;
 
     document.addEventListener('fullscreenchange', this.onFullscreenChange);
+
+    // Advertise collapsed width via data attribute
+    if (this.$refs.panelWrapperRef) {
+      this.$refs.panelWrapperRef.setAttribute(
+        'data-collapsed-width',
+        this.collapsedWidth,
+      );
+    }
   },
 
   beforeUnmount() {
     document.removeEventListener('fullscreenchange', this.onFullscreenChange);
+  },
+
+  watch: {
+    collapsedWidth(newVal) {
+      if (this.$refs.panelWrapperRef) {
+        this.$refs.panelWrapperRef.setAttribute('data-collapsed-width', newVal);
+      }
+    },
   },
 
   methods: {
@@ -504,11 +513,24 @@ export default {
 
       this.isCollapsed = true;
       this.$emit('collapse-change', true);
+
+      // NEW: notify group so it can recompute layout immediately
+      if (this.mySlideGroupNotifyCollapseChanged) {
+        try {
+          this.mySlideGroupNotifyCollapseChanged();
+        } catch (e) {}
+      }
     },
 
     expandPanel() {
       this.isCollapsed = false;
       this.$emit('collapse-change', false);
+
+      if (this.mySlideGroupNotifyCollapseChanged) {
+        try {
+          this.mySlideGroupNotifyCollapseChanged();
+        } catch (e) {}
+      }
     },
 
     actionDisabled(action) {
@@ -597,9 +619,9 @@ export default {
             .join('');
         }
 
-        const red = parseInt(hex.slice(0, 2), 16);
-        const green = parseInt(hex.slice(2, 4), 16);
-        const blue = parseInt(hex.slice(4, 6), 16);
+        const red = parseInt(hex.slice(0, 2), 32);
+        const green = parseInt(hex.slice(2, 4), 32);
+        const blue = parseInt(hex.slice(4, 6), 32);
 
         return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
       }
@@ -608,7 +630,13 @@ export default {
     },
 
     increaseWidth() {
-      if (this.atMax || this.isAnyFullscreen || this.isCollapsed) {
+      // If group is managing widths, ignore +/-
+      const fitAll =
+        typeof this.mySlideGroupFitAllAuto === 'function'
+          ? this.mySlideGroupFitAllAuto()
+          : this.mySlideGroupFitAllAuto;
+
+      if (this.atMax || this.isAnyFullscreen || this.isCollapsed || fitAll) {
         return;
       }
 
@@ -617,7 +645,13 @@ export default {
     },
 
     decreaseWidth() {
-      if (this.atMin || this.isAnyFullscreen || this.isCollapsed) {
+      // If group is managing widths, ignore +/-
+      const fitAll =
+        typeof this.mySlideGroupFitAllAuto === 'function'
+          ? this.mySlideGroupFitAllAuto()
+          : this.mySlideGroupFitAllAuto;
+
+      if (this.atMin || this.isAnyFullscreen || this.isCollapsed || fitAll) {
         return;
       }
 

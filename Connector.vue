@@ -36,7 +36,7 @@
         </v-btn>
       </Tooltip>
 
-      <Tooltip text="Show Feedback">
+      <!--Tooltip text="Show Feedback">
         <v-btn
           icon
           size="xx-small"
@@ -46,7 +46,7 @@
         >
           <v-icon>mdi-comment-quote</v-icon>
         </v-btn>
-      </Tooltip>
+      </Tooltip-->
 
       <Tooltip
         text="duplicate this connector and all the sub-connectors/statements"

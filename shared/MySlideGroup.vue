@@ -9,7 +9,7 @@
       <v-btn
         class="nav-arrow-btn"
         variant="text"
-        :disabled="pairFs.active"
+        :disabled="pairFs.active || fitAllAutomatically"
         :style="{ width: navBtnSizePx + 'px', height: navBtnSizePx + 'px' }"
         @click="scrollLeft"
       >
@@ -35,7 +35,7 @@
       <v-btn
         class="nav-arrow-btn"
         variant="text"
-        :disabled="pairFs.active"
+        :disabled="pairFs.active || fitAllAutomatically"
         :style="{ width: navBtnSizePx + 'px', height: navBtnSizePx + 'px' }"
         @click="scrollRight"
       >
@@ -55,6 +55,9 @@ export default {
     behavior: { type: String, default: 'smooth' },
     edgeEpsilon: { type: Number, default: 2 },
     navBtnSizePx: { type: Number, default: 110 },
+
+    // NEW: automatically size all non-collapsed items to fill the group
+    fitAllAutomatically: { type: Boolean, default: false },
   },
 
   data() {
@@ -63,7 +66,7 @@ export default {
       canScrollRight: false,
       raf: null,
       ro: null,
-
+      mo: null, //  MutationObserver handle
       pairFs: {
         active: false,
         a: -1,
@@ -77,9 +80,13 @@ export default {
 
   provide() {
     return {
-      // now accepts a DOM element (the clicked item wrapper)
+      // keeps existing pair fullscreen API
       mySlideGroupRequestPairFullscreen: this.requestPairFullscreen,
       mySlideGroupExitPairFullscreen: this.exitPairFullscreen,
+
+      // NEW: let children query whether fit-all is active and notify parent on collapse changes
+      mySlideGroupFitAllAuto: () => this.fitAllAutomatically,
+      mySlideGroupNotifyCollapseChanged: this.onChildCollapseChanged,
     };
   },
 
@@ -92,7 +99,15 @@ export default {
       if (window.ResizeObserver) {
         this.ro = new ResizeObserver(() => {
           this.updateScrollState();
-          if (this.pairFs.active) this.applyPairStyles();
+          // pair fullscreen takes precedence
+          if (this.pairFs.active) {
+            this.applyPairStyles();
+          } else if (this.fitAllAutomatically) {
+            this.applyFitAllStyles();
+          } else {
+            // ensure we clear any inline styles that belong to fitAll if turned off unexpectedly
+            this.applyNormalStyles();
+          }
         });
         if (this.$refs.scrollerRef) this.ro.observe(this.$refs.scrollerRef);
         if (this.$refs.trackRef) this.ro.observe(this.$refs.trackRef);
@@ -101,20 +116,73 @@ export default {
           passive: true,
         });
       }
+
+      // Ensure initial layout for fitAll if requested
+      if (!this.pairFs.active && this.fitAllAutomatically) {
+        this.applyFitAllStyles();
+      }
+
+      // observe children added/removed so we can re-apply fit-all after new items mount
+      try {
+        const track = this.$refs.trackRef;
+        if (track && window.MutationObserver) {
+          this.mo = new MutationObserver(() => {
+            // let Vue mount child and let browser settle; schedule application
+            this.$nextTick(() => {
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  if (this.pairFs.active) {
+                    this.applyPairStyles();
+                  } else if (this.fitAllAutomatically) {
+                    this.applyFitAllStyles();
+                  } else {
+                    this.applyNormalStyles();
+                  }
+                });
+              });
+            });
+          });
+          this.mo.observe(track, {
+            childList: true /* don't need subtree */,
+            attributes: false,
+          });
+        }
+      } catch (e) {
+        // no-op if MutationObserver not available
+        // eslint-disable-next-line no-console
+        console.warn('MySlideGroup: MutationObserver not available', e);
+      }
     });
   },
 
   beforeUnmount() {
     document.removeEventListener('fullscreenchange', this.onFullscreenChange);
     if (this.ro) this.ro.disconnect();
+    if (this.mo) this.mo.disconnect(); // <- disconnect the mutation observer
     window.removeEventListener('resize', this.onResizeFallback);
     if (this.raf) cancelAnimationFrame(this.raf);
+  },
+
+  watch: {
+    // react to the prop changing
+    fitAllAutomatically(newVal) {
+      this.$nextTick(() => {
+        if (this.pairFs.active) {
+          // pair fullscreen overrides fit-all; nothing to do now
+          return;
+        }
+        if (newVal) this.applyFitAllStyles();
+        else this.applyNormalStyles();
+      });
+    },
   },
 
   methods: {
     onResizeFallback() {
       this.updateScrollState();
       if (this.pairFs.active) this.applyPairStyles();
+      else if (this.fitAllAutomatically) this.applyFitAllStyles();
+      else this.applyNormalStyles();
     },
 
     getScroller() {
@@ -138,6 +206,13 @@ export default {
     updateScrollState() {
       const el = this.getScroller();
       if (!el) return;
+
+      // When fitAllAutomatically is active we hide overflow; set canScrollLeft/Right to false
+      if (this.fitAllAutomatically && !this.pairFs.active) {
+        this.canScrollLeft = false;
+        this.canScrollRight = false;
+        return;
+      }
 
       const max = el.scrollWidth - el.clientWidth;
       const pos = el.scrollLeft;
@@ -172,12 +247,12 @@ export default {
     },
 
     scrollLeft() {
-      if (this.pairFs?.active) return;
+      if (this.pairFs?.active || this.fitAllAutomatically) return;
       this.scrollToIndex(this.getAlignedIndex() - 1);
     },
 
     scrollRight() {
-      if (this.pairFs?.active) return;
+      if (this.pairFs?.active || this.fitAllAutomatically) return;
       this.scrollToIndex(this.getAlignedIndex() + 1);
     },
 
@@ -206,7 +281,7 @@ export default {
       });
     },
 
-    /* -------- pair fullscreen: now takes the clicked element -------- */
+    /* -------- pair fullscreen (unchanged behaviour) -------- */
 
     async requestPairFullscreen(clickedEl) {
       const kids = this.getItems();
@@ -322,6 +397,27 @@ export default {
 
       const kids = Array.from(track.children || []);
 
+      if (!this.pairFs.active) {
+        // If fit-all is enabled, let that layout take precedence
+        if (this.fitAllAutomatically) {
+          this.applyFitAllStyles();
+          return;
+        }
+
+        // restore regular (non-pair) styles
+        kids.forEach((el) => {
+          el.style.display = '';
+          el.style.removeProperty('flex');
+        });
+
+        // ensure scroller overflow is default when not fit-all
+        const scroller = this.getScroller();
+        if (scroller) scroller.style.removeProperty('overflow-x');
+
+        return;
+      }
+
+      // pairFS active: follow the existing pair fullscreen behaviour
       kids.forEach((el, i) => {
         if (!this.pairFs.active) {
           el.style.display = '';
@@ -340,6 +436,99 @@ export default {
           el.style.removeProperty('flex');
         }
       });
+
+      // hide scroller overflow during pair fullscreen
+      const scroller = this.getScroller();
+      if (scroller) scroller.style.overflowX = 'hidden';
+    },
+
+    /* -------- fit-all behaviour -------- */
+
+    // Called by items when their collapse state changes
+    onChildCollapseChanged() {
+      this.$nextTick(() => {
+        if (this.pairFs.active) {
+          // pair fullscreen has priority; let applyPairStyles handle it
+          this.applyPairStyles();
+        } else if (this.fitAllAutomatically) {
+          this.applyFitAllStyles();
+        } else {
+          this.applyNormalStyles();
+        }
+        this.updateScrollState();
+      });
+    },
+
+    applyFitAllStyles() {
+      if (!this.fitAllAutomatically) {
+        this.applyNormalStyles();
+        return;
+      }
+
+      const track = this.$refs.trackRef;
+      if (!track) return;
+
+      const kids = Array.from(track.children || []);
+
+      const collapsedKids = [];
+      const expandedKids = [];
+
+      for (const el of kids) {
+        if (el.classList.contains('my-slide-item--collapsed')) {
+          collapsedKids.push(el);
+        } else {
+          expandedKids.push(el);
+        }
+      }
+
+      // Apply collapsed widths (via data attribute) and fix flex for collapsed items
+      collapsedKids.forEach((el) => {
+        const cw = el.getAttribute('data-collapsed-width') || '44px';
+        el.style.display = '';
+        el.style.setProperty('flex', `0 0 ${cw}`, 'important');
+        el.style.removeProperty('width');
+      });
+
+      // Expanded items share leftover space equally
+      if (expandedKids.length > 0) {
+        expandedKids.forEach((el) => {
+          el.style.display = '';
+          el.style.setProperty('flex', `1 1 0`, 'important');
+          el.style.removeProperty('width');
+        });
+      } else {
+        // If no expanded items, keep collapsed items as-is; ensure others reset
+        kids.forEach((el) => {
+          if (!el.classList.contains('my-slide-item--collapsed')) {
+            el.style.removeProperty('flex');
+          }
+        });
+      }
+
+      // hide horizontal scrolling when using fit-all
+      const scroller = this.getScroller();
+      if (scroller) scroller.style.overflowX = 'hidden';
+
+      // update nav state
+      this.updateScrollState();
+    },
+
+    // Restore "normal" behaviour (remove inline flex and overflow-x overrides)
+    applyNormalStyles() {
+      const track = this.$refs.trackRef;
+      if (!track) return;
+
+      const kids = Array.from(track.children || []);
+      kids.forEach((el) => {
+        el.style.display = '';
+        el.style.removeProperty('flex');
+        // Do not forcibly remove width here; items compute widths themselves when not fit-all
+      });
+
+      const scroller = this.getScroller();
+      if (scroller) scroller.style.removeProperty('overflow-x');
+
+      this.updateScrollState();
     },
   },
 };
@@ -415,5 +604,12 @@ export default {
 .my-slide-fs-wrapper:fullscreen .my-slide-scroller {
   width: 100%;
   height: 100%;
+}
+
+/* Optional small transition for smoother flex changes */
+.my-slide-track > * {
+  transition:
+    flex 180ms ease,
+    width 180ms ease;
 }
 </style>
