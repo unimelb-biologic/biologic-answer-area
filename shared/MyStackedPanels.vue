@@ -157,7 +157,7 @@ export default {
           [
             h(
               VIcon,
-              { size: 14 },
+              { size: 24 },
               {
                 default: () =>
                   this.isHorizontal
@@ -219,7 +219,7 @@ export default {
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   padding: 2px 4px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);

@@ -550,7 +550,7 @@ export default {
   methods: {
     handleFeedbackVisibility({ isVisible, gradingInfo }) {
       console.log(
-        'Statement:handleFeedbackVisibility vis=',
+        'Connector:handleFeedbackVisibility vis=',
         isVisible,
         ' info=',
         gradingInfo,

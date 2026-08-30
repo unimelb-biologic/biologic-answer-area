@@ -86,6 +86,7 @@ export default {
   emits: ['feedback-visibility-changed'],
 
   mounted() {
+    /*
     console.log(
       '************* checking this.exnetID=',
       this.exnetID,
@@ -95,6 +96,7 @@ export default {
     localDebug = this.exnetID == '239329140479425';
     if (localDebug) console.log('highlightedRubric:', this.highlightedRubric);
     if (localDebug) console.log('is it a ref?:', isRef(this.highlightedRubric));
+  */
   },
 
   computed: {
@@ -108,6 +110,7 @@ export default {
      * Returns null if there is no rubric or no match of any kind.
      */
     resolvedGradingInfo() {
+      /*
       localDebug = this.exnetID == '239329140479425';
       console.log(
         '\n\n\n************* checking this.exnetID=',
@@ -117,9 +120,10 @@ export default {
       );
       if (localDebug)
         console.log('resolvedGradingInfo isConnector=', this.isConnector);
+*/
       const rubric = this.highlightedRubric;
       if (!rubric || this.exnetID == null) return null;
-      if (localDebug) console.log('id=', this.exnetID, ' RUBRIC = ', rubric);
+      //if (localDebug) console.log('id=', this.exnetID, ' RUBRIC = ', rubric);
 
       const id = String(this.exnetID);
 
@@ -133,17 +137,17 @@ export default {
         : this.exnetType == 'student'
           ? String(rubric.pairedStudentExFlowID)
           : String(rubric.exnetID);
-      if (localDebug) console.log('directMatchId=', directMatchId);
+      //if (localDebug) console.log('directMatchId=', directMatchId);
 
       if (directMatchId === id) {
-        if (localDebug) console.log('MATCHED - returning result of direct');
+        //if (localDebug) console.log('MATCHED - returning result of direct');
         return {
           ...rubric,
           matchType: 'direct',
           feedback: rubric.feedback ?? 'No feedback',
         };
       }
-      if (localDebug) console.log('DIDNT MATCH');
+      //if (localDebug) console.log('DIDNT MATCH');
 
       // 2. Target match — this element is what the rubric was targeting
       if (
@@ -153,7 +157,7 @@ export default {
             : rubric.expectedTargetStatementID,
         ) === id
       ) {
-        if (localDebug) console.log('TARGET');
+        //if (localDebug) console.log('TARGET');
         return {
           ...rubric,
           matchType: 'target',
@@ -164,7 +168,7 @@ export default {
       // 3. Matching statement — found and matched correctly
       if (this.exnetType == 'student') {
         if ((rubric.matchingStatementIDs ?? []).map(String).includes(id)) {
-          if (localDebug) console.log('MATCHING');
+          //if (localDebug) console.log('MATCHING');
           return {
             ...rubric,
             matchType: 'matching',
@@ -175,7 +179,7 @@ export default {
         if (
           (rubric.expectedReasonStatementIDs ?? []).map(String).includes(id)
         ) {
-          if (localDebug) console.log('MATCHING');
+          //if (localDebug) console.log('MATCHING');
           return {
             ...rubric,
             matchType: 'matching',
@@ -187,7 +191,7 @@ export default {
 
       // 4. Missing statement — expected but not present in the answer
       if ((rubric.missingStatementIDs ?? []).map(String).includes(id)) {
-        if (localDebug) console.log('MISSING');
+        //if (localDebug) console.log('MISSING');
         return {
           ...rubric,
           matchType: 'missing',
@@ -198,7 +202,7 @@ export default {
 
       // 5. Extra statement — present but not expected
       if ((rubric.extraStatementIDs ?? []).map(String).includes(id)) {
-        if (localDebug) console.log('EXTRA');
+        //if (localDebug) console.log('EXTRA');
         return {
           ...rubric,
           matchType: 'extra',
@@ -304,18 +308,24 @@ export default {
   },
 
   watch: {
-    highlightedRubric(val) {
-      localDebug = this.exnetID == '239329140479425';
-      if (localDebug) console.log('Watching highlightedRubric CHANGED:', val);
-      const resolvedVal = this.resolvedGradingInfo;
-      if (localDebug) console.log('FeedbackRubric EMIT:', resolvedVal);
-      this.$emit('feedback-visibility-changed', {
-        isVisible: this.isVisible,
-        gradingInfo: resolvedVal,
-      });
+    highlightedRubric: {
+      handler(val) {
+        //localDebug = this.exnetID == '239329140479425';
+        //if (localDebug) console.log('Watching highlightedRubric CHANGED:', val);
+        const resolvedVal = this.resolvedGradingInfo;
+        console.log(
+          'FeedbackRubric highlightedRubric changed EMIT:',
+          resolvedVal,
+        );
+        this.$emit('feedback-visibility-changed', {
+          isVisible: this.isVisible,
+          gradingInfo: resolvedVal,
+        });
+      },
+      immediate: true, // fires on mount with the current value
     },
     isVisible(val) {
-      if (localDebug) console.log('Watching isVisible CHANGED:', val);
+      console.log('FeedbackRubric isVisible changed :', val);
       this.$emit('feedback-visibility-changed', {
         isVisible: val,
         rubricStatus: this.resolvedGradingInfo?.rubricStatus ?? null,

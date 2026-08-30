@@ -5,7 +5,7 @@
     :class="{ 'is-pair-fullscreen': pairFs.active }"
   >
     <!-- Left arrow -->
-    <div class="my-slide-shell__nav">
+    <div class="my-slide-shell__nav" v-if="!fitAllAutomatically">
       <v-btn
         class="nav-arrow-btn"
         variant="text"
@@ -31,7 +31,7 @@
     </div>
 
     <!-- Right arrow -->
-    <div class="my-slide-shell__nav">
+    <div class="my-slide-shell__nav" v-if="!fitAllAutomatically">
       <v-btn
         class="nav-arrow-btn"
         variant="text"

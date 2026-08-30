@@ -27,7 +27,10 @@
       <div class="panel-header">
         <!-- Left cluster: resize controls + optional left actions -->
         <div class="panel-left-cluster">
-          <div class="panel-controls panel-controls--left">
+          <div
+            class="panel-controls panel-controls--left"
+            v-if="!mySlideGroupFitAllAuto"
+          >
             <Tooltip text="Decrease the width of this panel">
               <v-btn
                 size="xx-small"
@@ -73,7 +76,7 @@
                 }"
                 @click="emitToggle(action)"
               >
-                <v-icon v-if="toggleIcon(action)" size="48">
+                <v-icon v-if="toggleIcon(action)" size="36">
                   {{ toggleIcon(action) }}
                 </v-icon>
 
@@ -94,7 +97,7 @@
                 }"
                 @click="emitAction(action)"
               >
-                <v-icon v-if="action.icon" size="48">
+                <v-icon v-if="action.icon" size="36">
                   {{ action.icon }}
                 </v-icon>
 
@@ -139,7 +142,7 @@
                 }"
                 @click="emitToggle(action)"
               >
-                <v-icon v-if="toggleIcon(action)" size="48">
+                <v-icon v-if="toggleIcon(action)" size="36">
                   {{ toggleIcon(action) }}
                 </v-icon>
 
@@ -160,7 +163,7 @@
                 }"
                 @click="emitAction(action)"
               >
-                <v-icon v-if="action.icon" size="48">
+                <v-icon v-if="action.icon" size="36">
                   {{ action.icon }}
                 </v-icon>
 
