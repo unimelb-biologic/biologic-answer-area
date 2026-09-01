@@ -1581,6 +1581,8 @@ export default {
 
         if (match) {
           st.content.originalFacts = match.content.originalFacts;
+          st.content.autoCaseOnCollapse =
+            match.content.autoCaseOnCollapse === true;
           st.statementType = match.statementType;
         }
       }

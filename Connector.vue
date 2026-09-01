@@ -425,7 +425,7 @@ import RenderStatement from './RenderStatement.vue';
 import ConnectorContextMenu from './ConnectorContextMenu.vue';
 import FeedbackRubric from './FeedbackRubric.vue';
 import Tooltip from './shared/Tooltip.vue';
-import { formatAnswerText } from './answerText';
+import { buildCollapsedContent, formatAnswerText } from './answerText';
 import { globalConsoleLog } from './util';
 
 export default {
@@ -518,6 +518,12 @@ export default {
   computed: {
     formattedAnswerText() {
       return formatAnswerText(this.contentTextAll);
+    },
+    statementCaseAdjustmentState() {
+      return Object.entries(this.allStatements || {}).map(([id, statement]) => [
+        id,
+        statement?.content?.autoCaseOnCollapse === true,
+      ]);
     },
     rubricBorderClass() {
       return 'rubric-border--' + this.rubricBorderStatus;
@@ -771,21 +777,8 @@ export default {
       this.currConnectorContent = JSON.parse(
         JSON.stringify(this.connectorContent[newChoice]),
       );
-
-      this.contentTextAll =
-        (this.currConnectorContent[0] === null
-          ? ''
-          : this.currConnectorContent[0]) +
-        (this.acontent === null ? '' : this.acontent) +
-        (this.currConnectorContent[1] === null
-          ? ''
-          : this.currConnectorContent[1]) +
-        (this.bcontent === null ? '' : this.bcontent) +
-        (this.currConnectorContent[2] === null
-          ? ''
-          : this.currConnectorContent[2]);
-
       this.$emit('linkWordChanged', info);
+      this.updateContentTextAll();
     },
     handleChildLinkWordChange(info) {
       this.$emit('linkWordChanged', info);
@@ -855,18 +848,33 @@ export default {
       this.dragInProgress = false;
     },
     updateContentTextAll() {
-      this.contentTextAll =
-        (this.currConnectorContent[0] === null
-          ? ''
-          : this.currConnectorContent[0]) +
-        (this.acontent === null ? '' : this.acontent) +
-        (this.currConnectorContent[1] === null
-          ? ''
-          : this.currConnectorContent[1]) +
-        (this.bcontent === null ? '' : this.bcontent) +
-        (this.currConnectorContent[2] === null
-          ? ''
-          : this.currConnectorContent[2]);
+      if (this.allConnectors == undefined) {
+        this.contentTextAll =
+          '[A]' + this.connectorContent[this.selectedPhrase].join('') + '[B]';
+        return;
+      }
+
+      const connectorKey = String(this.connectorID);
+      const currentConnector = this.allConnectors[connectorKey] || {};
+      const connectorContent = Array.isArray(this.currConnectorContent)
+        ? [this.currConnectorContent]
+        : currentConnector.connectorContent;
+      const allConnectors = {
+        ...this.allConnectors,
+        [connectorKey]: {
+          ...currentConnector,
+          connectorContent,
+          selectedPhrase: 0,
+          leftContent: this.acontent === null ? '' : this.acontent,
+          rightContent: this.bcontent === null ? '' : this.bcontent,
+        },
+      };
+
+      this.contentTextAll = buildCollapsedContent({
+        connectorID: this.connectorID,
+        allConnectors,
+        allStatements: this.allStatements,
+      });
     },
     onDrop(e, side) {
       e.stopImmediatePropagation();
@@ -886,13 +894,13 @@ export default {
         const statementID = data.id;
         // Update content
         this.acontent = transContent;
-        // this.leftContent = transContent
-        this.updateContentTextAll();
         this.$emit('droppedAstat', [
           this.connectorID,
           statementID,
           transContent,
         ]);
+        // this.leftContent = transContent
+        this.updateContentTextAll();
       } else if (side === 'b' && type === 'statement') {
         const statementID = data.id;
         this.$emit('droppedBstat', [
@@ -905,12 +913,12 @@ export default {
         this.updateContentTextAll();
       } else if (side === 'a' && type === 'connector') {
         this.acontent = transContent;
-        this.updateContentTextAll();
         this.$emit('droppedAconn', [this.connectorID, data, transContent, e]);
+        this.updateContentTextAll();
       } else if (side === 'b' && type === 'connector') {
         this.bcontent = transContent;
-        this.updateContentTextAll();
         this.$emit('droppedBconn', [this.connectorID, data, transContent, e]);
+        this.updateContentTextAll();
       } else if (side === 'x' && type === 'connector') {
         // a connector has been dropped on the body of a connector.
         //
@@ -952,19 +960,6 @@ export default {
     },
     handleUpdateStatContentA(info) {
       this.acontent = info[0];
-      this.contentTextAll =
-        (this.currConnectorContent[0] === null
-          ? ''
-          : this.currConnectorContent[0]) +
-        this.acontent +
-        (this.currConnectorContent[1] === null
-          ? ''
-          : this.currConnectorContent[1]) +
-        (this.bcontent === null ? '' : this.bcontent) +
-        (this.currConnectorContent[2] === null
-          ? ''
-          : this.currConnectorContent[2]);
-
       const newStatData = info[1];
       this.$emit('update-stat-data', newStatData);
       this.$emit('update-child-stat', [
@@ -972,22 +967,10 @@ export default {
         this.acontent,
         'left',
       ]);
+      this.updateContentTextAll();
     },
     handleUpdateStatContentB(info) {
       this.bcontent = info[0];
-      this.contentTextAll =
-        (this.currConnectorContent[0] === null
-          ? ''
-          : this.currConnectorContent[0]) +
-        (this.acontent === null ? '' : this.acontent) +
-        (this.currConnectorContent[1] === null
-          ? ''
-          : this.currConnectorContent[1]) +
-        this.bcontent +
-        (this.currConnectorContent[2] === null
-          ? ''
-          : this.currConnectorContent[2]);
-
       const newStatData = info[1];
       this.$emit('update-stat-data', newStatData);
       this.$emit('update-child-stat', [
@@ -995,6 +978,7 @@ export default {
         this.bcontent,
         'right',
       ]);
+      this.updateContentTextAll();
     },
     handleStatDataChange(info) {
       this.$emit('update-stat-data', info);
@@ -1005,49 +989,24 @@ export default {
     handleUpdateConnectorContentA(info) {
       const currConnectID = info[0];
       this.acontent = info[1];
-
-      this.contentTextAll =
-        (this.currConnectorContent[0] === null
-          ? ''
-          : this.currConnectorContent[0]) +
-        this.acontent +
-        (this.currConnectorContent[1] === null
-          ? ''
-          : this.currConnectorContent[1]) +
-        (this.bcontent === null ? '' : this.bcontent) +
-        (this.currConnectorContent[2] === null
-          ? ''
-          : this.currConnectorContent[2]);
-
       this.$emit('update-child-connector-content', [
         currConnectID,
         this.acontent,
         this.connectorID,
         'left',
       ]);
+      this.updateContentTextAll();
     },
     handleUpdateConnectorContentB(info) {
       const currConnectID = info[0];
       this.bcontent = info[1];
-      this.contentTextAll =
-        (this.currConnectorContent[0] === null
-          ? ''
-          : this.currConnectorContent[0]) +
-        (this.acontent === null ? '' : this.acontent) +
-        (this.currConnectorContent[1] === null
-          ? ''
-          : this.currConnectorContent[1]) +
-        this.bcontent +
-        (this.currConnectorContent[2] === null
-          ? ''
-          : this.currConnectorContent[2]);
-
       this.$emit('update-child-connector-content', [
         currConnectID,
         this.bcontent,
         this.connectorID,
         'right',
       ]);
+      this.updateContentTextAll();
     },
     handleUpdateChildClickCount(info) {
       this.$emit('update-click-count', info);
@@ -1073,18 +1032,7 @@ export default {
           this.allConnectors[this.connectorID].rightContent === undefined
             ? '...'
             : this.allConnectors[this.connectorID].rightContent;
-        this.contentTextAll =
-          (this.currConnectorContent[0] === null
-            ? ''
-            : this.currConnectorContent[0]) +
-          this.acontent +
-          (this.currConnectorContent[1] === null
-            ? ''
-            : this.currConnectorContent[1]) +
-          this.bcontent +
-          (this.currConnectorContent[2] === null
-            ? ''
-            : this.currConnectorContent[2]);
+        this.updateContentTextAll();
       }
     },
     initContent() {
@@ -1104,20 +1052,7 @@ export default {
           this.allConnectors[this.connectorID].rightContent === undefined
             ? '...'
             : this.allConnectors[this.connectorID].rightContent;
-        this.contentTextAll =
-          (this.currConnectorContent[0] === null
-            ? ''
-            : this.currConnectorContent[0]) +
-          // + (this.acontent === null ? "" : this.acontent)
-          this.acontent +
-          (this.currConnectorContent[1] === null
-            ? ''
-            : this.currConnectorContent[1]) +
-          // + (this.bcontent === null ? "" : this.bcontent)
-          this.bcontent +
-          (this.currConnectorContent[2] === null
-            ? ''
-            : this.currConnectorContent[2]);
+        this.updateContentTextAll();
         this.word = this.connectorContent[this.selectedPhrase].join('');
       }
     },
@@ -1156,23 +1091,19 @@ export default {
       this.initContent();
     },
 
+    statementCaseAdjustmentState: {
+      handler() {
+        this.updateContentTextAll();
+      },
+      deep: true,
+    },
+
     leftContent() {
       this.acontent =
         this.allConnectors[this.connectorID].leftContent === undefined
           ? '...'
           : this.allConnectors[this.connectorID].leftContent;
-      this.contentTextAll =
-        (this.currConnectorContent[0] === null
-          ? ''
-          : this.currConnectorContent[0]) +
-        this.acontent +
-        (this.currConnectorContent[1] === null
-          ? ''
-          : this.currConnectorContent[1]) +
-        this.bcontent +
-        (this.currConnectorContent[2] === null
-          ? ''
-          : this.currConnectorContent[2]);
+      this.updateContentTextAll();
     },
 
     rightContent() {
@@ -1180,41 +1111,12 @@ export default {
         this.allConnectors[this.connectorID].rightContent === undefined
           ? '...'
           : this.allConnectors[this.connectorID].rightContent;
-      this.contentTextAll =
-        (this.currConnectorContent[0] === null
-          ? ''
-          : this.currConnectorContent[0]) +
-        (this.acontent === null ? '' : this.acontent) +
-        (this.currConnectorContent[1] === null
-          ? ''
-          : this.currConnectorContent[1]) +
-        this.bcontent +
-        (this.currConnectorContent[2] === null
-          ? ''
-          : this.currConnectorContent[2]);
+      this.updateContentTextAll();
     },
   },
   created() {
-    // this.currConnectorContent = JSON.parse(JSON.stringify(this.connectorContent[this.selectedPhrase]));
-    // // this.acontent = this.allConnectors[this.connectorID].leftContent
-    // // this.acontent = (this.allConnectors[this.connectorID].leftContent === undefined ?
-    // //                 "" : this.allConnectors[this.connectorID].leftContent)
-    // // this.bcontent = this.allConnectors[this.connectorID].rightContent
     if (this.allConnectors == undefined) {
-      //     this.acontent = (this.allConnectors[this.connectorID].leftContent === undefined ?
-      //                     "[A]" : this.allConnectors[this.connectorID].leftContent)
-      //     this.bcontent = (this.allConnectors[this.connectorID].rightContent === undefined ?
-      //                     "[B]" : this.allConnectors[this.connectorID].rightContent)
-      //     this.contentTextAll =  (this.currConnectorContent[0] === null ? "" : this.currConnectorContent[0])
-      //             // + (this.acontent === null ? "" : this.acontent)
-      //             + this.acontent
-      //             + (this.currConnectorContent[1] === null ? "" : this.currConnectorContent[1])
-      //             // + (this.bcontent === null ? "" : this.bcontent)
-      //             + this.bcontent
-      //             + (this.currConnectorContent[2] === null ? "" : this.currConnectorContent[2])
-      //     this.word = this.connectorContent[this.selectedPhrase].join("")
-      this.contentTextAll =
-        '[A]' + this.connectorContent[this.selectedPhrase].join('') + '[B]';
+      this.updateContentTextAll();
     }
     this.initContent();
   },
