@@ -219,3 +219,18 @@
   outline: var(--biologic-rubric-hl-stroke-width) solid var(--biologic-rubric-hl-extra);
   outline-offset: var(--biologic-rubric-hl-stroke-width);
 }
+
+.biologic-rubric-corner-icon {
+  position: absolute;
+  top: -16px;
+  right: -16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: white;
+  pointer-events: none;
+  z-index: 20;
+}

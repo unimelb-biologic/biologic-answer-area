@@ -1,5 +1,14 @@
 <template>
   <div :class="['Statement', statementClass, rubricBorderClass]">
+    <div
+      v-if="rubricCornerBadge"
+      class="biologic-rubric-corner-icon"
+      :class="rubricCornerBadge.className"
+      :title="rubricCornerBadge.label"
+      :aria-label="rubricCornerBadge.label"
+    >
+      <v-icon size="16">{{ rubricCornerBadge.icon }}</v-icon>
+    </div>
     <FeedbackRubric
       :isVisible="showAllFeedback || showThisFeedback"
       :exnetID="id"
@@ -251,9 +260,42 @@ export default {
       rubricBorderStatus: null,
     };
   },
+
   computed: {
     rubricBorderClass() {
-      return 'rubric-border--' + this.rubricBorderStatus;
+      return 'biologic-rubric-border--' + this.rubricBorderStatus;
+    },
+
+    rubricCornerBadge() {
+      const map = {
+        direct: {
+          icon: 'mdi-check-bold',
+          label: 'Matched item',
+          className: 'rubric-corner-icon--green',
+        },
+        target: {
+          icon: 'mdi-check-bold',
+          label: 'Target conclusion',
+          className: 'rubric-corner-icon--cyan',
+        },
+        matching: {
+          icon: 'mdi-link-variant',
+          label: 'Matching reason',
+          className: 'rubric-corner-icon--orange',
+        },
+        missing: {
+          icon: 'mdi-exclamation',
+          label: 'Missing reason',
+          className: 'rubric-corner-icon--red',
+        },
+        extra: {
+          icon: 'mdi-help',
+          label: 'Extra reason',
+          className: 'rubric-corner-icon--purple',
+        },
+      };
+
+      return map[this.rubricBorderStatus] ?? null;
     },
 
     concatenatedStatement() {
@@ -527,24 +569,23 @@ button {
   height: 6vw;
 }
 
-.rubric-border--direct {
-  outline: var(--hl-stroke-width) solid var(--hl-matching_item);
-  outline-offset: var(--hl-stroke-width);
+.rubric-corner-icon--green {
+  background-color: var(--biologic-rubric-hl-direct);
 }
-.rubric-border--target {
-  outline: var(--hl-stroke-width) solid var(--hl_target_conclusion);
-  outline-offset: var(--hl-stroke-width);
+
+.rubric-corner-icon--cyan {
+  background-color: var(--biologic-rubric-hl-target);
 }
-.rubric-border--matching {
-  outline: var(--hl-stroke-width) solid var(--hl_matching_reason);
-  outline-offset: var(--hl-stroke-width);
+
+.rubric-corner-icon--orange {
+  background-color: var(--biologic-rubric-hl-matching);
 }
-.rubric-border--missing {
-  outline: var(--hl-stroke-width) solid var(--hl_missing_reason);
-  outline-offset: var(--hl-stroke-width);
+
+.rubric-corner-icon--red {
+  background-color: var(--biologic-rubric-hl-missing);
 }
-.rubric-border--extra {
-  outline: var(--hl-stroke-width) solid var(--hl_extra_reason);
-  outline-offset: var(--hl-stroke-width);
+
+.rubric-corner-icon--purple {
+  background-color: var(--biologic-rubric-hl-extra);
 }
 </style>
