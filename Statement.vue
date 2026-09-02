@@ -191,6 +191,7 @@
 </template>
 
 <script>
+import { RUBRIC_BADGE_MAP } from '../../config/constants.js';
 import FeedbackRubric from './FeedbackRubric.vue';
 import Tooltip from './shared/Tooltip.vue';
 
@@ -267,35 +268,7 @@ export default {
     },
 
     rubricCornerBadge() {
-      const map = {
-        direct: {
-          icon: 'mdi-check-bold',
-          label: 'Matched item',
-          className: 'rubric-corner-icon--green',
-        },
-        target: {
-          icon: 'mdi-check-bold',
-          label: 'Target conclusion',
-          className: 'rubric-corner-icon--cyan',
-        },
-        matching: {
-          icon: 'mdi-link-variant',
-          label: 'Matching reason',
-          className: 'rubric-corner-icon--orange',
-        },
-        missing: {
-          icon: 'mdi-exclamation',
-          label: 'Missing reason',
-          className: 'rubric-corner-icon--red',
-        },
-        extra: {
-          icon: 'mdi-help',
-          label: 'Extra reason',
-          className: 'rubric-corner-icon--purple',
-        },
-      };
-
-      return map[this.rubricBorderStatus] ?? null;
+      return RUBRIC_BADGE_MAP[this.rubricBorderStatus] ?? null;
     },
 
     concatenatedStatement() {
