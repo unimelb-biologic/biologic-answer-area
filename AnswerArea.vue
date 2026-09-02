@@ -43,6 +43,7 @@
           :statement-data="data.getStatement(item)"
           :showToggle="true"
           :depth="0"
+          :exnetType="exnetType"
           @duplicate-statement="duplicateStatement"
           @delete-statement="deleteStatement"
           @update-statement-content="handleUpdateStatementContent"
@@ -80,6 +81,7 @@
           :connleft="data.getConnector(rootConnectorID).left"
           :rootConnectorID="rootConnectorID"
           :depth="0"
+          :exnetType="exnetType"
           @delete-child-connector="deleteChildConnector"
           @delete-connector="deleteConnector"
           @dropped-astat="(info) => handleStatementDrop(info, 'left')"
@@ -164,6 +166,10 @@ export default {
     // So commented it out throughout. Remove all these commented bits out later if no issues found.
     displayOnly: Boolean,
     testProp: Number,
+    exnetType: {
+      type: String,
+      default: 'student', // "academic" | "student"
+    },
   },
   setup() {
     return {
@@ -1174,10 +1180,6 @@ export default {
     toggleShowPopupFromConnector(id: StatementID_T) {
       this.data.getStatement(id).toggleShowPopup();
       this.notifyStateChange();
-    },
-
-    toggleAllFeedback() {
-      this.showAllFeedback = !this.showAllFeedback;
     },
 
     /**

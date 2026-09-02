@@ -16,12 +16,6 @@
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   >
-    <p v-if="globalDebugMode">conn_ID = {{ connectorID }}</p>
-    <FeedbackRubric
-      :isVisible="showFeedback"
-      :exnetID="connectorID"
-      :isConnector="true"
-    />
     <div
       v-if="this.parent !== undefined && showButtons && !dragInProgress"
       class="buttons-container"
@@ -47,7 +41,7 @@
           icon
           size="xx-small"
           v-if="feedbackIsAvailable"
-          @click="showFeedback = !showFeedback"
+          @click="showThisFeedback = !showThisFeedback"
           class="connectorButton"
         >
           <v-icon>mdi-comment-quote</v-icon>
@@ -177,6 +171,7 @@
             :statement-data="this.allStatements[this.leftID]"
             :showToggle="true"
             :depth="depthPlusOne"
+            :exnetType="exnetType"
             @update-statement-content="handleUpdateStatContentA"
             @mousedown="onMousedown('leftType')"
             @duplicate-statement="duplicateStatement"
@@ -212,6 +207,7 @@
             :orientation="allConnectors[this.leftID].orientation"
             :selected-phrase="allConnectors[this.leftID].selectedPhrase"
             :depth="depthPlusOne"
+            :exnetType="exnetType"
             @delete-connector="
               deleteChildConnector({
                 id: this.leftID,
@@ -262,7 +258,10 @@
           </v-btn>
         </Tooltip>
         <!--p class="connectorText">{{ connectorContent[selectedPhrase][1] }}</p-->
-        <div class="connectorMenu" v-if="connectorContent[selectedPhrase][1]">
+        <div
+          :class="['connectorMenu', rubricBorderClass]"
+          v-if="connectorContent[selectedPhrase][1]"
+        >
           <ConnectorContextMenu
             v-if="!displayOnly"
             :choice="selectedPhrase"
@@ -272,8 +271,16 @@
             :index="1"
             @change-link-word="handleLinkWordChange"
           />
+          <span v-if="globalDebugMode">{{ connectorID }}</span>
         </div>
       </div>
+      <FeedbackRubric
+        :isVisible="showAllFeedback || showThisFeedback"
+        :exnetID="connectorID"
+        :exnetType="exnetType"
+        :isConnector="true"
+        @feedback-visibility-changed="handleFeedbackVisibility"
+      />
 
       <!-- the right section -->
       <!-- in the order of empty, statement, connector -->
@@ -326,6 +333,7 @@
             :statement-data="this.allStatements[this.rightID]"
             :showToggle="true"
             :depth="depthPlusOne"
+            :exnetType="exnetType"
             @update-statement-content="handleUpdateStatContentB"
             @mousedown="onMousedown('rightType')"
             @connector-dropped-on-statement="connectorDroppedOnStatement"
@@ -361,6 +369,7 @@
             :selected-phrase="allConnectors[this.rightID].selectedPhrase"
             :rootConnectorID="rootConnectorID"
             :depth="depthPlusOne"
+            :exnetType="exnetType"
             @delete-connector="
               deleteChildConnector({
                 id: this.rightID,
@@ -483,6 +492,10 @@ export default {
       type: Number,
       required: true,
     },
+    exnetType: {
+      type: String,
+      default: 'student', // "correct" | "student"
+    },
   },
   data() {
     return {
@@ -495,11 +508,16 @@ export default {
       word: null,
       contentTextAll: null, // Record the contents in children and in itself
       // clickCountInConn: 0,
-      showFeedback: false,
+      showThisFeedback: false,
       dragInProgress: false,
+      rubricBorderStatus: null,
     };
   },
   computed: {
+    rubricBorderClass() {
+      return 'rubric-border--' + this.rubricBorderStatus;
+    },
+
     depthPlusOne() {
       return this.depth + 1;
     },
@@ -529,6 +547,18 @@ export default {
     },
   },
   methods: {
+    handleFeedbackVisibility({ isVisible, gradingInfo }) {
+      console.log(
+        'Statement:handleFeedbackVisibility vis=',
+        isVisible,
+        ' info=',
+        gradingInfo,
+      );
+      this.rubricBorderStatus = isVisible
+        ? (gradingInfo?.matchType ?? null)
+        : null;
+    },
+
     handleMouseEnter() {
       this.setActiveHover(this.connectorID, this.depth);
     },
@@ -1151,9 +1181,6 @@ export default {
           ? ''
           : this.currConnectorContent[2]);
     },
-    showAllFeedback() {
-      this.showFeedback = this.showAllFeedback;
-    },
   },
   created() {
     // this.currConnectorContent = JSON.parse(JSON.stringify(this.connectorContent[this.selectedPhrase]));
@@ -1334,5 +1361,26 @@ export default {
 
 .image-target-icon {
   pointer-events: none;
+}
+
+.rubric-border--direct {
+  outline: 10px solid #16a34a;
+  outline-offset: 2px;
+}
+.rubric-border--target {
+  outline: 2px solid #16a34a;
+  outline-offset: 2px;
+}
+.rubric-border--matching {
+  outline: 2px solid #16a34a;
+  outline-offset: 2px;
+}
+.rubric-border--missing {
+  outline: 2px solid #dc2626;
+  outline-offset: 2px;
+}
+.rubric-border--extra {
+  outline: 2px solid #d97706;
+  outline-offset: 2px;
 }
 </style>

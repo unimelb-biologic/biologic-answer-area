@@ -1,6 +1,11 @@
 <template>
-  <div :class="['Statement', statementClass]">
-    <FeedbackRubric :isVisible="showFeedback" :exnetID="id" />
+  <div :class="['Statement', statementClass, rubricBorderClass]">
+    <FeedbackRubric
+      :isVisible="showAllFeedback || showThisFeedback"
+      :exnetID="id"
+      :exnetType="exnetType"
+      @feedback-visibility-changed="handleFeedbackVisibility"
+    />
     <div :class="freeAnswer ? 'free-content-wrapper' : 'content-wrapper'">
       <div
         v-show="showButtons && !dragInProgress"
@@ -73,7 +78,7 @@
           <v-btn
             size="x-small"
             v-if="showToggle && feedbackIsAvailable"
-            @click="showFeedback = !showFeedback"
+            @click="showThisFeedback = !showThisFeedback"
             class="statementButton"
           >
             <v-icon>mdi-comment-quote</v-icon>
@@ -224,6 +229,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    exnetType: {
+      type: String,
+      default: 'student', // "academic" | "student"
+    },
   },
   data() {
     return {
@@ -242,11 +251,16 @@ export default {
       answeredData: null,
       hide_collapsed: false,
       hide_showPopup: true,
-      showFeedback: false,
+      showThisFeedback: false,
       freeInputText: '',
+      rubricBorderStatus: null,
     };
   },
   computed: {
+    rubricBorderClass() {
+      return 'rubric-border--' + this.rubricBorderStatus;
+    },
+
     concatenatedStatement() {
       if (this.freeAnswer) return this.freeInputText;
       return this.statementData.content.originalFacts
@@ -264,6 +278,18 @@ export default {
     },
   },
   methods: {
+    handleFeedbackVisibility({ isVisible, gradingInfo }) {
+      console.log(
+        'Statement:handleFeedbackVisibility vis=',
+        isVisible,
+        ' info=',
+        gradingInfo,
+      );
+      this.rubricBorderStatus = isVisible
+        ? (gradingInfo?.matchType ?? null)
+        : null;
+    },
+
     isPlaceHolderOption(option) {
       return option.startsWith('--');
     },
@@ -352,9 +378,6 @@ export default {
     },
     data() {
       this.initContent();
-    },
-    showAllFeedback() {
-      this.showFeedback = this.showAllFeedback;
     },
     freeInputText(newUserInput) {
       this.answeredData.content.userInput = newUserInput;
@@ -507,5 +530,26 @@ button {
 
 .textarea {
   height: 6vw;
+}
+
+.rubric-border--direct {
+  outline: var(--hl-stroke-width) solid var(--hl-matching_item);
+  outline-offset: var(--hl-stroke-width);
+}
+.rubric-border--target {
+  outline: var(--hl-stroke-width) solid var(--hl_target_conclusion);
+  outline-offset: var(--hl-stroke-width);
+}
+.rubric-border--matching {
+  outline: var(--hl-stroke-width) solid var(--hl_matching_reason);
+  outline-offset: var(--hl-stroke-width);
+}
+.rubric-border--missing {
+  outline: var(--hl-stroke-width) solid var(--hl_missing_reason);
+  outline-offset: var(--hl-stroke-width);
+}
+.rubric-border--extra {
+  outline: var(--hl-stroke-width) solid var(--hl_extra_reason);
+  outline-offset: var(--hl-stroke-width);
 }
 </style>
