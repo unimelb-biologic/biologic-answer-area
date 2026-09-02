@@ -234,3 +234,23 @@
   pointer-events: none;
   z-index: 20;
 }
+
+.biologic-rubric-corner-icon--green {
+  background-color: var(--biologic-rubric-hl-direct);
+}
+
+.biologic-rubric-corner-icon--cyan {
+  background-color: var(--biologic-rubric-hl-target);
+}
+
+.biologic-rubric-corner-icon--orange {
+  background-color: var(--biologic-rubric-hl-matching);
+}
+
+.biologic-rubric-corner-icon--red {
+  background-color: var(--biologic-rubric-hl-missing);
+}
+
+.biologic-rubric-corner-icon--purple {
+  background-color: var(--biologic-rubric-hl-extra);
+}
