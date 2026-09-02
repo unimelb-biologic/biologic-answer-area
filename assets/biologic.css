@@ -29,6 +29,12 @@
   --biologic-builder-correct-answer-color: rgb(140, 255, 0);
   --biologic-builder-logic-editor-color: rgb(0, 30, 255);
   --biologic-builder-rubric-color: rgb(17, 0, 255);
+  --biologic-rubric-hl-target: rgb(8, 145, 178);
+  --biologic-rubric-hl-matching: rgb(245, 158, 11);
+  --biologic-rubric-hl-direct: rgb(22, 163, 74);
+  --biologic-rubric-hl-extra: rgb(124, 58, 237);
+  --biologic-rubric-hl-missing: rgb(220, 38, 38);
+  --biologic-rubric-hl-stroke-width: 4px;
   --biologic-root-statement-gradient: linear-gradient(
     to bottom right,
     rgb(168, 234, 250),
@@ -190,3 +196,26 @@
   font-weight: bold;
 }
 /* Button styling for adding new items */
+
+
+/* Border colours for grading highlighting */
+.biologic-rubric-border--direct {
+  outline: var(--biologic-rubric-hl-stroke-width) solid var(--biologic-rubric-hl-target);
+  outline-offset: var(--biologic-rubric-hl-stroke-width);
+}
+.biologic-rubric-border--target {
+  outline: var(--biologic-rubric-hl-stroke-width) solid var(--biologic-rubric-hl-target);
+  outline-offset: var(--biologic-rubric-hl-stroke-width);
+}
+.biologic-rubric-border--matching {
+  outline: var(--biologic-rubric-hl-stroke-width) solid var(--biologic-rubric-hl-matching);
+  outline-offset: var(--biologic-rubric-hl-stroke-width);
+}
+.biologic-rubric-border--missing {
+  outline: var(--biologic-rubric-hl-stroke-width) solid var(--biologic-rubric-hl-missing);
+  outline-offset: var(--biologic-rubric-hl-stroke-width);
+}
+.biologic-rubric-border--extra {
+  outline: var(--biologic-rubric-hl-stroke-width) solid var(--biologic-rubric-hl-extra);
+  outline-offset: var(--biologic-rubric-hl-stroke-width);
+}

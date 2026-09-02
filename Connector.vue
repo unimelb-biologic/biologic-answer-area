@@ -507,7 +507,7 @@ export default {
   },
   computed: {
     rubricBorderClass() {
-      return 'rubric-border--' + this.rubricBorderStatus;
+      return 'biologic-rubric-border--' + this.rubricBorderStatus;
     },
 
     depthPlusOne() {
@@ -1362,24 +1362,4 @@ export default {
   pointer-events: none;
 }
 
-.rubric-border--direct {
-  outline: 10px solid #16a34a;
-  outline-offset: 2px;
-}
-.rubric-border--target {
-  outline: 2px solid #16a34a;
-  outline-offset: 2px;
-}
-.rubric-border--matching {
-  outline: 2px solid #16a34a;
-  outline-offset: 2px;
-}
-.rubric-border--missing {
-  outline: 2px solid #dc2626;
-  outline-offset: 2px;
-}
-.rubric-border--extra {
-  outline: 2px solid #d97706;
-  outline-offset: 2px;
-}
 </style>
