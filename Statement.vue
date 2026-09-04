@@ -74,7 +74,7 @@
           </v-btn>
         </Tooltip>
 
-        <Tooltip text="Show feedback">
+        <!--Tooltip text="Show feedback">
           <v-btn
             size="x-small"
             v-if="showToggle && feedbackIsAvailable"
@@ -83,7 +83,7 @@
           >
             <v-icon>mdi-comment-quote</v-icon>
           </v-btn>
-        </Tooltip>
+        </Tooltip-->
       </div>
       <Tooltip :text="tooltipText">
         <div class="main-content">
@@ -409,7 +409,7 @@ export default {
 @import 'assets/tooltips.css';
 
 .Statement {
-  border-radius: 5px;
+  border-radius: var(--hl-border-radius);
   min-width: 70px;
   min-height: 70px;
   padding: 2px;
@@ -533,6 +533,16 @@ button {
   font-size: var(--biologic-statement-font-size);
 }
 
+.statementRadioButtons div {
+  display: flex;
+  align-items: flex-start;
+}
+
+.statementRadioButtons input[type='radio'] {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
 .biologicImage {
   max-width: 100%;
   width: 100px;
@@ -549,22 +559,22 @@ button {
 
 .rubric-border--direct {
   outline: var(--hl-stroke-width) solid var(--hl-matching_item);
-  outline-offset: var(--hl-stroke-width);
+  outline-offset: var(--hl-outline-offset);
 }
 .rubric-border--target {
   outline: var(--hl-stroke-width) solid var(--hl_target_conclusion);
-  outline-offset: var(--hl-stroke-width);
+  outline-offset: var(--hl-outline-offset);
 }
 .rubric-border--matching {
   outline: var(--hl-stroke-width) solid var(--hl_matching_reason);
-  outline-offset: var(--hl-stroke-width);
+  outline-offset: var(--hl-outline-offset);
 }
 .rubric-border--missing {
   outline: var(--hl-stroke-width) solid var(--hl_missing_reason);
-  outline-offset: var(--hl-stroke-width);
+  outline-offset: var(--hl-outline-offset);
 }
 .rubric-border--extra {
   outline: var(--hl-stroke-width) solid var(--hl_extra_reason);
-  outline-offset: var(--hl-stroke-width);
+  outline-offset: var(--hl-outline-offset);
 }
 </style>
