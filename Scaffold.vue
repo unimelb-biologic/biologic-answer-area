@@ -73,7 +73,7 @@
         <v-icon size="14" class="scaffold-title-icon"
           >mdi-file-document-outline</v-icon
         >
-        <span class="scaffold-title-text">{{ scaffoldData.title }}</span>
+        <span class="scaffold-title-text" v-html="scaffoldData.title" />
       </div>
 
       <!-- Slots -->
@@ -87,7 +87,7 @@
           <!-- Label -->
           <div class="scaffold-slot-label">
             <span class="scaffold-slot-number">{{ index + 1 }}.</span>
-            <span class="scaffold-slot-label-text">{{ child.label }}</span>
+            <span class="scaffold-slot-label-text" v-html="child.label" />
           </div>
 
           <!-- Target or occupied child -->
